@@ -1,0 +1,5 @@
+name: tsn
+title: TSN Scenarios
+version: main
+nav:
+- modules/ROOT/nav.adoc
