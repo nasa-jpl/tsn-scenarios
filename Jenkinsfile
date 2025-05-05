@@ -6,7 +6,7 @@ pipeline {
         stage('Docs') {
             when { changeset "docs/**" }
             steps {
-                build '/hpsc/lab/antora'
+                build '/hpsc/lab/antora/main'
             }
         }
     }
