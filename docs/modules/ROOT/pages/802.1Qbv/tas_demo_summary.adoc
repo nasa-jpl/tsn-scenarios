@@ -98,7 +98,7 @@ See the following locations for specific implementation instructions for differe
 |Keysight NOVUS One Plus
 |Keysight NOVUS One Plus
 |Microchip VSC5640EV running iStax
-|xref:MicrochipSwitch_NovusEndPoints.adoc
+|xref:MicrochipSwitch_NovusEndPoints.adoc[]
 
 |2
 |TBD
@@ -119,9 +119,5 @@ See the following locations for specific implementation instructions for differe
 |Coming Soon
 
 |===
-
-ifndef::site-gen-antora[]
-toc::[]
-endif::[]
 
 ----

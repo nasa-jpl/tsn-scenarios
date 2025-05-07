@@ -14,10 +14,6 @@ Three ports are used on the NOVUS, connected to the switch as follows:
 
 <insert diagram showing which NOVUS ports are connected to which switch ports>
 
- 
-ifndef::site-gen-antora[]
-toc::[]
-endif::[]
 
 == Detailed Steps, Scenario 1: TAS disabled, non-overlapping critical traffic, non-saturated end-point
 
