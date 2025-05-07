@@ -1,5 +1,6 @@
 * xref:index.adoc[]
 * xref:topology.adoc[]
+* xref:base_switch_config.adoc[]
 * Scenarios
 ** xref:802.1AS.adoc[]
-** xref:802.1Qbv.adoc[]
+** xref:802.1Qbv/tas_demo_summary.adoc[]

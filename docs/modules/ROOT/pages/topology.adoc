@@ -1,4 +1,11 @@
 = Topology
+:toc: macro
+:idprefix:
+:idseparator: -
+
+ifndef::site-gen-antora[]
+toc::[]
+endif::[]
 
 The same basic topology is used for all scenarios.
 The topology is composed of several layers.

@@ -1,0 +1,127 @@
+= 802.1 Qbv Time-Aware Shaping Demonstration Overview
+
+:toc: macro
+:idprefix:
+:idseparator: -
+
+ifndef::site-gen-antora[]
+toc::[]
+endif::[]
+
+The purpose of this demonstration is to show how IEEE 802.1Qbv Time Aware Shaping (TAS) can ensure low latencies and no dropped frames for critical traffic when network links are over-subscribed, while also demonstrating the limits of TAS with a scenario that it is unable to protect against.
+
+All scenarios within this demonstration share a common topology.  
+
+* End-point 1 provides the IEEE 802.1AS reference clock, as well as producing 4 independent scheduled, critical traffic items.  
+* End-point 2 is a time receiver, as well as producing 3 streams of prioritized traffic and 1 stream of non-prioritized vanilla Ethernet traffic.  
+* End-point 3 is a time receiver, as well as receiving the traffic from end-points 1 & 2.  
+* For the scenarios that involve overlapping shared priority traffic, end-point 2 adds an additional 4 scheduled, critical traffic items that share the same schedule and priority levels as those from end-point 1.
+
+.Topology
+image::tas-scenario-topology.png[]
+
+Scheduled traffic refers to traffic that is transmit at a fixed offset from the start of each network cycle.  
+Streaming traffic refers to traffic that is allocated a percentage of the line rate, and is not synchronized to the network cycle.
+
+
+
+
+.Time Aware Shaping Scenarios
+|===  
+|Scenario |Switch TAS State |Scheduled Traffic Configuration |Receiving End-Point Link |Description |Expected Results
+|1
+|Disabled
+|Non-Overlapping, no shared priority levels
+|Not Saturated
+|This is a simple demo, with no switch quality of service features, showing how by over-provisioning the network, vanilla Ethernet can work well.
+|Low but slightly elevated latencies on critical traffic compared to w/ TAS.  Overall low latencies and no frame drops across all traffic items.
+
+|2
+|Disabled
+|Non-Overlapping, no shared priority levels
+|Saturated
+|This is an off-nominal extension of scenario 1, where the vanilla Ethernet device is 'babbling" resulting in over-subscribing the link to the receiving end-point.  
+|Given there are no QoS features enabled, it is expected this scenario will result in increased latencies and frame drops of all traffic items, including the critical traffic.
+
+|3
+|Disabled
+|Overlapping, shared priority levels
+|Not Saturated
+|This scenario has 2 transmitting nodes, both transmitting critical traffic of the same priority level which is likely to be a common occurrence in realistic flight networks.  For example, all GNC sensors may sample data at the same time and have it ready to transmit at the same time, and be mapped to the same priority level.  It is possible the TAS schedule will offset them at the transmitting end-point, but for a simplified network that may not happen resulting in the two nodes overlapping.  
+|Slightly increased latencies for the critical traffic, no dropped frames.
+
+|4
+|Disabled
+|Overlapping, shared priority levels
+|Saturated
+|This is an off-nominal extension of scenario 3.  In this case, one of the producers of critical traffic is over-producing traffic.  
+|Significantly increased latencies and frame drops on all traffic items.
+
+|5
+|Enabled
+|Non-Overlapping, no shared priority levels
+|Not Saturated
+|This is a repeat of scenario 1, but with TAS gating enabled in the switch.  This is a baseline nominal scenario for TAS.
+|Minor reduction in latency of what was already low-latency critical traffic (due to lack of contention with streaming traffic), otherwise not too much difference from scenario 1.  
+
+|6
+|Enabled
+|Non-Overlapping, no shared priority levels
+|Saturated
+|This is an off-nominal extension of scenario 5, and shows how TAS is able to prevent lower priority traffic (in this case, the vanilla Ethernet traffic) from affecting the higher priority traffic, through the use of TAS gating.  
+|Significantly increased latencies and frame drops only on the babbling vanilla Ethernet stream.  The critical traffic in particular should have latencies unaffected.
+
+|7
+|Enabled
+|Overlapping, shared priority levels
+|Not Saturated
+|This is a repeat of scenario 3, but with TAS gating enabled in the switch.  In this scenario, the critical traffic from the 2 nodes is scheduled to be output at the same time, and share a time window on the switch.  
+|Slightly increased latencies for critical traffic (due to contention between the 2 nodes) compared to the non-overlapping version.
+
+|8
+|Enabled
+|Overlapping, shared priority levels
+|Saturated
+|This final scenario is an off-nominal extension of scenario 7, and demonstrates how there are some faults that TAS by itself cannot deal with.  In this case, the 2 transmitting nodes shared a priority level, and one of them will 'babble' critical traffic.  In an ideal Spacecraft network, this should not interfere with the critical traffic from any other nodes.  However, TAS by itself is not able to address that.  A future demonstration will show how IEEE P802.1Qci (Per-Stream Filtering and Policing) addresses this fault case.
+|Significantly increased latencies and frame drops of all traffic, including critical traffic from the end-point that is behaving correctly.  
+
+|===
+
+For each scenario, frame drop and latency statistics per traffic item is reported.
+
+See the following locations for specific implementation instructions for different venues:
+
+.TAS Demo Venue Specific Instructions
+|===
+|Venue |Time Source |Traffic Generator |TSN Switch |Link to Instructions
+|1
+|Keysight NOVUS One Plus
+|Keysight NOVUS One Plus
+|Microchip VSC5640EV running iStax
+|xref:MicrochipSwitch_NovusEndPoints.adoc
+
+|2
+|TBD
+|Linux PC w/ Intel TSN NIC
+|Microchip VSC5640EV running iStax
+|Coming Soon
+
+|3
+|TBD
+|Linux PC w/ Intel TSN NIC
+|HPSC
+|Coming Soon
+
+|4
+|TBD
+|HPSC
+|HPSC
+|Coming Soon
+
+|===
+
+ifndef::site-gen-antora[]
+toc::[]
+endif::[]
+
+----

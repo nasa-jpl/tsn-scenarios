@@ -1,0 +1,38 @@
+= TSN Switch Base Configuration
+:toc: macro
+:idprefix:
+:idseparator: -
+
+ifndef::site-gen-antora[]
+toc::[]
+endif::[]
+
+This document provides a general overview of how to configure a TSN switch to support TSN demoes.  Specifically, setting up appropriate VLANs to isolate the demo traffic from the rest of the network.
+
+All demos start with this base configuration, and provide detailed instructions for any additional configuration needed specific to that demo.
+
+== Overview of Base Configuration
+
+The base configuration needs to 
+
+* Isolate aanet traffic (the general lab traffic) from the TSN / demo traffic.
+** This is accomplished by putting TSN network ports on a non-default VLAN (we will use VLAN 2)
+** To keep it simple, devices generating TSN / demo traffic should not use VLAN tagged frames.  Rather, use priority tagged frames.  That would be frames that have a 802.1Q tag but the VLAN ID is 0.
+* Disable switch background traffic (i.e., LLDP, MSTP) to avoid unexpected traffic.
+* Configure a PTP instance on VLAN 2
+* Disable MAC learning
+** Needs to be disabled on network analyzer ports if they are configured to pass all traffic through, or the traffic will create a loop
+** Prefer disabled on other ports to ensure complete control and match flight-like use-case.  If MAC learning is desierd, be sure to set up learning phase on whatever is part of the demo (if something is only a receiver, then the MAC learning cannot happen, Keysight has a way to make all ports send a "no-op" essentially, but have not gotten that to work yet.)
+* Enable port classification
+** This enables the switch to honor the priority tag
+
+
+
+== Detailed Steps, Microchip TSN Switch
+
+Disable LLDP
+<insert image>
+
+
+
+----

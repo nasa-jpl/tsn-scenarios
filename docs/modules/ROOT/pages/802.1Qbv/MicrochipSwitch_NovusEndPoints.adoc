@@ -1,0 +1,145 @@
+= Time-Aware Shaping Demonstration: NOVUS One Plus / Microchip iStax TSN Switch Venue
+
+:toc: macro
+:idprefix:
+:idseparator: -
+
+ifndef::site-gen-antora[]
+toc::[]
+endif::[]
+
+This document provides specific instructions for implementing the TAS demo with the Keysight Novus ONE Plus for the end-points, and the Microchip VSC5640EV switch hardware running iStax APPL-2024.12 Build 25 software.
+
+Three ports are used on the NOVUS, connected to the switch as follows:
+
+<insert diagram showing which NOVUS ports are connected to which switch ports>
+
+ 
+ifndef::site-gen-antora[]
+toc::[]
+endif::[]
+
+== Detailed Steps, Scenario 1: TAS disabled, non-overlapping critical traffic, non-saturated end-point
+
+=== Pegase Model
+Coming Soon
+
+=== Detailed Switch Configuration
+This demonstration assumes a base switch configuration that sets up appropriate VLANs to isolate the traffic for the demo from the rest of the network.  Instructions can be found <here>.
+
+No further changes are needed to the base switch configuration for this scenario.
+
+Exported Switch Configuration File: <link to github location>
+
+=== Detailed Novus Configuration
+
+=== Steps to capture packets and import into Pegase
+
+=== Results (Predicted & Actual)
+
+
+== Detailed Steps, Scenario 2: TAS disabled, non-overlapping critical traffic, saturated end-point
+
+=== Pegase Model
+Coming Soon
+
+=== Detailed Switch Configuration
+No further changes are needed to the base switch configuration for this scenario.
+
+=== Detailed Novus Configuration
+
+=== Steps to capture packets and import into Pegase
+
+=== Results (Predicted & Actual)
+
+
+== Detailed Steps, Scenario 3: TAS disabled, overlapping critical traffic, non-saturated end-point
+
+=== Pegase Model
+Coming Soon
+
+=== Detailed Switch Configuration
+No further changes are needed to the base switch configuration for this scenario.
+
+=== Detailed Novus Configuration
+
+=== Steps to capture packets and import into Pegase
+
+=== Results (Predicted & Actual)
+
+
+== Detailed Steps, Scenario 4: TAS disabled, overlapping critical traffic, saturated end-point
+
+=== Pegase Model
+Coming Soon
+
+=== Detailed Switch Configuration
+No further changes are needed to the base switch configuration for this scenario.
+
+=== Detailed Novus Configuration
+
+=== Steps to capture packets and import into Pegase
+
+=== Results (Predicted & Actual)
+
+
+== Detailed Steps, Scenario 5: TAS enabled, non-overlapping critical traffic, non-saturated end-point
+
+=== Pegase Model
+Coming Soon
+
+=== Detailed Switch Configuration
+<steps to enable TAS gating>
+
+=== Detailed Novus Configuration
+
+=== Steps to capture packets and import into Pegase
+
+=== Results (Predicted & Actual)
+
+
+== Detailed Steps, Scenario 6: TAS enabled, non-overlapping critical traffic, saturated end-point
+
+=== Pegase Model
+Coming Soon
+
+=== Detailed Switch Configuration
+No changes from the previous scenario are needed.
+
+=== Detailed Novus Configuration
+
+=== Steps to capture packets and import into Pegase
+
+=== Results (Predicted & Actual)
+
+
+== Detailed Steps, Scenario 7: TAS enabled, overlapping critical traffic, non-saturated end-point
+
+=== Pegase Model
+Coming Soon
+
+=== Detailed Switch Configuration
+No changes from the previous scenario are needed.
+
+=== Detailed Novus Configuration
+
+=== Steps to capture packets and import into Pegase
+
+=== Results (Predicted & Actual)
+
+
+== Detailed Steps, Scenario 8: TAS enabled, overlapping critical traffic, saturated end-point
+
+=== Pegase Model
+Coming Soon
+
+=== Detailed Switch Configuration
+No changes from the previous scenario are needed.
+
+=== Detailed Novus Configuration
+
+=== Steps to capture packets and import into Pegase
+
+=== Results (Predicted & Actual)
+
+----
