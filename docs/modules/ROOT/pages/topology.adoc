@@ -1,0 +1,58 @@
+= Topology
+
+The same basic topology is used for all scenarios.
+The topology is composed of several layers.
+
+== Base Layer
+
+The base layer is the Network Under Test (NUT).
+It consists of three end points and one switch.
+
+This topology is sufficient for both nominal and off-nominal scenarios for all of the relevant TSN standards.
+For 802.1CB, links are duplicated.
+
+The end points can be:
+
+* Novus
+* Intel i226
+* HPSC end point port
+* HPSC switch port
+
+The switch can be:
+
+* SparX-5i
+* HPSC
+
+.Base layer
+image::topo-layer-base.drawio.svg[]
+
+== Time Layer
+
+The time layer provides time to the NUT.
+
+Three scenarios are supportted:
+
+* TimeProvider is Grandmaster
+* EP~1~ is Grandmaster with TimeProvider reference via PPS and optionally ToD
+* EP~1~ is Grandmaster without a time reference (e.g., Novus, HPSC)
+
+.Time layer
+image::topo-layer-time.drawio.svg[]
+
+== Analysis Layer
+
+The analysis layer provides insight into traffic flowing across the Network Under Test.
+
+The mirroring functionality of the switch is used to mirror NUT traffic to an external network analyzer without requiring physical configuration changes.
+
+.Analysis layer
+image::topo-layer-analysis.drawio.svg[]
+
+== Management Layer
+
+The management layer enables remote operation/configuration of the nodes within the NUT.
+
+Attachment may be direct via Ethernet or indirect via a side-band interface like a serial console.
+
+.Management layer
+image::topo-layer-mgmt.drawio.svg[]
