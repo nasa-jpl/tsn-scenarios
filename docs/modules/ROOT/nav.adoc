@@ -1,5 +1,6 @@
 * xref:index.adoc[]
 * xref:topology.adoc[]
+* xref:venues.adoc[]
 * xref:base_switch_config.adoc[]
 * Scenarios
 ** xref:802.1AS.adoc[]

@@ -1,0 +1,42 @@
+= Venues
+
+There are 3 major venues and various transitional venues.
+
+== Emulation Venue
+
+The emulation venue is composed of emulated end points in the Keysight Novus ONE PLUS and a Microchip SparX-5i.
+
+.Emulation venue logical topology
+image::venue-emulation-logical.drawio.svg[]
+
+The Novus is multi-tenant and can emulate up to 8 end point ports, therefore it can support up to two logical topologies using the following physical topology.
+
+.Emulation venue physical topology
+image::venue-emulation-physical.drawio.svg[]
+
+== COTS Venue
+
+The COTS venue is composed of Intel i226 Ethernet controllers and a Microchip SparX-5i switch.
+
+.COTS venue
+image::venue-cots.drawio.svg[]
+
+== HPSC Venue
+
+The HPSC Venue is composed of HPSC end points and an HPSC switch.
+
+The HPSC venue will use both switched end points (switch ports) and non-switched end points (end point ports).
+
+.HPSC venue
+image::venue-hpsc.drawio.svg[]
+
+Because the HPSC has 16 switch ports and 4 end point ports, this venue could theoretically be implemented using a single HPSC evaluation board.
+
+== Transitional Venues
+
+Additional transitional venues may be used to ease the transition between COTS and HPSC.
+They are as follows:
+
+* Emulated end points, HPSC switch
+* COTS end points, HPSC switch
+* HPSC end poiunts, COTS switch
