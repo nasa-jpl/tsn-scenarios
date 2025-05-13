@@ -1,3 +1,20 @@
 = Introduction
 
-TODO
+This repository provides minimally viable reproducible TSN scenarios for demonstration and educational purposes.
+
+Several scenarios are provided for each of the TSN standards.
+Each scenario consists of an English description and 3 implementations: one implmentation per scenario per venue.
+
+The scenarios are designed to be simple to aid in understanding.
+
+The standards covered by this repository are as follows.
+
+* Core standards
+** 802.1AS Timing and Synchronization
+** 802.1Qbv Time-Aware Shaping
+** 802.1Qci Per-Stream Filtering and Policing
+* Additional standards
+** 802.1Qav Credit-Based Shaping
+** 802.1CB Frame Replication and Elimination for Reliability
+** 802.1ASed Time Integrity
+** 802.1Qbu Frame Preemption
