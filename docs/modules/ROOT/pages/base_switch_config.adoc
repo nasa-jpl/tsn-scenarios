@@ -55,6 +55,9 @@ image::vlan_config.png[]
 .Create PTP instance on VLAN 2
 image::ptp_instance_create.png[]
 
+.Configure PTP instance VID and Profile
+image::ptp_instance_vid_profile.png[]
+
 .Edit PTP instance
 image::ptp_instance_edit.png[]
 
