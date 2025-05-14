@@ -27,6 +27,7 @@ The base configuration needs to
 ** Prefer disabled on other ports to ensure complete control and match flight-like use-case.  If MAC learning is desierd, be sure to set up learning phase on whatever is part of the demo (if something is only a receiver, then the MAC learning cannot happen, Keysight has a way to make all ports send a "no-op" essentially, but have not gotten that to work yet.)
 * Enable port classification
 ** This enables the switch to honor the priority tag
+** Note that the current recommendation is to only enable this on ports that will be receiving priority frames.  This will depend on the scenario, and so we are not actually including this in the base configuration.
 
 Some wireshark captures showing traffic before and after these changes:
 
