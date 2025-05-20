@@ -3,3 +3,4 @@ title: TSN Scenarios
 version: main
 nav:
 - modules/ROOT/nav.adoc
+- modules/notes/nav.adoc

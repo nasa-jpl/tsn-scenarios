@@ -1,0 +1,2 @@
+* Notes
+** xref:pauls-qci-notes.adoc[]

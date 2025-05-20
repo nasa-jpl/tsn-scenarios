@@ -1,0 +1,476 @@
+= Paul's 802.1Qci Notes
+
+:toc: macro
+:idprefix:
+:idseparator: -
+
+ifndef::site-gen-antora[]
+toc::[]
+:imagesdir: ../images
+endif::[]
+
+1^st^ attempt
+
+I defined one stream on port 1 comprised of any traffic flowing to MAC
+address 00:12:01:00:00:01
+
+image:image1.png[image,width=608,height=391]
+
+Next I defined a PSFP Flow Meter that limited the flow to 400kbps
+
+image:image2.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=716,height=338]
+
+Next I defined a PSFP Stream Filter that limits the flow on the steam I
+created to 400kbs, but I did not enable the Flow Meter (Flow Meter
+Enable)
+
+image:image3.png[A white
+rectangular object with black text AI-generated content may be
+incorrect.,width=1146,height=374]
+
+Next I defined a simple topology with port 1 to port 2
+
+image:image4.png[A
+diagram of a cloud AI-generated content may be
+incorrect.,width=1032,height=214]
+
+With two traffic flows one at 400kbps and one at 800kpbs
+
+image:image5.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1048,height=165]
+
+With the flow meter off, approximately 1,200kbps is flowing from one
+port to the other
+
+image:image6.png[image,width=1110,height=95]
+
+With the flow meter on
+
+image:image7.png[A
+computer screen shot of a computer AI-generated content may be
+incorrect.,width=1126,height=338]
+
+The flow from one port to the other falls to about 400kbps
+
+image:image8.png[image,width=1158,height=86]
+
+And you can see in the PSFP Stream Filter Statistics that frames are
+being dropped to maintain the 400kbps flow.
+
+image:image9.png[A
+computer screen with text AI-generated content may be
+incorrect.,width=1318,height=168]
+
+2^nd^ attempt
+
+This time define a stream going to MAC address 00:12:01:00:00:01 from
+both port 1 and port 3
+
+image:image10.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1113,height=622]
+
+Next I defined a PSFP Flow Meter that limited the flow to 400kbps
+
+image:image11.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1152,height=204]
+
+Then I created a PSFP Stream Filter Configuration, but didn’t enable it
+
+image:image12.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1785,height=228]
+
+Next I defined a simple topology with port 1 and port 3 to port 2
+
+image:image13.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1295,height=387]
+
+With two traffic flows one at 400kbps and one at 800kpbs
+
+image:image14.png[image,width=2112,height=134]
+
+With the flow meter off, approximately 1,200kbps is flowing from ports 1
+and 3 to port 2
+
+image:image15.png[image,width=2111,height=137]
+
+With the flow meter on
+
+image:image16.png[image,width=1747,height=167]
+
+The flow from ports 1 and 3 falls to about 800kbps at port 2.  This
+implies the flow meter is metering both ports 1 and 3 at 400kbps not the
+total flow to port 2:
+
+image:image17.png[image,width=2112,height=146]
+
+The PSFP Stream Filter Statistics show the frames being dropped
+
+image:image18.png[A
+close-up of a list AI-generated content may be
+incorrect.,width=1092,height=160]
+
+[arabic]
+. Define 2 separate stream filters, one for port 1 and one for port 3. 
+Show how you can slow down one port more than the other.  Keep your 800
+/ 400 input streams, and put one flow meter at 200 and one at 100.
+
+We already have a stream defined on port 1
+
+image:image19.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1084,height=408]
+
+Make a new one on port 3
+
+image:image20.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1105,height=408]
+
+Create 2 new flow meters, one at 200kbps and one at 100kbps
+
+image:image21.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1218,height=580]
+
+Next I created a new Stream Filter for 10, but didn’t enable it
+
+image:image22.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1354,height=277]
+
+Same 2 port topology as before
+
+image:image23.png[A
+diagram of a cloud computing system AI-generated content may be
+incorrect.,width=1138,height=354]
+
+With two traffic flows one at 400kbps and one at 800kpbs
+
+image:image24.png[image,width=1928,height=167]
+
+With the flow meter off, approximately 1,200kbps is flowing from ports 1
+and 3 to port 2
+
+image:image25.png[image,width=1918,height=160]
+
+image:image26.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1351,height=307]
+
+image:image27.png[image,width=2112,height=163]
+
+image:image28.png[A
+close-up of a list AI-generated content may be
+incorrect.,width=1118,height=184]
+
+So not sure why only the port 1 stream is seeing all the 100 + 200 =
+300Kbps packets filtered.  Not sure why stream ID 3 (ports 1 and 3)  are
+seeing data when that Flow meter isn’t active.  Now sure why stream
+filter ID 40 (port 3) sees nothing. 936171/1269856 x 100 ~ 74% filtered
+out
+
+To try and figure out what’s going on, I’m going to delete Stream ID 5
+on Ports 1 and 3
+
+image:image29.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1106,height=626]
+
+OK, stream 5 is gone
+
+image:image30.png[A
+close-up of a list AI-generated content may be
+incorrect.,width=1098,height=256]
+
+Now stream Filter ID 30 and 40 are filtering data separately:
+
+image:image31.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1160,height=180]
+
+So it appears stream ID 5 (ports 1 and 3)  was capturing data even
+thought the stream filter wasn’t active.  69895/94808 x 100 ~ 74%  of
+traffic is filtered.  142051/189612 x 100 ~ 75% of traffic is filtered
+
+image:image32.png[image,width=2112,height=173]
+
+image:image33.png[A
+black and white text AI-generated content may be
+incorrect.,width=998,height=129]
+
+image:image34.png[A
+white and black calendar AI-generated content may be
+incorrect.,width=1041,height=167]
+
+image:image35.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1351,height=184]
+
+Port 1 (Stream ID 1) is streaming at 400kbps, Port 3 (Streaming ID 10)
+is streaming at 800kpbs
+
+Stream Filter 30 is filtering Stream ID 1 (Port 1= 400kbps) to 100kbps
+so 100/400 = 25% of the data is getting through or 75% is being filtered
+
+Stream Filter 40 is filtering Stream ID 10 (Port 3 = 800kpbs) to 200kpbs
+so 200/800 = 25% of the data is getting through or 75% is being
+filtered.
+
+This is consistent with what the Stream Filter Statistics was showing:
+
+image:image31.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1160,height=180]
+
+69895/94808 x 100 ~ 74%  of traffic is filtered.  142051/189612 x 100 ~
+75% of traffic is filtered
+
+This is also consistent with the 300kbps being received on Port 2
+
+image:image36.png[image,width=2111,height=141]
+
+[arabic, start=2]
+. Define a single stream filter that covers both ports, as you have
+now.  Include SMAC so that it matches to only 1 of the 2 streams (make
+sure the 2 Keysight ports are using different SMACs).  Basically repeat
+your last test, but adding SMAC to the stream filter, and now we should
+see the flow meter affect only one of the ports I would think.
+
+Define Stream 15 on Ports 1 and 3 with the SMAC from Port 3
+
+image:image37.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1012,height=561]
+
+Delete Stream IDs 1 and 10 so they don’t interfere with 15
+
+image:image38.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=900,height=554]
+
+image:image39.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1040,height=598]
+
+image:image40.png[image,width=1086,height=132]
+
+Make a new Flow Meter 45 pointed to Stream 15, but don’t enable it
+
+image:image41.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1350,height=235]
+
+Without the Stream Filter enabled, we are seeing full flow
+
+image:image42.png[image,width=1112,height=105]
+
+Enable the stream meter 35 on stream 15 which should limit the 800kbps
+stream to 100kbps for a total of 100 + 400 = 500kbps
+
+image:image43.png[A
+white box with black text AI-generated content may be
+incorrect.,width=1063,height=167]
+
+image:image44.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1354,height=216]
+
+Verified, 500kbps:
+
+image:image45.png[image,width=1518,height=150]
+
+Repeat 2, but on the Keysight set both ports to use the same SMAC.  This
+should now see the same results are your test below.
+
+Right now, Port 1 = 00:11:01:00:00:01, Port 2 = 00:12:01:00:00:01, Port
+3 = 00:13:01:00:00:01
+
+image:image46.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=796,height=285]
+
+Lets turn off filtering
+
+image:image47.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1356,height=213]
+
+And try and make the MAC address of Port 1 match the MAC address of Port
+3
+
+image:image48.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=853,height=280]
+
+Traffic seems to be as expected:
+
+image:image49.png[image,width=1204,height=80]
+
+Let enable the Flow Meter, this should limit the flow to 100kbps – but
+will it be on one port or both?
+
+image:image50.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1353,height=216]
+
+It looks like its filtering the 800kpbs stream to 100kbps but not
+touching the 400kbps for a total rate of 500kbps. 
+
+image:image51.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1027,height=146]
+
+I think the fact that the SMACs are identical and the way the hardware
+prioritizes streams is the reason:
+
+(from the documentation)
+
+*If a stream is configured to match multiple properties, e.g. DMAC and
+IPv4, all must*
+
+*match in the incoming stream for the stream to be hit.*
+
+*Streams are added to hardware in ID order. This means that a lower
+numbered stream*
+
+*has higher priority in the matching process than higher numbered
+streams.*
+
+*Example:*
+
+*# configure terminal*
+
+*(config)# stream 1*
+
+*(config-stream)# dmac 00:00:00:00:00:00*
+
+*(config-stream)# stream 2*
+
+*(config-stream)# dmac 00:00:00:00:00:00 / FF:FF:FF:FF:FF:00*
+
+*Stream 1 matches DMAC address 00:00:00:00:00:00 only.*
+
+*Stream 2 matches DMAC addresses 00:00:00:00:00:00 through
+00:00:00:00:00:FF .*
+
+*Since stream 1 comes before stream 2, stream 2 can never be hit by a
+frame with*
+
+*DMAC 00:00:00:00:00:00 , so essentially, stream 2 only matches DMAC
+addresses*
+
+*00:00:00:00:00:01 through 00:00:00:00:00:FF , which is not possible to
+specify in*
+
+*one single stream.*
+
+*Whether or not PSFP and/or FRER uses a stream, the stream will be added
+to*
+
+*hardware. In the above example, it could make sense to have stream 1
+just added to*
+
+*hardware and let PSFP and/or FRER attach to stream 2.*
+
+*If stream 1 and stream 2 from the example were swapped, stream 2 could
+never be*
+
+*hit.*
+
+So I think since both SMACs were the same, once it found Port 3 it
+ignored Port 1. Why Port 3 and not Port 1, no idea how the Ixia
+prioritized the ports.
+
+image:image52.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1080,height=179]
+
+80128/92249 x 100 ~ 87% rejection
+
+100/800 x 100 =  12.5% pass = 87.5% rejection
+
+That seems to confirm its taking from the 800kbps stream only.
+
+[arabic, start=3]
+. With your 800 / 400 input streams, set them to use different
+priorities.  Configure the stream filter to only match to one of those
+priorities, and see that it only polices that particular traffic.
+
+Return Port 1 to its original MAC address
+
+image:image53.png[A
+screen shot of a computer AI-generated content may be
+incorrect.,width=720,height=296]
+
+Add VLAN priorities 1 and 2 to Ports 1 and 3:
+
+image:image54.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1024,height=242]
+
+Modify Stream ID 15 to try and capture Priority 2 traffic
+
+image:image55.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=756,height=584]
+
+This “should” get any tag any VLAN and PCP 2 on ports 1 and 3 going to
+the MAC address on Port 2
+
+If you run it without the stream enabled, you get the full flow
+
+image:image56.png[A
+screen shot of a computer AI-generated content may be
+incorrect.,width=1008,height=141]
+
+image:image57.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1353,height=200]
+
+image:image58.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1060,height=175]
+
+image:image59.png[image,width=910,height=107]
+
+When I enable the filter
+
+image:image60.png[image,width=1350,height=201]
+
+Nothing happens.  Flow remains unchanged
+
+image:image61.png[A
+screenshot of a phone AI-generated content may be
+incorrect.,width=932,height=118]
+
+Don’t see any packets being filtered
+
+image:image62.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1070,height=175]
+
+If I remove the PCP =2 from the stream filter
+
+image:image63.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=929,height=559]
+
+The filter works, but at this point, its just a regular DMAC filter
+
+image:image64.png[image,width=842,height=82]
+
+And you see packets being filtered
+
+image:image65.png[A
+screenshot of a computer AI-generated content may be
+incorrect.,width=1066,height=179]
+
+So at this point, I don’t know if I defined the traffic priority wrong
+or if I am misunderstanding the inner and outer VLAN tags in the filter.
