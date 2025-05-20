@@ -28,6 +28,7 @@ The base configuration needs to
 * Enable port classification
 ** This enables the switch to honor the priority tag
 ** Note that the current recommendation is to only enable this on ports that will be receiving priority frames.  This will depend on the scenario, and so we are not actually including this in the base configuration.
+* Optional, but disable timeout on the web interface (by default, you have to re-authenticate after 10 minutes of inactivity).  Setting it to 0, disables the timeout.
 
 Some wireshark captures showing traffic before and after these changes:
 
@@ -67,5 +68,8 @@ image::ptp_instance_configure.png[]
 
 .Disable MAC learning
 image::disable_mac_learning.png[]
+
+.Disable web interface timeout
+image::tsn_switch_web_security_setting.png[]
 
 ----
