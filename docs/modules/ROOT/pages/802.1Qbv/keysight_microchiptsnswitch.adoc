@@ -14,7 +14,8 @@ The specific port assignments shown may need to be modified to match how the Key
 
 
 == Detailed Steps
-=== [[Scenario 1]]
+=== Scenario 1
+[[Scenario 1]]
 TAS disabled, non-overlapping critical traffic, non-saturated end-point
 
 ==== Detailed Switch Configuration
@@ -68,10 +69,10 @@ Same as <<Scenario 1>>.
 TAS enabled, non-overlapping critical traffic, saturated end-point
 
 
-=== Detailed Switch Configuration
+==== Detailed Switch Configuration
 Same as <<Scenario 5>>.
 
-=== Detailed Novus Configuration
+==== Detailed Novus Configuration
 Same as <<Scenario 2>>.
 
 === [[Scenario 7]]
