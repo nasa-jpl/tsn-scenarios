@@ -1,4 +1,4 @@
-= Keysight Network Emulator / Microchip iStax TSN Switch Venue
+= Pegase (Modeled) Venue
 
 :toc: macro
 :idprefix:
