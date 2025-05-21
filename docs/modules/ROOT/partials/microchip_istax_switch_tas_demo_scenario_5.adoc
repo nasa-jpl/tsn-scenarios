@@ -1,0 +1,13 @@
+The following steps enable Time Aware Shaping (TAS) gating on the egress of port 3.  It configures 4 separate exclusively gated traffic classes (1-4) spaced 250 micro-seconds apart, and the remaining time shared by all the remaining traffic classes.
+
+.Step 1 - Enable Time Aware Shaping
+image::802.1Qbv/microchip_istax_switch/step1_enable_TAS.png[]
+
+.Step 2 - Configure Gate Control List
+image::802.1Qbv/microchip_istax_switch/step2_configure_gcl.png[]
+
+.Step 3 - Activate Gate Control List
+image::802.1Qbv/microchip_istax_switch/step3_activate_gcl.png[]
+
+.Step 4 - Verify Successful Configuration
+image::802.1Qbv/microchip_istax_switch/step4_verify_success.png[]

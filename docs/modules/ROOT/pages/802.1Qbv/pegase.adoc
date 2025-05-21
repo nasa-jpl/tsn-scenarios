@@ -1,0 +1,96 @@
+= Keysight Network Emulator / Microchip iStax TSN Switch Venue
+
+:toc: macro
+:idprefix:
+:idseparator: -
+
+ifndef::site-gen-antora[]
+toc::[]
+endif::[]
+
+This document provides specific instructions for modeling the TAS demo with the Real Time at Work Pegase software package.  This includes performing worst case analysis, simulation, and then back annotating the packet captures to compare actual vs predicted performance.
+
+
+== Detailed Steps
+=== Scenario 1
+TAS disabled, non-overlapping critical traffic, non-saturated end-point
+
+==== Pegase Model Creation, Analysis, and Simulation
+TBD
+
+==== Predicted vs Actual Comparison
+TBD
+
+=== Scenario 2
+TAS disabled, non-overlapping critical traffic, saturated end-point
+
+==== Pegase Model Creation, Analysis, and Simulation
+TBD
+
+==== Predicted vs Actual Comparison
+TBD
+
+
+=== Scenario 3
+TAS disabled, overlapping critical traffic, non-saturated end-point
+
+==== Pegase Model Creation, Analysis, and Simulation
+TBD
+
+==== Predicted vs Actual Comparison
+TBD
+
+
+=== Scenario 4
+TAS disabled, overlapping critical traffic, saturated end-point
+
+==== Pegase Model Creation, Analysis, and Simulation
+TBD
+
+==== Predicted vs Actual Comparison
+TBD
+
+
+=== Scenario 5
+TAS enabled, non-overlapping critical traffic, non-saturated end-point
+
+
+==== Pegase Model Creation, Analysis, and Simulation
+TBD
+
+==== Predicted vs Actual Comparison
+TBD
+
+
+=== Scenario 6
+TAS enabled, non-overlapping critical traffic, saturated end-point
+
+
+==== Pegase Model Creation, Analysis, and Simulation
+TBD
+
+==== Predicted vs Actual Comparison
+TBD
+
+=== Scenario 7
+TAS enabled, overlapping critical traffic, non-saturated end-point
+
+
+==== Pegase Model Creation, Analysis, and Simulation
+TBD
+
+==== Predicted vs Actual Comparison
+TBD
+
+
+=== Scenario 8
+TAS enabled, overlapping critical traffic, saturated end-point
+
+
+==== Pegase Model Creation, Analysis, and Simulation
+TBD
+
+==== Predicted vs Actual Comparison
+TBD
+
+----

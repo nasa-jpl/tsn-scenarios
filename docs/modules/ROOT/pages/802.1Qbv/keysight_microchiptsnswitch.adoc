@@ -1,0 +1,98 @@
+= Keysight Network Emulator / Microchip iStax TSN Switch Venue
+
+:toc: macro
+:idprefix:
+:idseparator: -
+
+ifndef::site-gen-antora[]
+toc::[]
+endif::[]
+
+This document provides specific instructions for implementing the TAS demo with the Keysight Novus One Plus network emulator acting as the end-points, and the Microchip VSC5640EV switch hardware running iStax software.
+
+The specific port assignments shown may need to be modified to match how the Keysight is cabled to the switch.  For these steps, it is assuming Keysight ports 5-8 are cabled to switch ports 1-4.
+
+
+== Detailed Steps
+=== [[Scenario 1]]
+TAS disabled, non-overlapping critical traffic, non-saturated end-point
+
+==== Detailed Switch Configuration
+This demonstration only requires the base switch configuration that sets up appropriate VLANs to isolate the traffic for the demo from the rest of the network.  Instructions can be found at xref:base_switch_config.adoc[].
+
+==== Detailed Novus Configuration
+TBD
+
+=== [[Scenario 2]]
+TAS disabled, non-overlapping critical traffic, saturated end-point
+
+==== Detailed Switch Configuration
+Same as <<Scenario 1>>.
+
+==== Detailed Novus Configuration
+TBD
+
+
+=== [[Scenario 3]]
+TAS disabled, overlapping critical traffic, non-saturated end-point
+
+==== Detailed Switch Configuration
+Same as <<Scenario 1>>.
+
+==== Detailed Novus Configuration
+TBD
+
+
+=== [[Scenario 4]]
+TAS disabled, overlapping critical traffic, saturated end-point
+
+==== Detailed Switch Configuration
+Same as <<Scenario 1>>.
+
+==== Detailed Novus Configuration
+TBD
+
+
+=== [[Scenario 5]]
+TAS enabled, non-overlapping critical traffic, non-saturated end-point
+
+
+==== Detailed Switch Configuration
+include::partial$microchip_istax_switch_tas_demo_scenario_5.adoc[]
+
+==== Detailed Novus Configuration
+Same as <<Scenario 1>>.
+
+
+=== [[Scenario 6]]
+TAS enabled, non-overlapping critical traffic, saturated end-point
+
+
+=== Detailed Switch Configuration
+Same as <<Scenario 5>>.
+
+=== Detailed Novus Configuration
+Same as <<Scenario 2>>.
+
+=== [[Scenario 7]]
+TAS enabled, overlapping critical traffic, non-saturated end-point
+
+
+==== Detailed Switch Configuration
+Same as <<Scenario 5>>.
+
+==== Detailed Novus Configuration
+Same as <<Scenario 3>>.
+
+
+=== [[Scenario 8]]
+TAS enabled, overlapping critical traffic, saturated end-point
+
+
+==== Detailed Switch Configuration
+Same as <<Scenario 5>>.
+
+==== Detailed Novus Configuration
+Same as <<Scenario 4>>.
+
+----
