@@ -1,0 +1,9 @@
+= Linux Venue
+
+== Overview
+* For the TSN switch, the base configuration covers basic time sync.  See xref::base_switch_config.adoc[]
+* TBD overview of configuring Linux with a TSN NIC to support time sync
+
+== Detailed steps to setup and enable time synchronization
+
+TODO

@@ -1,0 +1,7 @@
+= 802.1AS Timing and Synchronization
+
+Details of any specific scenarios (nominal, off nominal) to try are TBD.  Currently the venue specific instructions only cover enabling basic time sync for nominal operation, with no ability to deal with faults.
+
+== Scenario Details
+
+TODO
