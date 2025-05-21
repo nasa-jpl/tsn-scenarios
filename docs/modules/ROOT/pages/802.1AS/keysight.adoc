@@ -2,8 +2,8 @@
 
 == Overview
 * For the TSN switch, the base configuration covers basic time sync.  See xref::base_switch_config.adoc[]
-* Configuring Keysight to support 802.1AS-2020 time sync is very straight forward.  Only a couple of items need to be configuerd - selecting which device will act as the time source, and for the time clients adjusting the mean link delay threshold parameter.
-* The instructions below show how to setup a simple 2 end point network, with one end point as the time source and the other as a time client (the switch as well is a time client).  For more complex networks with additional end points that are time clients, simply repeat the necessary steps to add the gPTP protocol to each ethernet device.
+* Configuring Keysight to support 802.1AS-2020 time sync is very straight forward.  Only a couple of items need to be configured - selecting which device will act as the time transmitter, and for the time receivers adjusting the mean link delay threshold parameter.
+* The instructions below show how to setup a simple 2 end point network, with one end point as the time transmitter and the other as a time receiver (the switch as well is a time receiver).  For more complex networks with additional time receivers, simply repeat the necessary steps to add the gPTP protocol to each ethernet device.
 * Note that the specific port mapping used may need to be modified to match how the Keysight is cabled to the switch.  The example here is where Keysight ports 5-8 are cabled to TSN switch ports 1-4.
 
 == Detailed steps to setup and enable time synchronization
