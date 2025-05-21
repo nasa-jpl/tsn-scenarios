@@ -15,7 +15,6 @@ The specific port assignments shown may need to be modified to match how the Key
 
 == Detailed Steps
 === Scenario 1
-[[Scenario 1]]
 TAS disabled, non-overlapping critical traffic, non-saturated end-point
 
 ==== Detailed Switch Configuration
@@ -24,7 +23,7 @@ This demonstration only requires the base switch configuration that sets up appr
 ==== Detailed Novus Configuration
 TBD
 
-=== [[Scenario 2]]
+=== Scenario 2
 TAS disabled, non-overlapping critical traffic, saturated end-point
 
 ==== Detailed Switch Configuration
@@ -34,7 +33,7 @@ Same as <<Scenario 1>>.
 TBD
 
 
-=== [[Scenario 3]]
+=== Scenario 3
 TAS disabled, overlapping critical traffic, non-saturated end-point
 
 ==== Detailed Switch Configuration
@@ -44,7 +43,7 @@ Same as <<Scenario 1>>.
 TBD
 
 
-=== [[Scenario 4]]
+=== Scenario 4
 TAS disabled, overlapping critical traffic, saturated end-point
 
 ==== Detailed Switch Configuration
@@ -54,7 +53,7 @@ Same as <<Scenario 1>>.
 TBD
 
 
-=== [[Scenario 5]]
+=== Scenario 5
 TAS enabled, non-overlapping critical traffic, non-saturated end-point
 
 
@@ -65,7 +64,7 @@ include::partial$microchip_istax_switch_tas_demo_scenario_5.adoc[]
 Same as <<Scenario 1>>.
 
 
-=== [[Scenario 6]]
+=== Scenario 6
 TAS enabled, non-overlapping critical traffic, saturated end-point
 
 
@@ -75,7 +74,7 @@ Same as <<Scenario 5>>.
 ==== Detailed Novus Configuration
 Same as <<Scenario 2>>.
 
-=== [[Scenario 7]]
+=== Scenario 7
 TAS enabled, overlapping critical traffic, non-saturated end-point
 
 
@@ -86,7 +85,7 @@ Same as <<Scenario 5>>.
 Same as <<Scenario 3>>.
 
 
-=== [[Scenario 8]]
+=== Scenario 8
 TAS enabled, overlapping critical traffic, saturated end-point
 
 
