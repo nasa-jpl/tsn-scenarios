@@ -33,43 +33,43 @@ The base configuration needs to
 Some wireshark captures showing traffic before and after these changes:
 
 .Before disabling LLDP and MSTP
-image::wireshark_before_disabling_lldp_mstp.png[]
+image::base_switch_config/wireshark_before_disabling_lldp_mstp.png[]
 
 .Before isolating TSN network ports on their own VLAN
-image::wireshark_before_isolating_TSN_traffic.png[]
+image::base_switch_config/wireshark_before_isolating_TSN_traffic.png[]
 
 .After making these changes
-image::wireshark_after_fixes.png[]
+image::base_switch_config/wireshark_after_fixes.png[]
 
 
 
 == Detailed Steps, Microchip TSN Switch
 
 .Disable LLDP
-image::disable_lldp.png[]
+image::base_switch_config/disable_lldp.png[]
 
 .Disable MSTP
-image::disable_mstp.png[]
+image::base_switch_config/disable_mstp.png[]
 
 .New VLAN Config
-image::vlan_config.png[]
+image::base_switch_config/vlan_config.png[]
 
 .Create PTP instance on VLAN 2
-image::ptp_instance_create.png[]
+image::base_switch_config/ptp_instance_create.png[]
 
 .Configure PTP instance VID and Profile
-image::ptp_instance_vid_profile.png[]
+image::base_switch_config/ptp_instance_vid_profile.png[]
 
 .Edit PTP instance
-image::ptp_instance_edit.png[]
+image::base_switch_config/ptp_instance_edit.png[]
 
 .Configure PTP instance
-image::ptp_instance_configure.png[]
+image::base_switch_config/ptp_instance_configure.png[]
 
 .Disable MAC learning
-image::disable_mac_learning.png[]
+image::base_switch_config/disable_mac_learning.png[]
 
 .Disable web interface timeout
-image::tsn_switch_web_security_setting.png[]
+image::base_switch_config/tsn_switch_web_security_setting.png[]
 
 ----
