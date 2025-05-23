@@ -144,8 +144,10 @@ image::802.1Qbv/keysight_scenario1/step32_keysight_latency.png[]
 Recall that this scenario is supposed to have the Keysight output the scheduled traffic at different times during the network cycle so as to not overlap.  Currently all 4 are output at the start of the cycle.  These steps will configure the offsets:
 
 .Step 33 - Add Flow Transmission column
+image::802.1Qbv/keysight_scenario1/step33_add_flow_transmission.png[]
 
 .Step 34 - Set output offsets
+image::802.1Qbv/keysight_scenario1/step34_set_output_offsets.png[]
 
 Don't forget to regenerate and re-apply traffic after making any changes, and before running the test again!  In this case, this change won't make any difference.  They Keysight is using a single port to output these 4 scheduled frames, so even when there is no offset configured, it physically cannot output them at the same time, and so they are output back-to-back.  Therefore they do not interfere with each other, and there is nothing to see different with latencies.
 
