@@ -21,7 +21,7 @@ TAS disabled, non-overlapping critical traffic, non-saturated end-point
 This demonstration only requires the base switch configuration that sets up appropriate VLANs to isolate the traffic for the demo from the rest of the network.  Instructions can be found at xref:base_switch_config.adoc[].
 
 ==== Detailed Novus Configuration
-TBD
+include::partial$keysight_tas_demo_scenario_1.adoc[]
 
 === Scenario 2
 TAS disabled, non-overlapping critical traffic, saturated end-point

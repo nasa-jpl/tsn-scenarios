@@ -34,9 +34,9 @@ The scenarios assume that EP~n~ is connected to port n of the switch.  If using 
 *** The endpoints producing scheduled traffic should always be configured to produce the traffic at the appropriate time, regardless of the switch configuration.
 ** Scheduled Traffic Configuration (Overlapping, shared priority levels / Non-Overlapping, no shared priority levels)
 *** In the non-overlapping case, there is a single endpoint EP~1~ generating scheduled traffic.  
-*** In the overlapping case, there are two endpoints EP~1~ and EP~2~ generating scheduled traffic, with identical priority levels and timing (both the transmission of the frames from the endpoint, and the same switch gate control list being applied to both ports)
+*** In the overlapping case, there are two endpoints EP~1~ and EP~2~ generating scheduled traffic, with identical priority levels and timing of transmission of the frames from the endpoint
 ** Receiving End-Point Link (Saturated / Not Saturated)
-*** In the not saturated version, the aggregate bandwidth of EP~1~ and EP~2~ do not exceed 1 Gbps line rate.  
+*** In the not saturated version, the aggregate bandwidth of EP~1~ and EP~2~ are well under 1 Gbps line rate.  
 **** EP~1~ generates 4 separate traffic classes, each at a different priority level 1-4, each producing a single packet of a fixed size (64 bytes) every 1ms, each offset by 250 micro-seconds from the previous.  
 **** EP~2~ generates 3 streams of traffic using priority levels 5-7, each utilizing 10% of the line rate, fixed 64 byte packets.
 **** EP~2~ also generates 1 stream of vanilla Ethernet (no priority specified), utilizing 50% of the line rate, with random packet sizes from 64 to 1518 bytes.
