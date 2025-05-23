@@ -55,3 +55,9 @@ image::802.1AS/keysight/step15_test_running.png[]
 
 .Step 16 - Verify test is running (TSN switch)
 image::802.1AS/keysight/step16_switch_test_running.png[]
+
+As a note, you can rename topologies and device groups which may help.  Double click the name to rename it.  For the example we have saved to the Keysight, we renamed the timing grand master as timeTransmitter, and the slave as timeReceiver.  
+
+.Step 17 - Rename topologies
+image::802.1AS/keysight/step17_rename_topologies.png[]
+
