@@ -146,7 +146,7 @@ If the traffic is not flowing as expected, some things to check for:
 
 * VLAN is enabled, and ID is set to 0 for the protocol stack that is generating the scheduled traffic and the prioritized background traffic.  (You may see frames being filtered in the switch stats if VLAN is some other value)
 * VLAN is disabled for the time sync (transmitter and receiver) and vanilla ethernet
-* Ports are mapped correctly to match the switch configuration.  The default switch configuration has port 1-4 enable port classification, and port 3 is the egress port that all the traffic should be going to.  How these ports map to the Keysight depends on which user.  For this example, it is using ports 5-7, and they need to be cabled keysight 5 -> switch 1, keysight 6 -> switch 2, keysight 7 -> switch 3, keysight 8 -> switch 4
+* Ports are mapped correctly to match the switch configuration.  The default switch configuration has port 1-4 enable port classification, and port 3 is the egress port that all the traffic should be going to.  How these ports map to the Keysight depends on which user.  For this example, it is using ports 5-7, and they need to be cabled keysight 5 -> switch 1, keysight 6 -> switch 2, keysight 7 -> switch 3
 * Make sure to regenerate and apply traffic changes after making them before starting the test.  The tool sometimes does this automatically, but for example if you change VLAN ID for an ethernet stack, you have to do this manually.
 * Make sure the right protocol stack is selected for source of traffic, because there are 2 to choose from for each device.  One with VLAN enabled, one with VLAN disabled.
 * In all cases, looking at the switch stats shown above can help a great deal with tracking down what is happening.  
