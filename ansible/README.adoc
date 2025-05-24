@@ -1,0 +1,191 @@
+= Ansible
+
+This directory contains a set of Ansible playbooks and roles for executing the scenarios for the Linux Endsystems in the COTS venue.
+
+== Dependencies
+
+* Ansible
+* Dancer's Shell (optional)
+
+== 802.1AS Example
+
+In one terminal, start tailing the logs:
+
+[source,sh]
+----
+dsh -m ansible@hpsctsnes0,ansible@hpsctsnes1,ansible@hpsctsnes2 -r ssh -cM -- tail -f ptp4l.log
+----
+
+In another terminal, start the 802.1AS scenario:
+
+[source,sh]
+----
+ansible-playbook AS-start.yml
+----
+
+When done, stop the 802.1AS scenario:
+
+[source,sh]
+----
+ansible-playbook AS-stop.yml
+----
+
+=== Output
+
+[source,console]
+----
+$ ansible-playbook AS-start.yml
+
+PLAY [802.1AS] *************************************************************************************************************
+
+TASK [Gathering Facts] *****************************************************************************************************
+ok: [hpsctsnes0]
+ok: [hpsctsnes1]
+ok: [hpsctsnes2]
+
+TASK [AS : Start 802.1AS] **************************************************************************************************
+included: /home/rdonnell/repos/hpsc/tsn-scenarios/ansible/roles/AS/tasks/start.yml for hpsctsnes0, hpsctsnes1, hpsctsnes2
+
+TASK [AS : Install ptp4l] **************************************************************************************************
+ok: [hpsctsnes0]
+ok: [hpsctsnes1]
+ok: [hpsctsnes2]
+
+TASK [AS : Copy configuration] *********************************************************************************************
+ok: [hpsctsnes1] => (item=ptp4l-gm.conf)
+ok: [hpsctsnes0] => (item=ptp4l-gm.conf)
+ok: [hpsctsnes2] => (item=ptp4l-gm.conf)
+ok: [hpsctsnes1] => (item=ptp4l-ei.conf)
+ok: [hpsctsnes0] => (item=ptp4l-ei.conf)
+ok: [hpsctsnes2] => (item=ptp4l-ei.conf)
+
+TASK [AS : Start ntp for Grandmasters] *************************************************************************************
+skipping: [hpsctsnes1]
+skipping: [hpsctsnes2]
+ok: [hpsctsnes0]
+
+TASK [AS : Stop ntp for End Instances] *************************************************************************************
+skipping: [hpsctsnes0]
+ok: [hpsctsnes2]
+changed: [hpsctsnes1]
+
+TASK [AS : Check phc2sys status] *******************************************************************************************
+ok: [hpsctsnes0]
+ok: [hpsctsnes2]
+ok: [hpsctsnes1]
+
+TASK [AS : Check ptp4l status] *********************************************************************************************
+ok: [hpsctsnes0]
+ok: [hpsctsnes1]
+ok: [hpsctsnes2]
+
+TASK [AS : Start phc2sys] **************************************************************************************************
+changed: [hpsctsnes1]
+changed: [hpsctsnes0]
+changed: [hpsctsnes2]
+
+TASK [AS : Start ptp4l] ****************************************************************************************************
+changed: [hpsctsnes0]
+changed: [hpsctsnes1]
+changed: [hpsctsnes2]
+
+TASK [AS : Stop 802.1AS] ***************************************************************************************************
+skipping: [hpsctsnes0]
+skipping: [hpsctsnes1]
+skipping: [hpsctsnes2]
+
+PLAY RECAP *****************************************************************************************************************
+hpsctsnes0                 : ok=9    changed=2    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+hpsctsnes1                 : ok=9    changed=3    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+hpsctsnes2                 : ok=9    changed=2    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+----
+
+[listing]
+.Log
+----
+ansible@hpsctsnes0: ptp4l[263226.099]: selected /dev/ptp0 as PTP clock
+ansible@hpsctsnes1: ptp4l[15796.133]: selected /dev/ptp0 as PTP clock
+ansible@hpsctsnes2: ptp4l[13454.144]: selected /dev/ptp0 as PTP clock
+ansible@hpsctsnes0: ptp4l[263226.122]: port 1 (enp1s0): INITIALIZING to MASTER on INIT_COMPLETE
+ansible@hpsctsnes0: ptp4l[263226.122]: port 0 (/var/run/ptp4l): INITIALIZING to LISTENING on INIT_COMPLETE
+ansible@hpsctsnes0: ptp4l[263226.122]: port 0 (/var/run/ptp4lro): INITIALIZING to LISTENING on INIT_COMPLETE
+ansible@hpsctsnes1: ptp4l[15796.156]: port 1 (enp1s0): INITIALIZING to SLAVE on INIT_COMPLETE
+ansible@hpsctsnes1: ptp4l[15796.156]: port 0 (/var/run/ptp4l): INITIALIZING to LISTENING on INIT_COMPLETE
+ansible@hpsctsnes1: ptp4l[15796.156]: port 0 (/var/run/ptp4lro): INITIALIZING to LISTENING on INIT_COMPLETE
+ansible@hpsctsnes2: ptp4l[13454.170]: port 1 (enp1s0): INITIALIZING to SLAVE on INIT_COMPLETE
+ansible@hpsctsnes2: ptp4l[13454.170]: port 0 (/var/run/ptp4l): INITIALIZING to LISTENING on INIT_COMPLETE
+ansible@hpsctsnes2: ptp4l[13454.170]: port 0 (/var/run/ptp4lro): INITIALIZING to LISTENING on INIT_COMPLETE
+ansible@hpsctsnes1: ptp4l[15799.169]: selected local clock 000732.fffe.c059d4 as best master
+ansible@hpsctsnes2: ptp4l[13457.256]: selected local clock 000732.fffe.c059ea as best master
+ansible@hpsctsnes2: ptp4l[13458.959]: port 1 (enp1s0): new foreign master 0004a3.fffe.010000-6
+ansible@hpsctsnes1: ptp4l[15800.961]: port 1 (enp1s0): new foreign master 0004a3.fffe.010000-4
+ansible@hpsctsnes2: ptp4l[13459.533]: selected best master clock 000732.fffe.c059d8
+ansible@hpsctsnes1: ptp4l[15801.734]: selected best master clock 000732.fffe.c059d8
+ansible@hpsctsnes2: ptp4l[13461.167]: rms 2144879 max 4290242 freq -29203 +/- 4112 delay   320 +/-   2
+ansible@hpsctsnes1: ptp4l[15804.045]: rms 2150252 max 4300971 freq -26486 +/- 4017 delay   321 +/-   2
+ansible@hpsctsnes2: ptp4l[13462.173]: rms  626 max  976 freq -28166 +/- 796 delay   322 +/-   0
+ansible@hpsctsnes1: ptp4l[15805.051]: rms  544 max  827 freq -25641 +/- 732 delay   319 +/-   0
+ansible@hpsctsnes2: ptp4l[13463.176]: rms 1014 max 1073 freq -26416 +/- 243 delay   322 +/-   0
+ansible@hpsctsnes1: ptp4l[15806.055]: rms  877 max  923 freq -24061 +/- 212 delay   319 +/-   0
+ansible@hpsctsnes2: ptp4l[13464.179]: rms  589 max  805 freq -26168 +/-  51 delay   321 +/-   0
+ansible@hpsctsnes1: ptp4l[15807.058]: rms  508 max  701 freq -23850 +/-  42 delay   319 +/-   0
+ansible@hpsctsnes2: ptp4l[13465.181]: rms  143 max  268 freq -26465 +/-  97 delay   321 +/-   0
+ansible@hpsctsnes1: ptp4l[15808.060]: rms  126 max  237 freq -24098 +/-  81 delay   319 +/-   0
+ansible@hpsctsnes2: ptp4l[13466.184]: rms   96 max  117 freq -26756 +/-  57 delay   321 +/-   0
+ansible@hpsctsnes1: ptp4l[15809.062]: rms   67 max   85 freq -24324 +/-  42 delay   319 +/-   0
+ansible@hpsctsnes2: ptp4l[13467.186]: rms  102 max  122 freq -26877 +/-  12 delay   321 +/-   0
+ansible@hpsctsnes1: ptp4l[15810.065]: rms   69 max   83 freq -24404 +/-   9 delay   319 +/-   0
+ansible@hpsctsnes2: ptp4l[13468.189]: rms   49 max   80 freq -26878 +/-  13 delay   321 +/-   0
+ansible@hpsctsnes1: ptp4l[15811.068]: rms   22 max   39 freq -24380 +/-  13 delay   318 +/-   0
+ansible@hpsctsnes2: ptp4l[13469.192]: rms   13 max   22 freq -26828 +/-  18 delay   320 +/-   0
+ansible@hpsctsnes1: ptp4l[15812.070]: rms   10 max   16 freq -24346 +/-   7 delay   319 +/-   0
+ansible@hpsctsnes2: ptp4l[13470.195]: rms   22 max   39 freq -26793 +/-  17 delay   320 +/-   0
+ansible@hpsctsnes1: ptp4l[15813.073]: rms   25 max   33 freq -24308 +/-  13 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13471.198]: rms   32 max   37 freq -26747 +/-   7 delay   320 +/-   0
+ansible@hpsctsnes1: ptp4l[15814.076]: rms   33 max   44 freq -24266 +/-   9 delay   319 +/-   0
+ansible@hpsctsnes2: ptp4l[13472.200]: rms   25 max   36 freq -26728 +/-   9 delay   320 +/-   0
+ansible@hpsctsnes1: ptp4l[15815.079]: rms   22 max   30 freq -24254 +/-  12 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13473.203]: rms   17 max   23 freq -26717 +/-   6 delay   320 +/-   0
+ansible@hpsctsnes1: ptp4l[15816.082]: rms   23 max   30 freq -24231 +/-  11 delay   319 +/-   0
+ansible@hpsctsnes2: ptp4l[13474.206]: rms   22 max   29 freq -26690 +/-  10 delay   319 +/-   0
+ansible@hpsctsnes1: ptp4l[15817.084]: rms   20 max   24 freq -24212 +/-   8 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13475.208]: rms   27 max   38 freq -26660 +/-  13 delay   319 +/-   0
+ansible@hpsctsnes1: ptp4l[15818.087]: rms   28 max   30 freq -24176 +/-   8 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13476.211]: rms   25 max   32 freq -26635 +/-   8 delay   319 +/-   0
+ansible@hpsctsnes1: ptp4l[15819.090]: rms   23 max   34 freq -24157 +/-   9 delay   319 +/-   0
+ansible@hpsctsnes2: ptp4l[13477.214]: rms   22 max   26 freq -26615 +/-   8 delay   318 +/-   0
+ansible@hpsctsnes1: ptp4l[15820.098]: rms   23 max   31 freq -24134 +/-  10 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13478.216]: rms   24 max   33 freq -26590 +/-  11 delay   318 +/-   0
+ansible@hpsctsnes1: ptp4l[15821.095]: rms   19 max   26 freq -24117 +/-   6 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13479.219]: rms   22 max   29 freq -26571 +/-  12 delay   318 +/-   0
+ansible@hpsctsnes1: ptp4l[15822.098]: rms   19 max   29 freq -24099 +/-   9 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13480.222]: rms   16 max   24 freq -26558 +/-   8 delay   317 +/-   0
+ansible@hpsctsnes1: ptp4l[15823.101]: rms   21 max   30 freq -24076 +/-   6 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13481.225]: rms   22 max   30 freq -26531 +/-   8 delay   317 +/-   0
+ansible@hpsctsnes1: ptp4l[15824.103]: rms   26 max   36 freq -24046 +/-  13 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13482.227]: rms   22 max   26 freq -26507 +/-   8 delay   318 +/-   0
+ansible@hpsctsnes1: ptp4l[15825.106]: rms   21 max   31 freq -24027 +/-   5 delay   319 +/-   0
+ansible@hpsctsnes2: ptp4l[13483.230]: rms   22 max   31 freq -26485 +/-   8 delay   318 +/-   0
+ansible@hpsctsnes1: ptp4l[15826.109]: rms   17 max   23 freq -24015 +/-   9 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13484.233]: rms   19 max   23 freq -26469 +/-   7 delay   319 +/-   0
+ansible@hpsctsnes1: ptp4l[15827.111]: rms   19 max   30 freq -23994 +/-  10 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13485.235]: rms   18 max   26 freq -26453 +/-  11 delay   319 +/-   0
+ansible@hpsctsnes1: ptp4l[15828.114]: rms   22 max   29 freq -23968 +/-   9 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13486.238]: rms   23 max   28 freq -26423 +/-   9 delay   319 +/-   0
+ansible@hpsctsnes1: ptp4l[15829.117]: rms   23 max   29 freq -23944 +/-   8 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13487.241]: rms   21 max   29 freq -26405 +/-  10 delay   319 +/-   0
+ansible@hpsctsnes1: ptp4l[15830.119]: rms   22 max   27 freq -23923 +/-   8 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13488.244]: rms   22 max   30 freq -26380 +/-   6 delay   320 +/-   0
+ansible@hpsctsnes1: ptp4l[15831.122]: rms   23 max   31 freq -23899 +/-   9 delay   320 +/-   0
+ansible@hpsctsnes2: ptp4l[13489.246]: rms   24 max   32 freq -26355 +/-  12 delay   320 +/-   0
+ansible@hpsctsnes1: ptp4l[15832.125]: rms   20 max   28 freq -23881 +/-   8 delay   321 +/-   0
+ansible@hpsctsnes2: ptp4l[13490.249]: rms   17 max   23 freq -26342 +/-   5 delay   321 +/-   0
+ansible@hpsctsnes1: ptp4l[15833.127]: rms   19 max   23 freq -23863 +/-   7 delay   321 +/-   0
+ansible@hpsctsnes2: ptp4l[13491.252]: rms   18 max   24 freq -26323 +/-   7 delay   321 +/-   0
+ansible@hpsctsnes1: ptp4l[15834.130]: rms   23 max   31 freq -23838 +/-  12 delay   321 +/-   0
+ansible@hpsctsnes2: ptp4l[13492.254]: rms   24 max   32 freq -26295 +/-  12 delay   322 +/-   0
+ansible@hpsctsnes1: ptp4l[15835.133]: rms   21 max   30 freq -23817 +/-  10 delay   323 +/-   0
+ansible@hpsctsnes2: ptp4l[13493.257]: rms   23 max   31 freq -26272 +/-  11 delay   322 +/-   0
+ansible@hpsctsnes1: ptp4l[15836.136]: rms   19 max   26 freq -23799 +/-   9 delay   323 +/-   0
+ansible@hpsctsnes2: ptp4l[13494.260]: rms   17 max   26 freq -26259 +/-   6 delay   321 +/-   0
+----

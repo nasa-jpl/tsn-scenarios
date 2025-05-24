@@ -1,0 +1,49 @@
+- name: Install ptp4l
+  become: true
+  apt:
+    name: linuxptp
+    state: present
+
+- name: Copy configuration
+  template:
+    src: "{{ item }}"
+    dest: "~"
+  loop:
+    - ptp4l-gm.conf
+    - ptp4l-ei.conf
+
+- name: Start ntp for Grandmasters
+  become: true
+  when: ptp_role == "gm"
+  service:
+    name: systemd-timesyncd
+    state: started
+
+- name: Stop ntp for End Instances
+  become: true
+  when: ptp_role == "ei"
+  service:
+    name: systemd-timesyncd
+    state: stopped
+
+- name: Check phc2sys status
+  shell: pgrep phc2sys
+  register: phc2sys_status
+  changed_when: false
+  failed_when: false
+
+- name: Check ptp4l status
+  shell: pgrep ptp4l
+  register: ptp4l_status
+  changed_when: false
+  failed_when: false
+
+- name: Start phc2sys
+  become: true
+  when: phc2sys_status.rc != 0
+  shell: nohup phc2sys -a -rr --transportSpecific=1 -S 1 >phc2sys.log 2>&1 &
+
+- name: Start ptp4l
+  become: true
+  when: ptp4l_status.rc != 0
+  shell: nohup ptp4l -f ptp4l-{{ ptp_role }}.conf -m >ptp4l.log 2>&1 &

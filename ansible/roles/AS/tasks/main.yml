@@ -1,0 +1,7 @@
+- name: Start 802.1AS
+  include_tasks: start.yml
+  when: op == "start"
+
+- name: Stop 802.1AS
+  include_tasks: stop.yml
+  when: op == "stop"

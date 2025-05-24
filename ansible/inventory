@@ -1,0 +1,19 @@
+all:
+  vars:
+    interface: enp1s0
+  children:
+    gms:
+    eis:
+
+gms:
+  vars:
+    ptp_role: gm
+  hosts:
+    hpsctsnes0:
+
+eis:
+  vars:
+    ptp_role: ei
+  hosts:
+    hpsctsnes1:
+    hpsctsnes2:

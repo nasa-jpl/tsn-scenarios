@@ -1,0 +1,9 @@
+- name: Stop phc2sys
+  become: true
+  shell: killall phc2sys
+  failed_when: false
+
+- name: Stop ptp4l
+  become: true
+  shell: killall ptp4l
+  failed_when: false
