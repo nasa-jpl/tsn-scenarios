@@ -118,52 +118,20 @@ image::802.1Qbv/keysight_scenario1/step24_set_vlan_tags.png[]
 .Step 25 - Apply traffic settings
 image::802.1Qbv/keysight_scenario1/step25_apply_traffic_settings.png[]
 
-This is the end of configuring the keysight.  Now you can run the test and check the results are expected.
+.Step 26 - Enable scheduled transmissions
+image::802.1Qbv/keysight_scenario1/step26_enable_scheduled_transmission.png[]
 
-.Step 26 - Start test
-image::802.1Qbv/keysight_scenario1/step26_start_test.png[]
+.Step 26b - Enable scheduled transmissions
+image::802.1Qbv/keysight_scenario1/step26b_enable_scheduled_transmission.png[]
 
-.Step 27 - Check stats on TSN switch
-image::802.1Qbv/keysight_scenario1/step27_switch_check_stats.png[]
+.Step 26c - Enable scheduled transmissions
+image::802.1Qbv/keysight_scenario1/step26c_enable_scheduled_transmission.png[]
 
-.Step 28 - Check QOS stats on TSN switch
-image::802.1Qbv/keysight_scenario1/step28_switch_qos_stats.png[]
+.Step 27 - Add Flow Transmission column
+image::802.1Qbv/keysight_scenario1/step27_add_flow_transmission.png[]
 
-.Step 29 - Check port 1 detailed stats on TSN switch
-image::802.1Qbv/keysight_scenario1/step29_switch_detailed_stats_port_1.png[]
+.Step 28 - Set output offsets
+image::802.1Qbv/keysight_scenario1/step28_set_output_offsets.png[]
 
-.Step 30 - Check port 2 detailed stats on TSN switch
-image::802.1Qbv/keysight_scenario1/step30_switch_detailed_stats_port_2.png[]
+This is the end of configuring the keysight.  Now you can run the test and check the results are expected.  
 
-.Step 31 - Check port 3 detailed stats on TSN switch
-image::802.1Qbv/keysight_scenario1/step31_switch_detailed_stats_port_3.png[]
-
-.Step 32 - Check latencies
-image::802.1Qbv/keysight_scenario1/step32_keysight_latency.png[]
-
-Recall that this scenario is supposed to have the Keysight output the scheduled traffic at different times during the network cycle so as to not overlap.  Currently all 4 are output at the start of the cycle.  These steps will configure the offsets:
-
-.Step 33 - Add Flow Transmission column
-image::802.1Qbv/keysight_scenario1/step33_add_flow_transmission.png[]
-
-.Step 34 - Set output offsets
-image::802.1Qbv/keysight_scenario1/step34_set_output_offsets.png[]
-
-Don't forget to regenerate and re-apply traffic after making any changes, and before running the test again!  In this case, this change won't make any difference.  They Keysight is using a single port to output these 4 scheduled frames, so even when there is no offset configured, it physically cannot output them at the same time, and so they are output back-to-back.  Therefore they do not interfere with each other, and there is nothing to see different with latencies.
-
-But, this is the proper configure for the Keysight to look at the effect of other traffic and the switch settings in the other scenarios.
-
-
-
-
-
-*Common Issues*
-
-If the traffic is not flowing as expected, some things to check for:
-
-* VLAN is enabled, and ID is set to 0 for the protocol stack that is generating the scheduled traffic and the prioritized background traffic.  (You may see frames being filtered in the switch stats if VLAN is some other value)
-* VLAN is disabled for the time sync (transmitter and receiver) and vanilla ethernet
-* Ports are mapped correctly to match the switch configuration.  The default switch configuration has port 1-4 enable port classification, and port 3 is the egress port that all the traffic should be going to.  How these ports map to the Keysight depends on which user.  For this example, it is using ports 5-7, and they need to be cabled keysight 5 -> switch 1, keysight 6 -> switch 2, keysight 7 -> switch 3
-* Make sure to regenerate and apply traffic changes after making them before starting the test.  The tool sometimes does this automatically, but for example if you change VLAN ID for an ethernet stack, you have to do this manually.
-* Make sure the right protocol stack is selected for source of traffic, because there are 2 to choose from for each device.  One with VLAN enabled, one with VLAN disabled.
-* In all cases, looking at the switch stats shown above can help a great deal with tracking down what is happening.  
