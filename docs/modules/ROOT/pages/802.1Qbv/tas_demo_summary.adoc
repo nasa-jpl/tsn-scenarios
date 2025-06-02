@@ -26,7 +26,7 @@ Streaming traffic refers to traffic that is allocated a percentage of the line r
 
 == Scenario Details
 
-The scenarios assume that EP~n~ is connected to port n of the switch.  If using different port assignments, adjust the instructions accordingly.
+The scenarios as described below assume that EP~n~ is connected to port n of the switch.  If using different port assignments, adjust the instructions accordingly.  The venue-specific instructions with screenshots that can be found in the navigation bar on the left, may also need to be adjusted depending on which switch ports are cabled to which end points.
 
 * Precise definitions of some of the terminology used in the table below, specific to these TAS demonstrations:
 ** Switch TAS State (Enabled / Disabled) 
