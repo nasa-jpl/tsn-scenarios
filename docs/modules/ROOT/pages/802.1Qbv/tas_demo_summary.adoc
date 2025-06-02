@@ -13,7 +13,7 @@ The purpose of this demonstration is to show how IEEE 802.1Qbv Time Aware Shapin
 All scenarios within this demonstration share a common topology.  
 
 * EP~1~ provides the IEEE 802.1AS reference clock, as well as producing 4 independent scheduled, critical traffic items.  
-* EP~2~ is a time receiver, as well as producing 3 streams of prioritized traffic and 1 stream of non-prioritized vanilla Ethernet traffic.  
+* EP~2~ produces 3 streams of prioritized traffic and 1 stream of non-prioritized vanilla Ethernet traffic.  Note that it is not a time receiver, nothing on this node is synchronized to the network schedule.
 * EP~3~ is a time receiver, as well as receiving the traffic from EP~1~ and EP~2~.  
 * For the scenarios that involve overlapping shared priority traffic, EP~2~ adds an additional 4 scheduled, critical traffic items that share the same schedule and priority levels as those from EP~1~.
 
