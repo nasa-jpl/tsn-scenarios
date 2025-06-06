@@ -30,15 +30,17 @@ The scenarios as described below assume that EP~n~ is connected to port n of the
 
 Unless explicitly defined otherwise, for every scenario, every traffic item produced by the end points should be produced at a unique rate, using different power of 2's (100 Kbps, 200 Kbps, 400 Kbps, 800 Kbps, etc).  The flow meters should also be set to unique rates, and always lower than the slowest traffic production rate.  This guarantees that it is always clear which traffic items are being filtered, and by which flow meter.
 
-PSFP consists of 3 main functions.  
+PSFP consists of 4 main functions.  
 
-* Using rules to assign incoming frames to a stream
+* Using rules to assign/map incoming frames to a stream
 ** It is critical to understand that the frame will be assigned to the first stream where all rules are matched, and no further streams will be evaluated for that frame.
+* Flow Meter
+** Defines steady-state and burst thresholds for policing traffic rates.
+** Supports guaranteed bandwidth (green) as well as best effort (yellow) thresholds.
 * Per-stream gating
 ** This can be time based (same concept as Time Aware Shaping, but applied at the stream level, rather than the egress priority queue level)
 ** This can also shut off the gate under certain conditions such as TBD flow meter tripping or TBD something else (invalid Rx)
-* Stream filtering, where frames can be dropped based on a variety of criteria - steady state flow metering, burst flow metering, and SDU size
-** Note that these can be configured such that the frame is only dropped if there is congestion at the switch.
+* Stream filtering, where the stream ID, flow meter ID, and gate ID are tied together, as well as additional SDU size filtering.
 
 * Precise definitions of some of the terminology used in the table below, specific to these TAS demonstrations:
 ** Switch TAS State (Enabled / Disabled) 
