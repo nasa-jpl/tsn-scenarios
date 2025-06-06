@@ -1,0 +1,100 @@
+= 802.1Qci Per Stream Filtering and Policing (PSFP): Keysight Network Emulator / Microchip iStax TSN Switch Venue
+
+:toc: macro
+:idprefix:
+:idseparator: -
+
+ifndef::site-gen-antora[]
+toc::[]
+endif::[]
+
+This document provides specific instructions for implementing the PSFP scenarios with the Keysight Novus One Plus network emulator acting as the end-points, and the Microchip VSC5640EV switch hardware running iStax software.
+
+The scenarios refer to endpoints EP~1~, EP~2~, and EP~3~.  These need to be translated to port numbers depending on the specific hardware configuration being used.  See the common topology for reference:
+
+.TAS Demo Topology
+image::topo-layer-base.drawio.svg[]
+
+It is assumed that there is basic familiarity with the Keysight and switch.  If not, the TAS scenario instructions are much more detailed and provide specific steps for how to create topologies and traffic items in Keysight, etc.
+
+All scenarios assume the base switch configuration has already been performed.  Instructions can be found here: xref:base_switch_config.adoc[].
+
+All scenarios assume the Keysight is starting with the base 802.1AS time synchronization setup, found here: xref:802.1AS/802.1AS.adoc[].
+
+*Common Issues*
+
+For these scenarios, when attempting to run the demonstration, if the traffic is not flowing as expected, some things to check for:
+
+* VLAN is enabled, and ID is set to 0 for the protocol stack that is generating prioritized traffic.  (You may see frames being filtered in the switch stats if VLAN is some other value)
+* VLAN is disabled for the time sync (transmitter and receiver) and vanilla ethernet
+* Correct port numbers are used on the switch, and correct end point to port mappings on the Keysight, to match how the switch and keysight are cabled.
+* Make sure to regenerate and apply traffic changes after making them before starting the test.  The tool sometimes does this automatically, but it seems there are some cases where it does not, so to be safe, the recommendation is to always do that manually after making any changes and before starting the test.  
+* Make sure the right protocol stack is selected for source of traffic, because there are sometimes multiple to choose from for each device (i.e. one with VLAN and one without).
+* Looking at the switch stats can help a great deal with tracking down what is happening.  The scenarios will show what is expected to be seen, but there may be other switch stat screens that can help diagnose what is happening when things are not working as expected.
+
+*General Microchip switch PSFP configuration overview*
+
+The scenarios will just list out the specifics of how to configure the switch, without detailed screenshots for each step.  The following screenshots provide an overview of how to configure PSFP on the switch.
+
+In all cases, if a dialog entry is not mentioned, leave it set to the default.
+
+.PSFP Config Screens
+image::802.1Qci/PSFP_tutorial/microchip_switch_config_screens.png[]
+
+.Stream ID Dialog
+image::802.1Qci/PSFP_tutorial/microchip_switch_stream_dialog.png[]
+
+.Flow Meter Dialog
+image::802.1Qci/PSFP_tutorial/microchip_switch_flow_meter_dialog.png[]
+
+.Stream Gate Dialog
+image::802.1Qci/PSFP_tutorial/microchip_switch_stream_gate_dialog.png[]
+
+.Stream Filter Dialog
+image::802.1Qci/PSFP_tutorial/microchip_switch_stream_filter_dialog.png[]
+
+== Detailed Steps, Stream Mapping
+=== Scenario 1
+Rule Order-Of-Execution
+
+==== Detailed Switch Configuration
+
+*It is critical that the streams be created with the IDs shown and in the order listed*
+
+* Create stream ID 5 that matches everything on EP~1~
+* Create stream ID 3 that matches everything on EP~1~
+* Create stream ID 7 that matches everything on EP~1~
+* Create 3 flow meters
+** Use rates CIR of 100, 200, and 400 Kbps.  To make things easy to keep straight, use flow meter IDs 1, 2, and 4 for those.
+** Use CBS of 8192 for all 3
+* Create 3 stream filters, also with IDs 1, 2, and 4, with the following Stream ID / flow meter / CIR mappings
+** Stream ID 5: Flow Meter 1: 100 Kbps
+** Stream ID 3: Flow Meter 2: 200 Kbps
+** Stream ID 7: Flow Meter 4: 400 Kbps
+
+==== Detailed Novus Configuration
+
+* Create a single traffic flow
+** EP~1~ to EP~3~
+** 1% line rate
+** fixed 64 byte frames
+
+==== Test Execution and Results
+
+The expectation is that the traffic item will only see 200 Kbps get through, as the switch should be checking the frame against stream rules in ascending numeric order, regardless of the order in which they were created.
+
+The results do match that as shown in the screenshots below.  Note that the bit rate being received slightly exceeds 200 Kbps.  It is not understood why that is.
+
+.Switch QoS Stats
+image::802.1Qci/keysight_microchip_mapping_scenario1/switch_qos_stats.png[]
+
+.Keysight Stats
+image::802.1Qci/keysight_microchip_mapping_scenario1/keysight_stats.png[]
+
+== Detailed Steps, Flow Metering
+
+== Detailed Steps, Stream Gating
+
+== Detailed Steps, Stream Filtering
+
+----
