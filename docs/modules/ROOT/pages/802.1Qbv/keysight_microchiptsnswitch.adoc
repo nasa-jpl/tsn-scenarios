@@ -1,4 +1,4 @@
-= Keysight Network Emulator / Microchip iStax TSN Switch Venue
+= 802.1Qbv Time-Aware Shaping (TAS): Keysight Network Emulator / Microchip iStax TSN Switch Venue
 
 :toc: macro
 :idprefix:
