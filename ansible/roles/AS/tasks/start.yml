@@ -46,4 +46,4 @@
 - name: Start ptp4l
   become: true
   when: ptp4l_status.rc != 0
-  shell: nohup ptp4l -f ptp4l-{{ ptp_role }}.conf -m >ptp4l.log 2>&1 &
+  shell: nohup ptp4l -f ptp4l-{{ ptp_role }}.conf &

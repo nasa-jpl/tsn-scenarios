@@ -1,0 +1,5 @@
+- name: Setup logging
+  hosts: all
+  become: true
+  roles:
+    - logging
