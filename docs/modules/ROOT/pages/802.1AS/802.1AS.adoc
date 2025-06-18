@@ -5,3 +5,5 @@ Details of any specific scenarios (nominal, off nominal) to try are TBD.  Curren
 == Scenario Details
 
 TODO
+
+One scenario should be to sync time with a non-TSN Ethernet client and see how that works.  Like is gptp compatible with ptp or something?  Try a software only protocol using a Linux client.  See how the sync accuracy compares.
