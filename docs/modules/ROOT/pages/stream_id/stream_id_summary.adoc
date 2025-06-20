@@ -1,0 +1,132 @@
+= Stream Identification Demonstration Overview
+
+:toc: macro
+:idprefix:
+:idseparator: -
+
+ifndef::site-gen-antora[]
+toc::[]
+endif::[]
+
+The purpose of this demonstration is to show how Stream Identification (part of both IEEE 802.1CB and 802.1Qci) is used to map incoming frames to streams.  Scenarios as part of those other standards will be used to demonstrate how the switch can act on those streams.
+
+Stream Identification operates by defining a series of streams.  Each stream has an associated set of rules used for matching.  Incoming frames are evaluated against the streams in numeric order (e.g. stream 1 is evaluated before stream 2, even if stream 2 was defined first).  The frame is assigned to the first stream where all rules are matched.  It is also possible for frames to not match any stream, in which no stream processing functions enabled in the switch will affect that frame.
+
+== Demo Topology
+
+All scenarios within this demonstration share a common topology.  
+
+* EP~1~ provides the IEEE 802.1AS reference clock, as well as a variety of traffic dependening on the needs of the particular scenario.  
+* EP~2~ produces additional traffic dependent on the needs of the particular scenario.  The primary reason to have 2 separate end points produce frames, is to show how the policing can be configured to police based on which port the frames are received on.  
+* EP~3~ is a time receiver, as well as receiving the traffic from EP~1~ and EP~2~.  
+* For the scenarios that involve overlapping shared priority traffic, EP~2~ adds an additional 4 scheduled, critical traffic items that share the same schedule and priority levels as those from EP~1~.
+
+The details of each scenario, and the venue-specific instructions, were developed with some particular cabling between end points and switch ports, which may differ for anybody trying to recreate these scenarios.  Keep that in mind and adjust the instructions accordingly.
+
+.Demo Topology
+image::topo-layer-base.drawio.svg[]
+
+== Common Details
+
+Unless explicitly defined otherwise, for every scenario, every traffic item produced by the end points should be produced at a unique rate, using different power of 2's (100 Kbps, 200 Kbps, 400 Kbps, 800 Kbps, etc).  The flow meters should also be set to unique rates, and always lower than the slowest traffic production rate.  This guarantees that it is always clear which traffic items are being filtered, and by which flow meter.
+
+== Terminology
+
+Precise definitions of some of the terminology used in the table below, specific to these TAS demonstrations:
+
+* TBD
+
+== Scenario Details
+
+=== Scenario 1 - Order-of-execution
+
+* Create stream ID S1, with ID 10, that matches destination MAC, ports 1 & 2
+* Create flow meter at rate X1, attached to stream S1
+* Create stream ID S2, with ID 5, identical to S1
+* Create flow meter at rate X2, attached to stream S2
+* Create stream ID S3, with ID 20, identical to S2
+* Create flow meter at rate X3, attached to stream S3
+* Single traffic flow from endpoint matching the DMAC
+* Observe which flow meter takes effect.  Is it lowest number, highest number, or most recently created.
+* Should see rate X2
+
+=== Scenario 2 - DMAC matching
+
+* Define a stream based on DMAC using mask to have some wild cards, ports 1 & 2
+* Create 2 traffic items per end point, 1 from each that are separate DMACs but both match the DMAC/mask, and 1 from each that does not match.
+* Create a flow meter and see that the total sum of the 2 traffic items matching the DMAC/mask are metered, and the traffic items not matching are not metered
+
+=== Scenario 3 - SMAC matching
+
+* Identical to DMAC, but using 4 separate SMACs for the traffic items
+
+=== Scenario 4 - IP based matching
+
+* Create UDP/IPv4 traffic from 2 separate devices on separate switch ports, going to each other
+* Create 6 streams, each mapped to an associated flow meter via a stream filter, setup to drop any frames above the specified steady-state rate.  The table also indicates if we expect any frames to match to this stream, based on the traffic item definitions.
+
+.IP Based Matching Stream Rules
+|===  
+|Stream ID |Source IP |Destination IP |Destination Port |Flow Meter Rate |Matching SDUs?
+|1 |Any |Any |3300 |10 Kbps |Yes
+|2 |IP1 |Any |Any |20 Kbps |Yes
+|3 |Any |IP2 |1000 |30 Kbps |No
+|4 |Any |IP2 |4000 to 4400 |40 Kbps |Yes
+|5 |IP2 |IP1 |3000 |50 Kbps |Yes
+|6 |Any |Any |Any |60 Kbps |No
+|===
+
+* Create 8 sets of traffic items, with an indication of which stream it is expected to match to
+
+.IP Based Matching Traffic Items
+|===  
+|Traffic Item |Source IP |Destination IP |Destination Port |Rate |Expected Stream
+|1 |IP1 |IP1 |1000 |100 Kbps | 2 
+|2 |IP1 |IP1 |1100 |200 Kbps | 2 
+|3 |IP1 |IP2 |2000 |400 Kbps | 2 
+|4 |IP1 |IP2 |2200 |800 Kbps | 2 
+|5 |IP2 |IP1 |3000 |1600 Kbps | 5
+|6 |IP2 |IP1 |3300 |3200 Kbps | 1
+|7 |IP2 |IP2 |4000 |6400 Kbps | 4
+|8 |IP2 |IP2 |4400 |12800 Kbps | 4
+|===
+
+* Run the scenario.
+** Verify in switch statistics that SDUs are matching to the expected streams
+** Verify via destination bit-rate statistics, that the frames are matching and being filtered as expected
+*** Traffic items 1, 2, 3, 4 should total 20 Kbps
+*** Traffic item 5 should be 50 Kbps
+*** Traffic item 6 should be 10 Kbps
+*** Traffic item 7, 8 should total 40 Kbps
+
+=== Scenario 5 - Source Port
+
+* Create stream ID S1 that matches anything on port 1
+* Create stream ID S2 that matches anything on port 2
+* Create separate flow meter for each stream ID
+* 2 traffic flows per end point: Use separate SMAC for each, VLAN 0, separate priority for each, separate DMAC for each (EP3 will need some new devices with different DMACs)
+* Show that flow meter operates on each traffic flow equally, i.e. without regard for frame header contents, just source port
+
+
+=== ON HOLD: Additional Scenarios
+
+It is not clear if these capabilities would ever be used, and therefore there are currently no plans to demonstrate them:
+
+* Multicast / Broadcast / Unicast filters
+* Inner VLAN tags, VLAN ID, tag type, DEI
+* Outer VLAN tag (but do have scenarios defined)
+** Setup stream S1 with VLAN tag not allowed, on both ports 1 & 2
+** Create flow meter at rate 0 (drop everything), attached to stream S1
+** Setup stream S2 with VLAN tag required, any tag type, VLAN 2, VLAN mask 0xFFF, PCP 0, PCP mask 0, DEI any, on both ports
+** Create flow meter at rate X1, attached to stream S2
+** Setup stream S3 with VLAN tag required, any tag type, VLAN 0, VLAN mask 0, PCP 3, PCP mask 0x7, DEI any, on port 1 only
+** Create flow meter at rate X2, attached to stream S3
+** Setup stream S4, that matches everything, ports 1 & 2.  
+** Create flow meter at rate X3, attached to stream S4
+** Create 7 traffic items per end point.  One with no VLAN tag.  One with VLAN 2 priority 1.  One with VLAN 2 priority 3.  One with VLAN 0 priority 1.  One with VLAN 0 priority 3.  One with VLAN 3 priority 3.  One with VLAN 3 priority 1.
+** See what happens!   In particular want to see if PSFP treats VLAN 0 as "no VLAN" or "VLAN 0".  Also want to see if this filtering happens after VLAN 2 is assigned.
+* Protocol filters for EtherType, LLC, SNAP, and IPv6
+* IPv4 filter settings for Prefix Length, DSCP, Fragment, and Protocol
+
+
+----

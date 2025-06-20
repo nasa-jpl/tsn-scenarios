@@ -12,6 +12,7 @@ The standards covered by this repository are as follows.
 * Core standards
 ** 802.1AS Timing and Synchronization
 ** 802.1Qbv Time-Aware Shaping
+** Stream Identification (used by 802.1CB and 802.1Qci)
 ** 802.1Qci Per-Stream Filtering and Policing
 * Additional standards
 ** 802.1Qav Credit-Based Shaping

@@ -10,6 +10,20 @@ endif::[]
 
 The purpose of this demonstration is to show how IEEE 802.1Qci Per Stream Filtering and Policing (PSFP) can drop frames according to a variety of rules to provide fault tolerance and ensure the frames critical to a mission's success are delivered with minimal latency and jitter.
 
+PSFP consists of 3 main functions.  Note these rely heavily on the Stream Identification function, which has a separate scenario documentation page.  Those pages and the venue-specific instructions will cover how to map frames to streams in detail.
+
+* *Flow Meter:* Policing the bandwidth of a stream
+** Defines steady-state and burst thresholds for policing traffic rates.
+** Supports guaranteed bandwidth (green) as well as best effort (yellow) thresholds.
+* *Stream Gating:* Provides time-aware control of when frames are allowed to pass for a given stream
+** Same concept as Time Aware Shaping, but applied at the stream level, rather than the egress priority queue level
+** This can also be configured to permanently shut off the gate (until a mgmt command is sent to clear the error) under certain conditions such as a frame received at an unexpected time, or a frame received that is too large.
+* *Stream filtering:* Ties everything together
+** The stream ID, flow meter ID, and Stream Gate ID are mapped together, as well as additional SDU size filtering.
+** Flow meters and Stream Gates can be re-used (mapped to multiple stream IDs).
+
+== Demo Topology
+
 All scenarios within this demonstration share a common topology.  
 
 * EP~1~ provides the IEEE 802.1AS reference clock, as well as a variety of traffic dependening on the needs of the particular scenario.  
@@ -23,122 +37,17 @@ image::topo-layer-base.drawio.svg[]
 Scheduled traffic refers to traffic that is transmit at a fixed offset from the start of each network cycle.  
 Streaming traffic refers to traffic that is allocated a percentage of the line rate, and is not synchronized to the network cycle.
 
+== Common Details
 
-== Scenario Details
-
-The scenarios as described below assume that EP~n~ is connected to port n of the switch.  If using different port assignments, adjust the instructions accordingly.  The venue-specific instructions with screenshots that can be found in the navigation bar on the left, may also need to be adjusted depending on which switch ports are cabled to which end points.
+The scenarios as described below assume that EP~n~ is connected to port n+4 of the switch.  If using different port assignments, adjust the instructions accordingly.  The venue-specific instructions with screenshots that can be found in the navigation bar on the left, may also need to be adjusted depending on which switch ports are cabled to which end points.
 
 Unless explicitly defined otherwise, for every scenario, every traffic item produced by the end points should be produced at a unique rate, using different power of 2's (100 Kbps, 200 Kbps, 400 Kbps, 800 Kbps, etc).  The flow meters should also be set to unique rates, and always lower than the slowest traffic production rate.  This guarantees that it is always clear which traffic items are being filtered, and by which flow meter.
 
-PSFP consists of 4 main functions.  
+Precise definitions of some of the terminology used in the table below, specific to these TAS demonstrations:
 
-* Using rules to assign/map incoming frames to a stream
-** It is critical to understand that the frame will be assigned to the first stream where all rules are matched, and no further streams will be evaluated for that frame.
-* Flow Meter
-** Defines steady-state and burst thresholds for policing traffic rates.
-** Supports guaranteed bandwidth (green) as well as best effort (yellow) thresholds.
-* Per-stream gating
-** This can be time based (same concept as Time Aware Shaping, but applied at the stream level, rather than the egress priority queue level)
-** This can also shut off the gate under certain conditions such as TBD flow meter tripping or TBD something else (invalid Rx)
-* Stream filtering, where the stream ID, flow meter ID, and gate ID are tied together, as well as additional SDU size filtering.
+* Time slot.  This is TDMA terminology, for the window of time in which a device is allowed to transmit.  In our case we use this terminology when defining gate opening and closing times.  Each entry in a Gate Control List defines a time slot, with a specific starting and ending time relative to the start of the network cycle.
 
-* Precise definitions of some of the terminology used in the table below, specific to these TAS demonstrations:
-** Switch TAS State (Enabled / Disabled) 
-*** This is referring to whether or not the egress ports on the switch have TAS gates enabled or disabled.  
-*** The endpoints producing scheduled traffic should always be configured to produce the traffic at the appropriate time, regardless of the switch configuration.
-** Scheduled Traffic Configuration (Overlapping, shared priority levels / Non-Overlapping, no shared priority levels)
-*** In the non-overlapping case, there is a single endpoint EP~1~ generating scheduled traffic.  
-*** In the overlapping case, there are two endpoints EP~1~ and EP~2~ generating scheduled traffic, with identical priority levels and timing of transmission of the frames from the endpoint
-** Receiving End-Point Link (Saturated / Not Saturated)
-*** In the not saturated version, the aggregate bandwidth of EP~1~ and EP~2~ are well under 1 Gbps line rate.  
-**** EP~1~ generates 4 separate traffic classes, each at a different priority level 1-4, each producing a single packet of a fixed size (64 bytes) every 1ms, each offset by 250 micro-seconds from the previous.  
-**** EP~2~ generates 3 streams of traffic using priority levels 5-7, each utilizing 10% of the line rate, fixed 64 byte packets.
-**** EP~2~ also generates 1 stream of vanilla Ethernet (no priority specified), utilizing 50% of the line rate, with random packet sizes from 64 to 1518 bytes.
-*** In the saturated version, the aggregate bandwidth exceeds 1 Gbps line rate
-**** EP~1~ is unchanged
-**** EP~2~, the vanilla Ethernet is produced at 70% of line rate.
-
-.Stream Configuration PSFP Scenarios
-|===  
-|Scenario |Switch TAS State |Scheduled Traffic Configuration |Receiving End-Point Link |Description |Expected Results
-|1
-|Disabled
-|Non-Overlapping, no shared priority levels
-|Not Saturated
-|This is a simple demo, with no switch quality of service features, showing how by over-provisioning the network, vanilla Ethernet can work well.
-|Low but slightly elevated latencies on critical traffic compared to w/ TAS.  Overall low latencies and no frame drops across all traffic items.
-
-|2
-|Disabled
-|Non-Overlapping, no shared priority levels
-|Saturated
-|This is an off-nominal extension of scenario 1, where the vanilla Ethernet device is 'babbling" resulting in over-subscribing the link to the receiving end-point.  
-|Given there are no QoS features enabled, it is expected this scenario will result in increased latencies and frame drops of all traffic items, including the critical traffic.
-
-|3
-|Disabled
-|Overlapping, shared priority levels
-|Not Saturated
-|This scenario has 2 transmitting nodes, both transmitting critical traffic of the same priority level which is likely to be a common occurrence in realistic flight networks.  For example, all GNC sensors may sample data at the same time and have it ready to transmit at the same time, and be mapped to the same priority level.  It is possible the TAS schedule will offset them at the transmitting end-point, but for a simplified network that may not happen resulting in the two nodes overlapping.  
-|Slightly increased latencies for the critical traffic, no dropped frames.
-
-|4
-|Disabled
-|Overlapping, shared priority levels
-|Saturated
-|This is an off-nominal extension of scenario 3.  In this case, one of the producers of critical traffic is over-producing traffic.  
-|Significantly increased latencies and frame drops on all traffic items.
-
-|5
-|Enabled
-|Non-Overlapping, no shared priority levels
-|Not Saturated
-|This is a repeat of scenario 1, but with TAS gating enabled in the switch.  This is a baseline nominal scenario for TAS.
-|Minor reduction in latency of what was already low-latency critical traffic (due to lack of contention with streaming traffic), otherwise not too much difference from scenario 1.  
-
-|6
-|Enabled
-|Non-Overlapping, no shared priority levels
-|Saturated
-|This is an off-nominal extension of scenario 5, and shows how TAS is able to prevent lower priority traffic (in this case, the vanilla Ethernet traffic) from affecting the higher priority traffic, through the use of TAS gating.  
-|Significantly increased latencies and frame drops only on the babbling vanilla Ethernet stream.  The critical traffic in particular should have latencies unaffected.
-
-|7
-|Enabled
-|Overlapping, shared priority levels
-|Not Saturated
-|This is a repeat of scenario 3, but with TAS gating enabled in the switch.  In this scenario, the critical traffic from the 2 nodes is scheduled to be output at the same time, and share a time window on the switch.  
-|Slightly increased latencies for critical traffic (due to contention between the 2 nodes) compared to the non-overlapping version.
-
-|8
-|Enabled
-|Overlapping, shared priority levels
-|Saturated
-|This final scenario is an off-nominal extension of scenario 7, and demonstrates how there are some faults that TAS by itself cannot deal with.  In this case, the 2 transmitting nodes shared a priority level, and one of them will 'babble' critical traffic.  In an ideal Spacecraft network, this should not interfere with the critical traffic from any other nodes.  However, TAS by itself is not able to address that.  A future demonstration will show how IEEE P802.1Qci (Per-Stream Filtering and Policing) addresses this fault case.
-|Significantly increased latencies and frame drops of all traffic, including critical traffic from the end-point that is behaving correctly.  
-
-|9
-|TBD
-|TBD
-|TBD
-|Something where time sync is disabled to see what happens under the fault condition where time is not being syncrhonized.  Look at the case where it is never enabled, can PSFP even work, and then for a case where everything is configured and operating, and then time sync stops...does rate limiting still work for example?
-|TBD
-
-|===
-
-.Stream Gating PSFP Scenarios
-|===  
-|Scenario |Switch TAS State |Scheduled Traffic Configuration |Receiving End-Point Link |Description |Expected Results
-|===
-
-.Stream Filtering PSFP Scenarios
-|===  
-|Scenario |Switch TAS State |Scheduled Traffic Configuration |Receiving End-Point Link |Description |Expected Results
-|===
-
-For each scenario, frame drop and latency statistics per traffic item are reported.
-
-For each scenario, the general approach is to model it in Pegase, implement it in each hardware venue, export the results back to Pegase, and compare the actual vs model.
+== Scenario Details
 
 
 ----
