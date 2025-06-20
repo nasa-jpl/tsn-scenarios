@@ -1,0 +1,24 @@
+- name: Install systemd-journal-remote
+  apt:
+    name: systemd-journal-remote
+    state: present
+
+- name: Configure systemd-journal-remote service
+  template:
+    src: "journal-remote.conf"
+    dest: "/etc/systemd/"
+    owner: systemd-journal-remote
+    group: systemd-journal-remote
+    mode: "0640"
+  notify:
+    - Restart systemd-journal-remote service
+
+- name: Install systemd-journal-remote service
+  template:
+    src: "systemd-journal-remote.service"
+    dest: "/etc/systemd/system/"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart systemd-journal-remote service

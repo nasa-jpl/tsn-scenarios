@@ -1,5 +1,5 @@
 - name: 802.1AS
-  hosts: all
+  hosts: duts
   roles:
     - role: AS
       op: start

@@ -1,0 +1,16 @@
+- name: Install systemd-journal-remote
+  apt:
+    name: systemd-journal-remote
+    state: present
+
+- name: Configure systemd-journal-upload service
+  template:
+    src: "journal-upload.conf"
+    dest: "/etc/systemd/"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart systemd-journal-upload service
+
+

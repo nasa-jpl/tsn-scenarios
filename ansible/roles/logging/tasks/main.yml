@@ -1,0 +1,7 @@
+# Reference: https://www.blunix.com/blog/centralized-logging-server-on-linux-with-systemd-journal-remote.html
+
+- include_tasks: server.yml
+  when: inventory_hostname in groups["logging_server"]
+
+- include_tasks: clients.yml
+  when: inventory_hostname in groups["logging_clients"]

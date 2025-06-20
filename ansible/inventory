@@ -1,19 +1,59 @@
 all:
-  vars:
-    interface: enp1s0
   children:
-    gms:
-    eis:
+    logging_server:
+    duts:
+
+logging_server:
+  vars:
+    # USER: If the logging server and the Ansible control node are different
+    # systems, then comment out this line.
+    ansible_connection: local
+  hosts:
+    # USER: If the logging server and the Ansible control node are different
+    # systems, then set this line to the hostname of logging server.
+    localhost
+
+logging_clients:
+  children:
+    duts:
+
+duts:
+  vars:
+    # USER: Set to name of the interface connected to the TSN network
+    tsn_interface: enp1s0
+    # USER: Set to the hostname of the logging server
+    logging_server: work-desktop
+    # USER: Set to username that exists on all systems with passwordless sudo access
+    ansible_user: ansible
+  children:
+    es0:
+    es1:
+    es2:
 
 gms:
   vars:
     ptp_role: gm
-  hosts:
-    hpsctsnes0:
+  children:
+    es0:
 
 eis:
   vars:
     ptp_role: ei
+  children:
+    es1:
+    es2:
+
+es0:
   hosts:
+    # USER: Set to the hostname of end system 0
+    hpsctsnes0:
+
+es1:
+  hosts:
+    # USER: Set to the hostname of end system 1
     hpsctsnes1:
+
+es2:
+  hosts:
+    # USER: Set to the hostname of end system 2
     hpsctsnes2:
