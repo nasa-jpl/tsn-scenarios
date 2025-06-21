@@ -43,11 +43,120 @@ The scenarios as described below assume that EP~n~ is connected to port n+4 of t
 
 Unless explicitly defined otherwise, for every scenario, every traffic item produced by the end points should be produced at a unique rate, using different power of 2's (100 Kbps, 200 Kbps, 400 Kbps, 800 Kbps, etc).  The flow meters should also be set to unique rates, and always lower than the slowest traffic production rate.  This guarantees that it is always clear which traffic items are being filtered, and by which flow meter.
 
+== Terminology
+
 Precise definitions of some of the terminology used in the table below, specific to these TAS demonstrations:
 
 * Time slot.  This is TDMA terminology, for the window of time in which a device is allowed to transmit.  In our case we use this terminology when defining gate opening and closing times.  Each entry in a Gate Control List defines a time slot, with a specific starting and ending time relative to the start of the network cycle.
 
 == Scenario Details
+
+=== Flow Metering
+
+==== Scenario 1 - CIR / CBS
+
+* Create stream ID S1 that matches anything on SMAC connected to port 1.  Use color-blind mode.
+* Create flow meter with CIR = 1000 (1 Mbps), CBS = 1,000,000 (bytes), EIR = 0, EBS = 0
+* Create traffic flow set to output a burst of 8,000,000 bits at line rate, every 10 seconds
+* Run this test, nothing should be dropped (the 8,000,000 bits or 1,000,000 bytes fits in the bucket, and we are sending it at an average 0.8 Mbps, but filling the bucket with tokens at 1 Mbps, so we should never run out of tokens.  So should see 0.8 Mbps transmit and received.)
+* Increase burst to every 7 seconds, and should see frames dropped from the burst but not all frames (we are now sending at about 1.14 Mbps, so the bucket will not fill up with enough tokens in time for the next burst.  Should see 1.14 Mbps transmit and 1 Mbps received)
+
+==== Scenario 2 - EIR / EBS
+
+* Might need to play with numbers - suggest try first with no policing and figure out 2 rates that can run from the 2 ports with no frame drops but as high of bandwidth as possible
+* Create stream ID S1 that matches anything on SMAC connected to port 1.  Use color-blind mode.
+* Create flow meter with CIR = 10,000 (10 Mbps), CBS = 10,000,000 (bytes), EIR = 100,000 (100 Mbps), EBS = 100,000,000 (bytes)
+* Create traffic flow on port 1, output a burst of 8,000,000 bits at line rate, every 0.5 seconds
+* Run this test, nothing should be dropped (should see 16 Mbps transmit and received, it will be using all the green tokens and some of the yellow tokens)
+* Increase burst to every 0.05 seconds, and should see frames dropped from the burst but not all frames (should see 160 Mbps transmit, and 110 Mbps received)
+* Capture frames into and out of switch and verify DEI bit not set on ingress, and see if it is sometimes set on egress (because droponyellow = false)
+* Create 2nd traffic flow on port 2, output a constant 980 Mbps line rate (the value should leave remaining bandwidth > CIR and < EIR)
+* Rerun test with burst every 0.5 seconds
+* Nothing should be dropped (and particularly nothing from port 2)
+* Rerun test with burst every 0.05 seconds.  We should see at least 10 Mbps from port 1, but beyond that what happens depends on how switch handles drop eligible bit.
+
+==== Scenario 3 - Drop On Yellow
+
+* Repeat scenario 2, but with drop on yellow enabled.
+* In this scenario, we should see all frames beyond 10 Mbps on port 1 dropped.
+
+==== Scenario 4 - Mark Red
+
+* Repeat just the first part of scenario 2, that only uses one port.  
+** Run with drop on yellow disabled, and mark red enabled
+* In this scenario, we should see all traffic from port 1 stop.  
+* Clear the error, see that a little more traffic gets through and then is stopped again.
+* Reduce the rate back to 16 Mbps transmit, clear the error, and see traffic flow again.
+
+==== ON HOLD: Additional Scenarios
+
+These functions were deemed not important at this time, and there are currently no plans to demonstrate them.
+
+* Coupling
+* Color Mode
+
+=== Stream Gating
+
+==== Scenario 1 - Gating
+
+* Setup stream ID S1 and S2, matching to 2 different SMAC addresses
+* Setup stream gating for each S1 and S2.  For S1 open a gate for time slot [250us,275us] and for S2 open a gate for time slot [500us,525us].  Using a network cycle of 1ms.  (Doing this means you have to have at least length 3 GCL, with the first and last portion having the gate closed, and the middle portion corresponding to the time slot open.  So closed [0us,250us] open [250us,275us] closed [275us,1000us].
+* Ensure the normal switch TAS is disabled.
+* Setup 1 traffic item per port, matching the 2 SMAC addresses, no VLAN tag.  Transmit with 0 offset. 
+* Should see a 250us latency for one, and a 500us latency for the other. 
+
+==== Scenario 2 - Invalid RX
+
+* Continue where scenario 1 left off
+* Adjust one traffic item to have an offset to match the gate on it's associated stream.  Rerun.
+* Should see the stream with matching offset, deliver all frames with low latency, and all frames dropped from the other stream with offset 0.  
+* Change the offset on the 2nd stream to also match the configured gate, show that still no traffic goes through.
+* Go to stream gate status monitor on switch, clear the fault, and see that traffic now goes through on both streams
+
+==== Scenario 3 - Octets Exceeded
+
+* Continue where scenario 2 invalid RX left off.
+* Set an octet max, and use random frame sizes to show larger frames are getting dropped but not smaller frames (using switch stats) (see stream filtering scenario 1 SDU size)
+* Set close gate due to octets exceeded, and show that all traffic stops.
+* Switch keysight back to fixed frame sizes < octet max, show no traffic goes through still.
+* Go to stream gate status monitor on switch, clear the fault, and see that traffic now goes through on both streams
+
+==== Scenario 4 - Re-prioritization
+
+* Setup stream ID S1, matching everything, and configure stream gate to divide the network cycle into equal quarters, with each index having a different priority specified (say, 4 / 5 / 6 / 7)
+* Setup 4 traffic items, no VLAN tag, with offsets so they line up with the 4 different stream gates
+* Traffic should have very low latencies, and looking at switch detailed port stats should see all the traffic coming in on a single queue, but going out via queues 4-7.
+* Capture traffic to see if frame headers updated (vs switch just used different priorities internally)
+* Repeat, this time with each traffic item having a priority tag specifying priority - 2 priority 1, 2 priority 2.  Results should be the same.
+* Capture frames again and check headers as before
+
+=== Stream Filtering
+
+==== Scenario 1 - SDU size
+
+* Create stream ID S1 that matches anything on the SMACs connected to ports 1 & 2
+* Create filter, with max SDU size of 511 bytes, and block oversize frame ENABLED
+* Create filter, with max SDU size of 255 bytes, and block oversize frame DISABLED
+* Setup single traffic item per end point, each generating random size frames with a maximum size of 255 bytes.  See they all pass through.  Look at detailed port stats on switch.
+* Separate test, increase max size to 500 bytes.  Should see drops, and in detailed port stats should see Tx only be transmitting 64, 65-127, and 128-255 byte frames.
+* Separate test, add a 2nd traffic item on just one port, that outputs a 1000 byte frame once every 20 seconds (probably need to offset by 20 seconds or something).  Should see traffic flow for 20 seconds, then all traffic stop from both ports.
+* Go into stream filter status, clear the blocked filter, and see traffic flow again for 20 seconds.
+* This one would be good to get some keysight stats over time as a chart, like showing the Tx rate and Rx rates.
+
+==== Scenario 2 - Multiple streams mapped to one gate
+
+* Setup stream ID S1 to match everything on SMAC connected to port 1, and ID S2 to match everything on SMAC connected to port 2
+* Port 1, use same traffic flows as stream gating scenario 3.  Port 2, use a traffic flow that violates no timing or frame size rules
+* Repeat stream gating scenario 3 test, and observe is the frames from port 2 are also cut off
+
+==== Scenario 3 - Multiple streams mapped to one flow meter
+
+* Create stream ID S1 that matches anything on SMAC connected to port 1, and ID S2 matching anything on SMAC connected to port 2.  Use color-blind mode.
+* Create flow meter same as scenario 2a
+* Create duplicate set of traffic items on port 1 and port 2 (each the same as in flow meter scenario 1)
+* Run the first test (burst every 10 seconds) from flow meter scenario 1, and should see traffic dropped.
+
+
 
 
 ----
