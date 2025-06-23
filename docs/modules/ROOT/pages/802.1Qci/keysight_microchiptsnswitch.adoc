@@ -18,15 +18,12 @@ All scenarios assume the Keysight is starting with the base 802.1AS time synchro
 
 == General Microchip switch PSFP configuration overview
 
-The scenarios will just list out the steps of how to configure the switch, without detailed screenshots for each step.  The following screenshots provide an overview of how to configure PSFP on the switch.
+The scenarios will just list out the steps of how to configure the switch, without detailed screenshots for each step.  The following screenshots provide an overview of how to configure PSFP on the switch.  Note that Stream ID is handled with a separate set of scenarios, and a screenshot showing the basics of configuring it can be found there.
 
 In all cases, if a dialog entry is not mentioned, leave it set to the default.
 
 .PSFP Config Screens
 image::802.1Qci/PSFP_tutorial/microchip_switch_config_screens.png[]
-
-.Stream ID Dialog
-image::802.1Qci/PSFP_tutorial/microchip_switch_stream_dialog.png[]
 
 .Flow Meter Dialog
 image::802.1Qci/PSFP_tutorial/microchip_switch_flow_meter_dialog.png[]

@@ -1,0 +1,79 @@
+= Stream Identification: Keysight Network Emulator / Microchip iStax TSN Switch Venue
+
+:toc: macro
+:idprefix:
+:idseparator: -
+
+ifndef::site-gen-antora[]
+toc::[]
+endif::[]
+
+This document provides specific instructions for implementing the Stream Identification scenarios with the Keysight Novus One Plus network emulator acting as the end-points, and the Microchip VSC5640EV switch hardware running iStax software.
+
+It is assumed that there is basic familiarity with the Keysight and switch.  If not, the TAS scenario instructions are much more detailed and provide specific steps for how to create topologies and traffic items in Keysight, etc.
+
+All scenarios assume the base switch configuration has already been performed.  Instructions can be found here: xref:base_switch_config.adoc[].
+
+All scenarios assume the Keysight is starting with the base 802.1AS time synchronization setup, found here: xref:802.1AS/802.1AS.adoc[].
+
+== General Microchip switch Stream Identification configuration overview
+
+The scenarios will just list out the steps of how to configure the switch, without detailed screenshots for each step.  The following screenshots provide an overview of how to configure Stream Identification on the switch.  Note that the scenarios require both streams to be defined, as well as flow meters and stream filters.  Similar screen shots covering those are found in the PSFP scenario documentation.
+
+In all cases, if a dialog entry is not mentioned, leave it set to the default.
+
+.PSFP Config Screens
+image::802.1Qci/PSFP_tutorial/microchip_switch_config_screens.png[]
+
+.Stream ID Dialog
+image::802.1Qci/PSFP_tutorial/microchip_switch_stream_dialog.png[]
+
+== Detailed Steps, Stream Mapping
+=== Scenario 1
+Rule Order-Of-Execution
+
+==== Detailed Switch Configuration
+
+See screenshots earlier in this scenario, and in the PSFP venue-specific documentation, for how to configure the switch.  No further information should be needed beyond what is provided by the general scenario description.
+
+==== Detailed Novus Configuration
+
+* Create a single traffic flow
+** EP~1~ transmitting to EP~3~
+** 800 Kbps rate
+** fixed 64 byte frames
+
+==== Test Execution and Results
+
+The expectation is that the traffic item will only see 200 Kbps get through, as the switch should be checking the frame against stream rules in ascending numeric order, regardless of the order in which they were created.
+
+The results do match that as shown in the screenshots below.  
+
+Note that the bit rate being received slightly exceeds 200 Kbps.  It is not fully understood why that is, but it is likely a combination of a difference between the traffic generator and switch in whether or not frame headers are counted, and the exact mechanism by which the switch enforces the bandwidth (averaging over some period of time, windows, etc).  Further investigation could be performed, if this becomes relevant, using packet captures to see exactly what is going into and out of the switch.  The same results are expected for any tests using flow meters, but will not repeat this text for every scenario.  This idiosyncrasy will just be captured here.
+
+.Switch QoS Stats
+image::stream_id/keysight_microchip_streamid_scenario1/switch_qos_stats.png[]
+
+.Keysight Stats
+image::stream_id/keysight_microchip_streamid_scenario1/keysight_stats.png[]
+
+=== Scenario 2
+Destination MAC matching
+
+==== Detailed Switch Configuration
+
+General scenario description should be sufficient.
+
+==== Detailed Novus Configuration
+
+General scenario description should be sufficient.
+
+==== Test Execution and Results
+
+Results match expected - the 2 traffic flows matching the DMAC, combined, are reduced to ~50 Kbps.  The other traffic flows are not affected.
+
+.Keysight Stats
+image::stream_id/keysight_microchip_streamid_scenario2/keysight_stats.png[]
+
+
+----

@@ -27,19 +27,19 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 *It is critical, for this scenario, to perform these steps in the order listed, even though it would be quicker to rearrange them*
 
 . Create 1st stream
-.. Create stream, with ID 10, that matches everything on all ports
+.. Create stream, with ID 10, that matches everything on ports 1,2
 .. Create flow meter ID 1, CIR = 100 Kbps, CBS = 8192 bytes
 .. Create stream filter ID 1 connecting stream ID 10 to flow meter ID 1
 . Create 2nd stream
-.. Create stream, with ID 5, that matches everything on all ports
+.. Create stream, with ID 5, that matches everything on ports 1,2
 .. Create flow meter ID 2, CIR = 200 Kbps, CBS = 8192 bytes
 .. Create stream filter ID 2 connecting stream ID 5 to flow meter ID 2
 . Create 3rd stream
-.. Create stream, with ID 20, that matches everything on all ports
+.. Create stream, with ID 20, that matches everything on ports 1,2
 .. Create flow meter ID 4, CIR = 400 Kbps, CBS = 8192 bytes
 .. Create stream filter ID 4 connecting stream ID 20 to flow meter ID 4
 . Create traffic
-.. Craete traffic item from EP~1~, 800 Kbps, destination EP~3~
+.. Create traffic item from EP~1~, 800 Kbps, destination EP~3~
 . Execute test
 .. Observe which flow meter takes effect.  Is it lowest number, highest number, or most recently created?
 ... Should see traffic item receive rate 200 Kbps (stream ID 5, lowest number)
@@ -48,8 +48,9 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 
 *Purpose:* Demonstrate how frames can be matched to a stream based on the specified destination MAC, including with a mask for wild card matching.
 
-. Define a stream based on DMAC using a mask to have some wild cards, all ports
+. Define a stream based on DMAC using a mask to have some wild cards
 .. DMAC = 00:16:01:00:00:01, Mask = 00:FF:00:00:00:FF
+.. Ports 1 & 2
 . Create 4 total traffic items, 2 each on EP~1~ and EP~2~
 .. 1 traffic item from each EP~1~ and EP~2~, using separate DMACs, but each matching the DMAC+mask defined for the stream
 ... Traffic Item 1: EP~1~: 100 Kbps, DMAC 00:16:02:00:00:01
@@ -69,7 +70,7 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 
 *Purpose:* Demonstrate how frames can be matched to a stream based on the specified source MAC, including with a mask for wild card matching.
 
-. Define a stream based on SMAC using a mask to have some wild cards, all ports
+. Define a stream based on SMAC using a mask to have some wild cards, ports 1,2
 .. SMAC = 00:12:01:00:00:01, Mask = 00:FF:00:00:00:FF
 . Create 4 total traffic items, 2 each on EP~1~ and EP~2~, all to the same destination MAC on EP~3~
 .. 1 traffic item from each EP~1~ and EP~2~, using separate SMACs, each matching the masked SMAC
@@ -90,18 +91,18 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 *Purpose:* Demonstrate how IP frames can be matched to a stream based on the specified source IP address, destination IP address, and port.  This can be useful to differentiate by application, where different applications use different ports.  This all demonstrates making a "catch all" stream as the last stream, so that every frame matches to something.  This would for example be a way to get a switch to simply drop all unexpected traffic.
 
 . Setup network stack such that EP~1~ and EP~2~ can each send and receive UDP/IPv4 traffic, and have IP addresses IP1 and IP2 respectively
-. Create 6 streams, per table below, each mapped to an associated flow meter via a stream filter, setup to drop any frames above the specified steady-state rate.  The table also indicates if we expect any frames to match to this stream when the test is executed, based on the traffic item definitions specified further down.
+. Create 6 streams, per table below, each mapped to an associated flow meter via a stream filter, setup to drop any frames above the specified steady-state rate.  The table also indicates if we expect any frames to match to this stream when the test is executed, based on the traffic item definitions specified further down.  
 .. Use CBS of 2048 bytes for all flow meters
 +
 .IP Based Matching Stream Rules
 |===  
-|Stream ID |Source IP |Destination IP |Destination Port |Flow Meter CIR |Matching SDUs?
-|1 |Any |Any |3300 |10 Kbps |Yes
-|2 |IP1 |Any |Any |20 Kbps |Yes
-|3 |Any |IP2 |1000 |30 Kbps |No
-|4 |Any |IP2 |4000 to 4400 |40 Kbps |Yes
-|5 |IP2 |IP1 |3000 |50 Kbps |Yes
-|6 |Any |Any |Any |0 Kbps |Yes
+|Stream ID |Source IP |Destination IP |Destination Port |Flow Meter CIR |Switch Port(s) |Matching SDUs?
+|1 |Any |Any |3300 |10 Kbps |1,2 |Yes
+|2 |IP1 |Any |Any |20 Kbps |1,2 |Yes
+|3 |Any |IP2 |1000 |30 Kbps |1,2 |No
+|4 |Any |IP2 |4000 to 4400 |40 Kbps |1,2 |Yes
+|5 |IP2 |IP1 |3000 |50 Kbps |1,2 |Yes
+|6 |Any |Any |Any |0 Kbps |1,2 |Yes
 |===
 +
 . Create 10 sets of traffic items, with an indication of which stream it is expected to match to
@@ -135,7 +136,7 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 
 *Purpose:* Demonstrate the switch can assign frames to a stream based on which physical port the frame was received.  Supporting this might not be required by the standard, although there is a note that implies some way to do this (see https://hal.science/hal-04159172v4 section 2.1).  Note that also complete fault tolerance cannot be delivered without this capability - there must be some way to prevent a device from spoofing valid frames from a different device.
 
-. Create stream ID 1 that matches anything, on any port EXCEPT ports 1,2
+. Create stream ID 1 that matches anything, on any port EXCEPT ports 1,2,21
 . Create stream ID 2 that matches anything on port 1
 . Create stream ID 3 that matches anything on port 2
 . Create separate flow meters for each stream ID, and map via stream filters
