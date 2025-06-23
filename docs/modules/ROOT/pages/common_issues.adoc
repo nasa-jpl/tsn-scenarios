@@ -27,6 +27,7 @@ TODO: Add more information about what to look for.  Maybe a section on symptoms 
 * Keysight
 ** Try regenerating and applying traffic changes.  The tool sometimes does this automatically, but there are some cases where it does not.  Safest is to simply always perform both of these steps after making any changes and before starting the test.  
 * Microchip iStax TSN switch
+** The management port (last port) is treated like any other port, meaning various QoS and TSN features can be applied to that port, which can make the web ui inaccessible.  For example when defining a stream, do not select the last port as one of the ports to match to.  If this happens, the remote serial connection (rsc ngatsnsw1, for example) can be used to recover.  There is some separate documentation on the equipment page for the switch for how to use the remote serial connection, and what kinds of commands can be sent.
 ** There have been occasions where the TAS gate config won't become active
 *** Monitor page will show it is enabled, but no GCL defined, even though there is one on the config page
 *** It isn't clear the exact series of steps that got it to work when this has happened, but when it eventually worked, traffic generators / time transmitter were halted, a switch config file that setup the gates was loaded, and then the time transmitter was started.  As soon as PTP was going it looks like the config change happened.  However, that same series of steps had been previous tried without success, so it isn't clear what may have been different when it eventually worked.
