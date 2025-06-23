@@ -22,44 +22,90 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 
 === Scenario 1 - Order-of-execution
 
-* Create stream ID S1, with ID 10, that matches destination MAC, ports 1 & 2
-* Create flow meter at rate X1, attached to stream S1
-* Create stream ID S2, with ID 5, identical to S1
-* Create flow meter at rate X2, attached to stream S2
-* Create stream ID S3, with ID 20, identical to S2
-* Create flow meter at rate X3, attached to stream S3
-* Single traffic flow from endpoint matching the DMAC
-* Observe which flow meter takes effect.  Is it lowest number, highest number, or most recently created.
-* Should see rate X2
+*Purpose:* Demonstrate the order in which streams are checked for a match to each frame.  Per the standard, the streams should be checked in numerical order by ID, and the frame assigned to the first stream it matches, with no further streams checked for that frame.
+
+*It is critical, for this scenario, to perform these steps in the order listed, even though it would be quicker to rearrange them*
+
+. Create 1st stream
+.. Create stream, with ID 10, that matches everything on all ports
+.. Create flow meter ID 1, CIR = 100 Kbps, CBS = 8192 bytes
+.. Create stream filter ID 1 connecting stream ID 10 to flow meter ID 1
+. Create 2nd stream
+.. Create stream, with ID 5, that matches everything on all ports
+.. Create flow meter ID 2, CIR = 200 Kbps, CBS = 8192 bytes
+.. Create stream filter ID 2 connecting stream ID 5 to flow meter ID 2
+. Create 3rd stream
+.. Create stream, with ID 20, that matches everything on all ports
+.. Create flow meter ID 4, CIR = 400 Kbps, CBS = 8192 bytes
+.. Create stream filter ID 4 connecting stream ID 20 to flow meter ID 4
+. Create traffic
+.. Craete traffic item from EP~1~, 800 Kbps, destination EP~3~
+. Execute test
+.. Observe which flow meter takes effect.  Is it lowest number, highest number, or most recently created?
+... Should see traffic item receive rate 200 Kbps (stream ID 5, lowest number)
 
 === Scenario 2 - DMAC matching
 
-* Define a stream based on DMAC using mask to have some wild cards, ports 1 & 2
-* Create 2 traffic items per end point, 1 from each that are separate DMACs but both match the DMAC/mask, and 1 from each that does not match.
-* Create a flow meter and see that the total sum of the 2 traffic items matching the DMAC/mask are metered, and the traffic items not matching are not metered
+*Purpose:* Demonstrate how frames can be matched to a stream based on the specified destination MAC, including with a mask for wild card matching.
+
+. Define a stream based on DMAC using a mask to have some wild cards, all ports
+.. DMAC = 00:16:01:00:00:01, Mask = 00:FF:00:00:00:FF
+. Create 4 total traffic items, 2 each on EP~1~ and EP~2~
+.. 1 traffic item from each EP~1~ and EP~2~, using separate DMACs, but each matching the DMAC+mask defined for the stream
+... Traffic Item 1: EP~1~: 100 Kbps, DMAC 00:16:02:00:00:01
+... Traffic Item 2: EP~2~: 200 Kbps, DMAC 01:16:00:FF:FF:01
+.. 1 traffic item from each EP~1~ and EP~2~, using separate DMACs, that do not match
+... Traffic Item 3: EP~1~: 400 Kbps, DMAC 00:16:01:00:00:02
+... Traffic Item 4: EP~2~: 800 Kbps, DMAC 00:17:01:00:00:01
+.. Given all of this traffic needs to get through, need to create 4 receiving devices on EP~3~ with those 4 DMAC addresses specified above, and make sure the switch is configured to know what port those are on.
+. Create a flow meter, limited to 50 Kbps.
+. Create a stream filter, that maps the flow meter to the stream.
+. Execute test, should see:
+.. Traffic Item 1+2 received rate = 50 Kbps
+.. Traffic Item 3 received rate = 400 Kbps
+.. Traffic Item 4 received rate = 800 Kbps
 
 === Scenario 3 - SMAC matching
 
-* Identical to DMAC, but using 4 separate SMACs for the traffic items
+*Purpose:* Demonstrate how frames can be matched to a stream based on the specified source MAC, including with a mask for wild card matching.
+
+. Define a stream based on SMAC using a mask to have some wild cards, all ports
+.. SMAC = 00:12:01:00:00:01, Mask = 00:FF:00:00:00:FF
+. Create 4 total traffic items, 2 each on EP~1~ and EP~2~, all to the same destination MAC on EP~3~
+.. 1 traffic item from each EP~1~ and EP~2~, using separate SMACs, each matching the masked SMAC
+... Traffic Item 1: EP~1~: 1000 Kbps, SMAC 00:12:02:00:00:01
+... Traffic Item 2: EP~2~: 2000 Kbps, SMAC 01:12:00:FF:FF:01
+.. 1 traffic item from each EP~1~ and EP~2~, using separate SMACs, that do not match the masked SMAC
+... Traffic Item 3: EP~1~: 4000 Kbps, SMAC 00:12:01:00:00:02
+... Traffic Item 4: EP~2~: 8000 Kbps, SMAC 00:13:01:00:00:01
+. Create a flow meter, limited to 500 Kbps.
+. Create a stream filter, that maps the flow meter to the stream.
+. Execute test, should see:
+.. Traffic Item 1+2 received rate = 500 Kbps
+.. Traffic Item 3 received rate = 4000 Kbps
+.. Traffic Item 4 received rate = 8000 Kbps
 
 === Scenario 4 - IP based matching
 
-* Create UDP/IPv4 traffic from 2 separate devices on separate switch ports, going to each other
-* Create 6 streams, each mapped to an associated flow meter via a stream filter, setup to drop any frames above the specified steady-state rate.  The table also indicates if we expect any frames to match to this stream, based on the traffic item definitions.
+*Purpose:* Demonstrate how IP frames can be matched to a stream based on the specified source IP address, destination IP address, and port.  This can be useful to differentiate by application, where different applications use different ports.  This all demonstrates making a "catch all" stream as the last stream, so that every frame matches to something.  This would for example be a way to get a switch to simply drop all unexpected traffic.
 
+. Setup network stack such that EP~1~ and EP~2~ can each send and receive UDP/IPv4 traffic, and have IP addresses IP1 and IP2 respectively
+. Create 6 streams, per table below, each mapped to an associated flow meter via a stream filter, setup to drop any frames above the specified steady-state rate.  The table also indicates if we expect any frames to match to this stream when the test is executed, based on the traffic item definitions specified further down.
+.. Use CBS of 2048 bytes for all flow meters
++
 .IP Based Matching Stream Rules
 |===  
-|Stream ID |Source IP |Destination IP |Destination Port |Flow Meter Rate |Matching SDUs?
+|Stream ID |Source IP |Destination IP |Destination Port |Flow Meter CIR |Matching SDUs?
 |1 |Any |Any |3300 |10 Kbps |Yes
 |2 |IP1 |Any |Any |20 Kbps |Yes
 |3 |Any |IP2 |1000 |30 Kbps |No
 |4 |Any |IP2 |4000 to 4400 |40 Kbps |Yes
 |5 |IP2 |IP1 |3000 |50 Kbps |Yes
-|6 |Any |Any |Any |60 Kbps |No
+|6 |Any |Any |Any |0 Kbps |Yes
 |===
-
-* Create 8 sets of traffic items, with an indication of which stream it is expected to match to
-
++
+. Create 10 sets of traffic items, with an indication of which stream it is expected to match to
++
 .IP Based Matching Traffic Items
 |===  
 |Traffic Item |Source IP |Destination IP |Destination Port |Rate |Expected Stream
@@ -71,23 +117,39 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 |6 |IP2 |IP1 |3300 |3200 Kbps | 1
 |7 |IP2 |IP2 |4000 |6400 Kbps | 4
 |8 |IP2 |IP2 |4400 |12800 Kbps | 4
+|9 |IP2 |IP2 |5000 |25600 Kbps | 6
+|10 |IP2 |IP1 |5000 |51200 Kbps | 6
 |===
-
-* Run the scenario.
-** Verify in switch statistics that SDUs are matching to the expected streams
-** Verify via destination bit-rate statistics, that the frames are matching and being filtered as expected
-*** Traffic items 1, 2, 3, 4 should total 20 Kbps
-*** Traffic item 5 should be 50 Kbps
-*** Traffic item 6 should be 10 Kbps
-*** Traffic item 7, 8 should total 40 Kbps
++
+. Run the scenario.
+.. Verify in switch statistics that SDUs are matching to the expected streams
+.. Verify via destination bit-rate statistics, that the frames are matching and being filtered as expected
+... Traffic items 1, 2, 3, 4 should total 20 Kbps
+... Traffic item 5 should be 50 Kbps
+... Traffic item 6 should be 10 Kbps
+... Traffic item 7, 8 should total 40 Kbps
+... Traffic item 9, 10 should drop 100% of frames
+.. Check switch resource availability vs the base switch config, to see what % of capabilities this is using.
 
 === Scenario 5 - Source Port
 
-* Create stream ID S1 that matches anything on port 1
-* Create stream ID S2 that matches anything on port 2
-* Create separate flow meter for each stream ID
-* 2 traffic flows per end point: Use separate SMAC for each, VLAN 0, separate priority for each, separate DMAC for each (EP3 will need some new devices with different DMACs)
-* Show that flow meter operates on each traffic flow equally, i.e. without regard for frame header contents, just source port
+*Purpose:* Demonstrate the switch can assign frames to a stream based on which physical port the frame was received.  Supporting this might not be required by the standard, although there is a note that implies some way to do this (see https://hal.science/hal-04159172v4 section 2.1).  Note that also complete fault tolerance cannot be delivered without this capability - there must be some way to prevent a device from spoofing valid frames from a different device.
+
+. Create stream ID 1 that matches anything, on any port EXCEPT ports 1,2
+. Create stream ID 2 that matches anything on port 1
+. Create stream ID 3 that matches anything on port 2
+. Create separate flow meters for each stream ID, and map via stream filters
+.. CIR = 0 Kbps, 20 Kbps and 80 Kbps, respectively
+.. CBS = 2048 bytes for each
+. Create 4 total traffic items, 2 each on EP~1~ and EP~2~.  The traffic on each EP should be identical.
+.. Traffic Item 1: EP~1~: 100 Kbps, SMAC 00:12:01:00:00:01, DMAC 00:16:01:00:00:01, VLAN 0 priority 1
+.. Traffic Item 2: EP~1~: 200 Kbps, SMAC 00:13:01:00:00:01, DMAC 00:17:01:00:00:01, VLAN 0 priority 2
+.. Traffic Item 3: EP~2~: 400 Kbps, SMAC 00:12:01:00:00:01, DMAC 00:16:01:00:00:01, VLAN 0 priority 1
+.. Traffic Item 4: EP~2~: 800 Kbps, SMAC 00:13:01:00:00:01, DMAC 00:17:01:00:00:01, VLAN 0 priority 2
+.. Given all of this traffic needs to get through, need to create 4 receiving devices on EP~3~ with those 4 DMAC addresses specified above, and make sure the switch is configured to know what port those are on.
+. Execute test, should see:
+.. Traffic Item 1+2 received rate = 20 Kbps
+.. Traffic Item 3+4 received rate = 80 Kbps
 
 
 === ON HOLD: Additional Scenarios

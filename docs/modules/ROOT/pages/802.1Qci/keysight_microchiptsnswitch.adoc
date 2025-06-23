@@ -18,7 +18,7 @@ All scenarios assume the Keysight is starting with the base 802.1AS time synchro
 
 == General Microchip switch PSFP configuration overview
 
-The scenarios will just list out the specifics of how to configure the switch, without detailed screenshots for each step.  The following screenshots provide an overview of how to configure PSFP on the switch.
+The scenarios will just list out the steps of how to configure the switch, without detailed screenshots for each step.  The following screenshots provide an overview of how to configure PSFP on the switch.
 
 In all cases, if a dialog entry is not mentioned, leave it set to the default.
 
@@ -45,9 +45,9 @@ Rule Order-Of-Execution
 
 *It is critical that the streams be created with the IDs shown and in the order listed*
 
+* Create stream ID 10 that matches everything on EP~1~
 * Create stream ID 5 that matches everything on EP~1~
-* Create stream ID 3 that matches everything on EP~1~
-* Create stream ID 7 that matches everything on EP~1~
+* Create stream ID 20 that matches everything on EP~1~
 * Create 3 flow meters
 ** Use rates CIR of 100, 200, and 400 Kbps.  To make things easy to keep straight, use flow meter IDs 1, 2, and 4 for those.
 ** Use CBS of 8192 for all 3
