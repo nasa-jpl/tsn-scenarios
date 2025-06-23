@@ -10,25 +10,14 @@ endif::[]
 
 The purpose of this demonstration is to show how IEEE 802.1Qbv Time Aware Shaping (TAS) can ensure low latencies and no dropped frames for critical traffic when network links are over-subscribed, while also demonstrating the limits of TAS with a scenario that it is unable to protect against.
 
-All scenarios within this demonstration share a common topology.  
+*TODO* provide a brief overview of time-aware-shaping
 
-* EP~1~ provides the IEEE 802.1AS reference clock, as well as producing 4 independent scheduled, critical traffic items.  
-* EP~2~ produces 3 streams of prioritized traffic and 1 stream of non-prioritized vanilla Ethernet traffic.  Note that it is not a time receiver, nothing on this node is synchronized to the network schedule.
-* EP~3~ is a time receiver, as well as receiving the traffic from EP~1~ and EP~2~.  
-* For the scenarios that involve overlapping shared priority traffic, EP~2~ adds an additional 4 scheduled, critical traffic items that share the same schedule and priority levels as those from EP~1~.
+include::partial$base_topology.adoc[]
 
-.TAS Demo Topology
-image::topo-layer-base.drawio.svg[]
+== Common Scenario Details
 
-Scheduled traffic refers to traffic that is transmit at a fixed offset from the start of each network cycle.  
-Streaming traffic refers to traffic that is allocated a percentage of the line rate, and is not synchronized to the network cycle.
+Some of the terminology specific to this scenario, in the table below, is defined here:
 
-
-== Scenario Details
-
-The scenarios as described below assume that EP~n~ is connected to port n of the switch.  If using different port assignments, adjust the instructions accordingly.  The venue-specific instructions with screenshots that can be found in the navigation bar on the left, may also need to be adjusted depending on which switch ports are cabled to which end points.
-
-* Precise definitions of some of the terminology used in the table below, specific to these TAS demonstrations:
 ** Switch TAS State (Enabled / Disabled) 
 *** This is referring to whether or not the egress ports on the switch have TAS gates enabled or disabled.  
 *** The endpoints producing scheduled traffic should always be configured to produce the traffic at the appropriate time, regardless of the switch configuration.

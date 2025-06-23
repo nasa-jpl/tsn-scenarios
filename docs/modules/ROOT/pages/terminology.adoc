@@ -1,0 +1,5 @@
+= Terminology
+
+* Time slot.  This is TDMA terminology, for the window of time in which a device is allowed to transmit.  In our case we use this terminology when defining gate opening and closing times.  Each entry in a Gate Control List defines a time slot, with a specific starting and ending time relative to the start of the network cycle.
+* Scheduled traffic refers to traffic that is transmit at a fixed offset from the start of each network cycle.  
+* Streaming traffic refers to traffic that is allocated a percentage of the line rate, and is not synchronized to the network cycle.

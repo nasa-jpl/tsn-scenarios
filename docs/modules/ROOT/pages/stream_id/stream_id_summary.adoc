@@ -12,29 +12,11 @@ The purpose of this demonstration is to show how Stream Identification (part of 
 
 Stream Identification operates by defining a series of streams.  Each stream has an associated set of rules used for matching.  Incoming frames are evaluated against the streams in numeric order (e.g. stream 1 is evaluated before stream 2, even if stream 2 was defined first).  The frame is assigned to the first stream where all rules are matched.  It is also possible for frames to not match any stream, in which no stream processing functions enabled in the switch will affect that frame.
 
-== Demo Topology
-
-All scenarios within this demonstration share a common topology.  
-
-* EP~1~ provides the IEEE 802.1AS reference clock, as well as a variety of traffic dependening on the needs of the particular scenario.  
-* EP~2~ produces additional traffic dependent on the needs of the particular scenario.  The primary reason to have 2 separate end points produce frames, is to show how the policing can be configured to police based on which port the frames are received on.  
-* EP~3~ is a time receiver, as well as receiving the traffic from EP~1~ and EP~2~.  
-* For the scenarios that involve overlapping shared priority traffic, EP~2~ adds an additional 4 scheduled, critical traffic items that share the same schedule and priority levels as those from EP~1~.
-
-The details of each scenario, and the venue-specific instructions, were developed with some particular cabling between end points and switch ports, which may differ for anybody trying to recreate these scenarios.  Keep that in mind and adjust the instructions accordingly.
-
-.Demo Topology
-image::topo-layer-base.drawio.svg[]
+include::partial$base_topology.adoc[]
 
 == Common Details
 
 Unless explicitly defined otherwise, for every scenario, every traffic item produced by the end points should be produced at a unique rate, using different power of 2's (100 Kbps, 200 Kbps, 400 Kbps, 800 Kbps, etc).  The flow meters should also be set to unique rates, and always lower than the slowest traffic production rate.  This guarantees that it is always clear which traffic items are being filtered, and by which flow meter.
-
-== Terminology
-
-Precise definitions of some of the terminology used in the table below, specific to these TAS demonstrations:
-
-* TBD
 
 == Scenario Details
 

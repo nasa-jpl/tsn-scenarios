@@ -1,0 +1,14 @@
+== Network Topology
+
+All scenarios within this demonstration share a common topology.  
+
+* EP~1~ provides the IEEE 802.1AS reference clock, as well as a variety of traffic dependening on the needs of the particular scenario.  
+* EP~2~ produces additional traffic dependent on the needs of the particular scenario.  The primary reason to have 2 separate end points produce frames, is that some switch / TSN features can be configured to act based on which physical port the frame was received on.  
+* EP~3~ is a time receiver, as well as receiving the traffic from EP~1~ and EP~2~.  
+
+Venue-specific instructions for each scenario (in particular, screenshots showing exact steps to recreate) were developed with particular cabling between end points and switch ports, which may not match the configuration being used to recreate the demo.  Keep that in mind and adjust the instructions accordingly.
+
+In general, the venues abstract that from the rest of the configuration, so only a few steps should need to change.  For example with the Keysight traffic generator, a port can be assigned to each emulated device, with no other modifications being needed.  The switch configuration changes may be more involved as many of the items are port-based.
+
+.PSFP Demo Topology
+image::topo-layer-base.drawio.svg[]

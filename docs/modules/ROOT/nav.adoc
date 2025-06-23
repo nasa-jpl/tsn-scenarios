@@ -1,7 +1,9 @@
 * xref:index.adoc[]
+* xref:terminology.adoc[]
 * xref:topology.adoc[]
 * xref:venues.adoc[]
 * xref:base_switch_config.adoc[]
+* xref:common_issues.adoc[]
 * Scenarios
 ** xref:802.1AS/802.1AS.adoc[]
 *** xref:802.1AS/keysight.adoc[]

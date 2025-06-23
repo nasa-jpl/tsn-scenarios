@@ -12,18 +12,6 @@ This document provides specific instructions for implementing the TAS demo with 
 
 The specific port assignments shown may need to be modified to match how the Keysight is cabled to the switch.  For these steps, it is assuming Keysight ports 5-8 are cabled to switch ports 1-4.
 
-*Common Issues*
-
-For these scenarios, when attempting to run the demonstration, if the traffic is not flowing as expected, some things to check for:
-
-* VLAN is enabled, and ID is set to 0 for the protocol stack that is generating the scheduled traffic and the prioritized background traffic.  (You may see frames being filtered in the switch stats if VLAN is some other value)
-* VLAN is disabled for the time sync (transmitter and receiver) and vanilla ethernet
-* Ports are mapped correctly to match the switch configuration.  The default switch configuration has port 1-4 enable port classification, and port 3 is the egress port that all the traffic should be going to.  How these ports are cabled to the Keysight ports may differ from when these instructions were cabled.  For these example scenarios, Keysight ports 5-7 are utilized, and they need to be cabled keysight 5 -> switch 1, keysight 6 -> switch 2, keysight 7 -> switch 3.  If this doesn't match, one can either re-cable the keysight / switch, or modify the keysight and switch configuration to match how it is cabled.  Up to the user.
-* Make sure to regenerate and apply traffic changes after making them before starting the test.  The tool sometimes does this automatically, but it seems there are some cases where it does not, so to be safe, the recommendation is to always do that manually after making any changes and before starting the test.  The instructions for scenario 1 include a step showing how to do that.
-* Make sure the right protocol stack is selected for source of traffic, because there are 2 to choose from for each device.  One with VLAN enabled, one with VLAN disabled.
-* Looking at the switch stats can help a great deal with tracking down what is happening.  Scenario 1 provides some examples of what to look for to see proper operation.
-* There has been trouble in past in getting switch to make the TAS gate config, active (monitor page will show it is enabled, but no GCL defined).  It isn't clear the exact series of steps that got it to work, but when it eventually worked, we had keysight halted, loaded a new TSN switch config file that setup the gates and all, and then started the keysight test, and as soon as PTP was going it looks like the config change happened.  However, as best I recall I had done those same things the previous day and it didn't work.  If we figure out how to recreate the issue and reliably address it, will update these instructions.
-
 == Detailed Steps
 === Scenario 1
 TAS disabled, non-overlapping critical traffic, non-saturated end-point

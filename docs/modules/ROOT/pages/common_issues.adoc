@@ -1,0 +1,32 @@
+= Common Issues
+
+If a scenario is not executing as expected, some things to check for:
+
+TODO: Add more information about what to look for.  Maybe a section on symptoms (based on switch stats, traffic latencies / frame drops, etc), with likely causes.
+
+== Symptom-based tips
+* Looking at the switch stats can help a great deal with tracking down what is happening.  
+
+== General hardware configuration tips
+* Verify the hardware configuration matches how the ports are physically connected.
+** Switch
+*** Many items are based on port.  For example, for time-aware shaping, it has to be enabled on the specific egress port.  For prioritization to work, classification needs to be enabled on each ingress port.
+*** The default switch configuration has port 1-4 enable port classification, and port 3 is the egress port that all the traffic should be going to.  
+*** Consider if it would be easier to modify the hardware settings, or change the physical cabling to match the scenario instructions.
+** Traffic Generators
+*** For the Keysight, this is relatively simple - on the overview screen, check each port is mapped to the correct physical port in the chassis.
+* Virtual LANs (VLANs)
+** Switch
+*** Ensure the VLAN settings match the base switch configuration, unless otherwise specified for the specific scenario.
+** Traffic Generators
+*** Be sure to use the right protocol stack - for the Keysight for example, there is one for Ethernet w/ VLAN and one for Ethernet w/o VLAN
+**** VLAN is enabled, with ID set to 0 for devices / protocol stacks generating prioritized traffic.  (You may see frames being filtered in the switch stats if VLAN is some other value)
+**** VLAN is disabled for the time sync (transmitter and receiver) and vanilla ethernet devices / protocol stacks
+
+== Harware-specific tips
+* Keysight
+** Try regenerating and applying traffic changes.  The tool sometimes does this automatically, but there are some cases where it does not.  Safest is to simply always perform both of these steps after making any changes and before starting the test.  
+* Microchip iStax TSN switch
+** There has been occasions where the TAS gate config won't become active
+*** Monitor page will show it is enabled, but no GCL defined, even though there is one on the config page
+*** It isn't clear the exact series of steps that got it to work when this has happened, but when it eventually worked, traffic generators / time transmitter were halted, a switch config file that setup the gates was loaded, and then the time transmitter was started.  As soon as PTP was going it looks like the config change happened.  However, that same series of steps had been previous tried without success, so it isn't clear what may have been different when it eventually worked.
