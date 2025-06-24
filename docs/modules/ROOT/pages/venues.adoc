@@ -39,4 +39,4 @@ They are as follows:
 
 * Emulated end points, HPSC switch
 * COTS end points, HPSC switch
-* HPSC end poiunts, COTS switch
+* HPSC end points, COTS switch

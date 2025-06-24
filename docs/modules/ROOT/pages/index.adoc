@@ -3,7 +3,7 @@
 This repository provides minimally viable reproducible TSN scenarios for demonstration and educational purposes.
 
 Several scenarios are provided for each of the TSN standards.
-Each scenario consists of an English description and 3 implementations: one implmentation per scenario per venue.
+Each scenario consists of an English description and 3 implementations: one implementation per scenario per venue.
 
 The scenarios are designed to be simple to aid in understanding.
 

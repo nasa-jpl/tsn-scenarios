@@ -7,7 +7,7 @@ ifndef::site-gen-antora[]
 toc::[]
 endif::[]
 
-This document provides a general overview of how to configure a TSN switch to support TSN demoes.  Specifically, setting up appropriate VLANs to isolate the demo traffic from the rest of the network.
+This document provides a general overview of how to configure a TSN switch to support TSN demos.  Specifically, setting up appropriate VLANs to isolate the demo traffic from the rest of the network.
 
 All demos start with this base configuration, and provide detailed instructions for any additional configuration needed specific to that demo.
 
@@ -23,8 +23,8 @@ The base configuration needs to
 * Configure a PTP instance on VLAN 2
 * Disable MAC learning
 ** Needs to be disabled on network analyzer ports if they are configured to pass all traffic through, or the traffic will create a loop.  For the screenshots shown below, the analyzer was connected to ports 6 and 8.
-** For test, it might be simpler initially to keep MAC learning enabled on other ports, but for filght will most likely disable this so eventually will need to update switch configs to match.
-** Prefer disabled on other ports to ensure complete control and match flight-like use-case.  If MAC learning is desierd, be sure to set up learning phase on whatever is part of the demo (if something is only a receiver, then the MAC learning cannot happen, Keysight has a way to make all ports send a "no-op" essentially, but have not gotten that to work yet.)
+** For test, it might be simpler initially to keep MAC learning enabled on other ports, but for flight will most likely disable this so eventually will need to update switch configs to match.
+** Prefer disabled on other ports to ensure complete control and match flight-like use-case.  If MAC learning is desired, be sure to set up learning phase on whatever is part of the demo (if something is only a receiver, then the MAC learning cannot happen, Keysight has a way to make all ports send a "no-op" essentially, but have not gotten that to work yet.)
 * Enable port classification
 ** This enables the switch to honor the priority tag
 ** Our demos generally use just ports 1-4, so enable this on ports 1-4.
