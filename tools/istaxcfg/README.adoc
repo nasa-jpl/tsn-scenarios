@@ -1,0 +1,171 @@
+= istaxcfg
+
+Manage configuration for IStaX network switches.
+
+== Overview
+
+istaxcfg provides powerful configuration management capabilities for network switches running the IStaX platform.
+
+It allows configuration to be layered and templated.
+
+=== Configuration Layering
+
+Configuration can be split over multiple files to allow configuration to be organized into layers.
+
+For example, a base layer can provide basic configuration that is common across all uses, a VLAN layer can configure the port VLANs, a time sync layer can setup 802.1AS, etc.
+These layers can be reused across scenarios.
+Changing a single layer will change all scenarios that use it.
+
+=== Configuration Templating
+
+IMPORTANT: Not yet implemented.
+
+Configurations can be templated to allow the same configuration to be used across more contexts.
+
+There are two types on configuration:
+
+* Instance based - Can be different across instances of the same switch type (e.g., hostname)
+* Type based - Can be different across different types of switch (e.g., VSC5640EV vs EV23X71A)
+
+== Usage
+
+[source,sh]
+.Download configuration
+----
+istaxcfg download <host>
+----
+
+[source,console]
+.Download example
+----
+> istaxcfg download hpsctsnsw0 | grep hostname
+hostname hpsctsnsw0
+----
+
+[source,sh]
+.Upload configuration
+----
+istaxcfg upload <host> <config-file>
+----
+
+[source,sh]
+.Upload concatenation of multiple configuration partials
+----
+istaxcfg upload <host> <partial-config-file> <partial-config-file> ...
+----
+
+[source,console]
+.Example configuration layering
+----
+istaxcfg upload hpsctsnsw0 base.cfg vlans.cfg nolldp.cfg
+----
+
+== Advanced Usage
+
+=== Use a SOCKS5 Proxy
+
+[source,sh]
+----
+ssh -D 9999 jump-host
+istaxcfg --proxy localhost:9999 download <host>
+----
+
+== Configuration Templating
+
+The `istax upload` performs the following steps:
+
+. Concatenates all configuration input files
+. Sets the `hostname` template variable to:
+.. If host argument is IP address, transform IP address into valid hostname by replacing `.` with `_`
+.. Else, host argument
+. Adds switch metadata to template variables
+.. If `--metadata <file.yml>` option provided, loads switch metadata from provided YAML file
+.. Else,
+... If `--part <part-id>` option provided, loads switch metadata from internal metadata for given part ID
+... Else, queries switch for information to infer the part ID then loads switch metadata from internal metadata for inferred part ID
+. Renders the template
+
+=== Configuration Templating Example
+
+Given the following configuration template:
+
+[source]
+.Example configuration template (`example.cfg`)
+----
+hostname {{ hostname }}
+
+{% for port in ports %}
+interface {{ port.name }}
+ switchport access vlan 2
+!
+{% endfor %}
+----
+
+And given the following switch description:
+
+[source,yaml]
+.Example switch description
+----
+ports:
+- name: 10GigabitEthernet 1/1
+- name: 10GigabitEthernet 1/2
+- name: GigabitEthernet 1/1
+----
+
+[NOTE]
+====
+Ports is a list of all ports including the management port.
+
+The management port can be referenced in templates with `port[-1]`.
+All ports except the management port can be referenced in templates with `ports[:-1]`.
+====
+
+The following command line:
+
+[source,sh]
+.Example command line
+----
+istaxcfg upload myhostname example.cfg --dry-run
+----
+
+Will generate the following output:
+
+[source]
+.Example output
+----
+hostname myhostname
+
+interface 10GigabitEthernet 1/1
+ switchport access vlan 2
+!
+interface 10GigabitEthernet 1/2
+ switchport access vlan 2
+!
+interface GigabitEthernet 1/1
+ switchport access vlan 2
+!
+----
+
+== Dependencies
+
+* https://docs.astral.sh/uv/[UV]
+
+== Development Dependencies
+
+* https://just.systems/[Just]
+
+== Development
+
+[source,sh]
+.Format
+----
+just format
+----
+
+[source,sh]
+.Check
+----
+just check
+----
+
+

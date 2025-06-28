@@ -1,0 +1,232 @@
+#!/usr/bin/env -S uv run --script --quiet
+# PYTHON_ARGCOMPLETE_OK
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "argcomplete>=3.5.3",
+#   "requests[socks]>=2.32.4",
+# ]
+# ///
+
+import argparse
+import fileinput
+from io import StringIO
+import sys
+from http.cookiejar import CookieJar
+import requests
+import time
+from typing import TextIO
+
+import argcomplete
+
+VERSION = "0.1.0"
+
+
+class ApplicationError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+
+def parse_opts():
+    parser = argparse.ArgumentParser(
+        prog="istaxcfg", description="IStaX configuration tool"
+    )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
+    parser.add_argument("--username", "-u", default="admin")
+    parser.add_argument("--password", "-p", default="")
+    parser.add_argument("--proxy", "-x", help="proxy requests through a SOCKS5 proxy")
+
+    commands = parser.add_subparsers(dest="command")
+
+    activate = commands.add_parser("activate", help="activate a stored configuration")
+    activate.add_argument("host", help="hostname or IP address of the switch")
+    activate.add_argument(
+        "filename",
+        help="filename of the configuration stored on the switch",
+    )
+
+    download = commands.add_parser(
+        "download", aliases=["dl"], help="download the running configuration"
+    )
+    download.add_argument(
+        "--output", "-o", help="output file"
+    ).completer = argcomplete.FilesCompleter
+    download.add_argument("host", help="hostname or IP address of the switch")
+
+    upload = commands.add_parser(
+        "upload", aliases=["ul"], help="upload the running configuration"
+    )
+    upload.add_argument(
+        "--dry-run",
+        "-n",
+        action=argparse.BooleanOptionalAction,
+        help="print config without uploading",
+    )
+    upload.add_argument(
+        "--merge",
+        "-m",
+        action=argparse.BooleanOptionalAction,
+        help="merge uploaded configuration with running configuration instead of replacing it",
+    )
+    upload.add_argument("host", help="hostname or IP address of the switch")
+    upload.add_argument(
+        "files",
+        nargs="*",
+        help="configuration file, multiple files are concatenated.",
+    ).completer = argcomplete.FilesCompleter
+
+    argcomplete.autocomplete(parser)
+
+    return parser.parse_args()
+
+
+def create_session(opts) -> requests.Session:
+    session = requests.Session()
+    session.cookies = CookieJar()
+
+    if opts.proxy:
+        proxies = {
+            "http": f"socks5h://{opts.proxy}",
+            "https": f"socks5h:/{opts.proxy}",
+        }
+        session.proxies.update(proxies)
+
+    return session
+
+
+def istax_login(session, host, username, password):
+    data = {
+        "user": username,
+        "password": password,
+    }
+
+    response = session.post(f"http://{host}/login", data=data)
+    if response.status_code != 200:
+        raise ApplicationError(f"unable to login to '{host}'")
+
+
+def istax_config_activate(session, host, filename):
+    data = {
+        "file_name": filename,
+    }
+
+    session.post(f"http://{host}/config/icfg_conf_activate", data=data)
+
+    istax_config_activate_status(session, host)
+
+
+def istax_config_download(session, host):
+    data = {
+        "file_name": "running-config",
+    }
+
+    response = session.post(f"http://{host}/config/icfg_conf_download", data=data)
+    print(response.text)
+
+
+def istax_config_activate_status(session, host):
+    eprint("activating configuration...", end="", flush=True)
+
+    timeout = time.time() + 90
+    while True:
+        try:
+            response = session.get(
+                f"http://{host}/config/icfg_conf_activate", timeout=1
+            )
+        except requests.Timeout:
+            if time.time() > timeout:
+                raise ApplicationError("timed out waiting for response")
+            time.sleep(3)
+            eprint(".", end="", flush=True)
+            continue
+        firstline = response.text.partition("\n")[0]
+        if firstline == "<html>":
+            if time.time() > timeout:
+                raise ApplicationError("timed out waiting for response")
+            eprint(".", end="", flush=True)
+            time.sleep(3)
+            continue
+        elif response.text.partition("\n")[0] == "DONE":
+            eprint()
+            eprint("activation complete")
+            break
+        else:
+            raise ApplicationError(f"activation failed with:\n{response.text.strip()}")
+
+
+def istax_upload_config(session, host, merge, config: TextIO):
+    filename = "running-config"
+    data = {
+        "file_name": filename,
+        "merge": str(merge).lower(),
+    }
+
+    files = {
+        "source_file": config,
+    }
+
+    eprint("uploading configuration...")
+    session.post(f"http://{host}/config/icfg_conf_upload", data=data, files=files)
+
+    if filename == "running-config":
+        istax_config_activate_status(session, host)
+
+
+def command_activate(opts):
+    session = create_session(opts)
+    istax_login(session, opts.host, opts.username, opts.password)
+    istax_config_activate(session, opts.host, opts.filename)
+
+
+def command_download(opts):
+    session = create_session(opts)
+    istax_login(session, opts.host, opts.username, opts.password)
+    istax_config_download(session, opts.host)
+
+
+def command_upload(opts):
+    # Concat inputs and insure only one end statement
+    config = StringIO()
+    for line in fileinput.input(opts.files):
+        if line != "end\n":
+            config.write(line)
+    config.write("end\n")
+    config.seek(0)
+
+    if opts.dry_run:
+        print(config.read())
+        sys.exit()
+
+    session = create_session(opts)
+    istax_login(session, opts.host, opts.username, opts.password)
+    istax_upload_config(session, opts.host, opts.merge, config)
+
+
+def main():
+    opts = parse_opts()
+    match opts.command:
+        case "activate":
+            command_activate(opts)
+        case "download":
+            command_download(opts)
+        case "upload":
+            command_upload(opts)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except requests.exceptions.ConnectionError as e:
+        eprint("error: " + str(e))
+        sys.exit(1)
+    except ApplicationError as e:
+        eprint("error: " + str(e))
+        if e.__cause__ is not None:
+            eprint(f"cause: {e.__cause__}")
+        sys.exit(1)
+
+# vim: ft=python
