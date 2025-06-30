@@ -1,6 +1,9 @@
 = istaxcfg
+:toc: macro
 
 Manage configuration for IStaX network switches.
+
+toc::[]
 
 == Overview
 
