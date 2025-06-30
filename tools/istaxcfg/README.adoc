@@ -11,7 +11,7 @@ istaxcfg provides powerful configuration management capabilities for network swi
 
 It allows configuration to be layered and templated.
 
-=== Configuration Layering
+=== Layering
 
 Configuration can be split over multiple files to allow configuration to be organized into layers.
 
@@ -19,7 +19,7 @@ For example, a base layer can provide basic configuration that is common across 
 These layers can be reused across scenarios.
 Changing a single layer will change all scenarios that use it.
 
-=== Configuration Templating
+=== Templating
 
 IMPORTANT: Not yet implemented.
 
