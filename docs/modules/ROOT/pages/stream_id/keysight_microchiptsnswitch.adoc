@@ -49,7 +49,7 @@ The expectation is that the traffic item will only see 200 Kbps get through, as 
 
 The results do match that as shown in the screenshots below.  
 
-Note that the bit rate being received slightly exceeds 200 Kbps.  It is not fully understood why that is, but it is likely a combination of a difference between the traffic generator and switch in whether or not frame headers are counted, and the exact mechanism by which the switch enforces the bandwidth (averaging over some period of time, windows, etc).  Further investigation could be performed, if this becomes relevant, using packet captures to see exactly what is going into and out of the switch.  The same results are expected for any tests using flow meters, but will not repeat this text for every scenario.  This idiosyncrasy will just be captured here.
+Note that the bit rate being received slightly exceeds 200 Kbps.  It is not fully understood why that is.  Ticket was opened https://github.jpl.nasa.gov/hpsc/tsn-scenarios/issues/3.  The same effect is expected for any tests using flow meters, but will not repeat this text for every scenario.  This idiosyncrasy will just be captured here.
 
 .Switch QoS Stats
 image::stream_id/keysight_microchip_streamid_scenario1/switch_qos_stats.png[]
@@ -62,11 +62,14 @@ Destination MAC matching
 
 ==== Detailed Switch Configuration
 
-General scenario description should be sufficient.
+General scenario description should be sufficient.  Need to add the 4 specific destination MAC addresses being used as static entries to the MAC table.  Recommend removing them at end of test.
 
 ==== Detailed Novus Configuration
 
-General scenario description should be sufficient.
+* For the most part, the general scenario description should be sufficient.
+* Need to have 4 destination MAC addresses on EP~3~.  To do this, you can add 4 additional Ethernet protocol stacks to that device group, and then set the MAC address of each.
+
+
 
 ==== Test Execution and Results
 
@@ -75,5 +78,27 @@ Results match expected - the 2 traffic flows matching the DMAC, combined, are re
 .Keysight Stats
 image::stream_id/keysight_microchip_streamid_scenario2/keysight_stats.png[]
 
+=== Scenario 3
+Source MAC matching
+
+==== Detailed Switch Configuration
+
+General scenario description should be sufficient.
+
+==== Detailed Novus Configuration
+
+* For the most part, the general scenario description should be sufficient.
+* Need to have 2 destination MAC addresses each on EP~1~ and EP~2~.  To do this, you can add additional Ethernet protocol stacks to that device group, and then set the MAC address of each.  To avoid issues, don't use the ethernet stack used for time sync.  Changing the MAC address of that might prevent time sync from working.
+* Note that the source MAC address 01:12:00:ff:ff:01 did not work.  Issue https://github.jpl.nasa.gov/hpsc/tsn-scenarios/issues/4 created.  Used 00:12:00:ff:ff:01 instead which works and still demonstrates SMAC matching sufficiently.
+
+==== Test Execution and Results
+
+Results match expected - the 2 traffic flows matching the SMAC, combined, are reduced to ~500 Kbps.  The other traffic flows are not affected.
+
+.Keysight Stats
+image::stream_id/keysight_microchip_streamid_scenario3/keysight_stats.png[]
+
+.Switch Stats
+image::stream_id/keysight_microchip_streamid_scenario3/switch_stats.png[]
 
 ----

@@ -51,14 +51,14 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 . Define a stream based on DMAC using a mask to have some wild cards
 .. DMAC = 00:16:01:00:00:01, Mask = 00:FF:00:00:00:FF
 .. Ports 1 & 2
-. Create 4 total traffic items, 2 each on EP~1~ and EP~2~
+. Create 4 total traffic items, 2 each on EP~1~ and EP~2~.  It should not matter but disable VLANs on each source.
 .. 1 traffic item from each EP~1~ and EP~2~, using separate DMACs, but each matching the DMAC+mask defined for the stream
 ... Traffic Item 1: EP~1~: 100 Kbps, DMAC 00:16:02:00:00:01
 ... Traffic Item 2: EP~2~: 200 Kbps, DMAC 01:16:00:FF:FF:01
 .. 1 traffic item from each EP~1~ and EP~2~, using separate DMACs, that do not match
 ... Traffic Item 3: EP~1~: 400 Kbps, DMAC 00:16:01:00:00:02
 ... Traffic Item 4: EP~2~: 800 Kbps, DMAC 00:17:01:00:00:01
-.. Given all of this traffic needs to get through, need to create 4 receiving devices on EP~3~ with those 4 DMAC addresses specified above, and make sure the switch is configured to know what port those are on.
+.. Given all of this traffic needs to get through, need to create 4 receiving devices on EP~3~ with those 4 DMAC addresses specified above, and make sure the switch is configured to know what port those are on (i.e. create static MAC table entries).
 . Create a flow meter, limited to 50 Kbps.
 . Create a stream filter, that maps the flow meter to the stream.
 . Execute test, should see:
@@ -72,7 +72,7 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 
 . Define a stream based on SMAC using a mask to have some wild cards, ports 1,2
 .. SMAC = 00:12:01:00:00:01, Mask = 00:FF:00:00:00:FF
-. Create 4 total traffic items, 2 each on EP~1~ and EP~2~, all to the same destination MAC on EP~3~
+. Create 4 total traffic items, 2 each on EP~1~ and EP~2~, all to the same destination MAC on EP~3~.  It should not matter but disable VLANs on each source.
 .. 1 traffic item from each EP~1~ and EP~2~, using separate SMACs, each matching the masked SMAC
 ... Traffic Item 1: EP~1~: 1000 Kbps, SMAC 00:12:02:00:00:01
 ... Traffic Item 2: EP~2~: 2000 Kbps, SMAC 01:12:00:FF:FF:01
@@ -90,7 +90,7 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 
 *Purpose:* Demonstrate how IP frames can be matched to a stream based on the specified source IP address, destination IP address, and port.  This can be useful to differentiate by application, where different applications use different ports.  This all demonstrates making a "catch all" stream as the last stream, so that every frame matches to something.  This would for example be a way to get a switch to simply drop all unexpected traffic.
 
-. Setup network stack such that EP~1~ and EP~2~ can each send and receive UDP/IPv4 traffic, and have IP addresses IP1 and IP2 respectively
+. Setup network stack such that EP~1~ and EP~2~ can each send and receive UDP/IPv4 traffic, and have IP addresses IP1 and IP2 respectively.  Setup EP~3~ to be able to receive on 2 separate IP addresses, IP3 and IP4.
 . Create 6 streams, per table below, each mapped to an associated flow meter via a stream filter, setup to drop any frames above the specified steady-state rate.  The table also indicates if we expect any frames to match to this stream when the test is executed, based on the traffic item definitions specified further down.  
 .. Use CBS of 2048 bytes for all flow meters
 +
@@ -99,9 +99,9 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 |Stream ID |Source IP |Destination IP |Destination Port |Flow Meter CIR |Switch Port(s) |Matching SDUs?
 |1 |Any |Any |3300 |10 Kbps |1,2 |Yes
 |2 |IP1 |Any |Any |20 Kbps |1,2 |Yes
-|3 |Any |IP2 |1000 |30 Kbps |1,2 |No
-|4 |Any |IP2 |4000 to 4400 |40 Kbps |1,2 |Yes
-|5 |IP2 |IP1 |3000 |50 Kbps |1,2 |Yes
+|3 |Any |IP4 |1000 |30 Kbps |1,2 |No
+|4 |Any |IP4 |4000 to 4400 |40 Kbps |1,2 |Yes
+|5 |IP2 |IP3 |3000 |50 Kbps |1,2 |Yes
 |6 |Any |Any |Any |0 Kbps |1,2 |Yes
 |===
 +
@@ -110,18 +110,19 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 .IP Based Matching Traffic Items
 |===  
 |Traffic Item |Source IP |Destination IP |Destination Port |Rate |Expected Stream
-|1 |IP1 |IP1 |1000 |100 Kbps | 2 
-|2 |IP1 |IP1 |1100 |200 Kbps | 2 
-|3 |IP1 |IP2 |2000 |400 Kbps | 2 
-|4 |IP1 |IP2 |2200 |800 Kbps | 2 
-|5 |IP2 |IP1 |3000 |1600 Kbps | 5
-|6 |IP2 |IP1 |3300 |3200 Kbps | 1
-|7 |IP2 |IP2 |4000 |6400 Kbps | 4
-|8 |IP2 |IP2 |4400 |12800 Kbps | 4
-|9 |IP2 |IP2 |5000 |25600 Kbps | 6
-|10 |IP2 |IP1 |5000 |51200 Kbps | 6
+|1 |IP1 |IP3 |1000 |100 Kbps | 2 
+|2 |IP1 |IP3 |1100 |200 Kbps | 2 
+|3 |IP1 |IP4 |2000 |400 Kbps | 2 
+|4 |IP1 |IP4 |2200 |800 Kbps | 2 
+|5 |IP2 |IP3 |3000 |1600 Kbps | 5
+|6 |IP2 |IP3 |3300 |3200 Kbps | 1
+|7 |IP2 |IP4 |4000 |6400 Kbps | 4
+|8 |IP2 |IP4 |4400 |12800 Kbps | 4
+|9 |IP2 |IP4 |5000 |25600 Kbps | 6
+|10 |IP2 |IP3 |5000 |51200 Kbps | 6
 |===
 +
+. Create an 11th traffic item, which is raw ethernet (not IPv4) with a rate of 102,400 Kbps.
 . Run the scenario.
 .. Verify in switch statistics that SDUs are matching to the expected streams
 .. Verify via destination bit-rate statistics, that the frames are matching and being filtered as expected
@@ -130,6 +131,7 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 ... Traffic item 6 should be 10 Kbps
 ... Traffic item 7, 8 should total 40 Kbps
 ... Traffic item 9, 10 should drop 100% of frames
+... Traffic item 11 should not be filtered and see 102,400 Kbps.
 .. Check switch resource availability vs the base switch config, to see what % of capabilities this is using.
 
 === Scenario 5 - Source Port
