@@ -38,7 +38,12 @@ def parse_opts():
     parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
     parser.add_argument("--username", "-u", default="admin")
     parser.add_argument("--password", "-p", default="")
-    parser.add_argument("--proxy", "-x", help="proxy requests through a SOCKS5 proxy")
+    parser.add_argument(
+        "--proxy",
+        "-x",
+        metavar="[HOST:]PORT",
+        help="proxy requests through a SOCKS5 proxy. HOST part defaults to localhost.",
+    )
 
     commands = parser.add_subparsers(dest="command")
 
@@ -84,14 +89,22 @@ def parse_opts():
     return parser.parse_args()
 
 
+def parse_proxy(proxy: str) -> str:
+    if proxy.isdecimal():
+        return f"localhost:{proxy}"
+    else:
+        return proxy
+
+
 def create_session(opts) -> requests.Session:
     session = requests.Session()
     session.cookies = CookieJar()
 
     if opts.proxy:
+        proxy = parse_proxy(opts.proxy)
         proxies = {
-            "http": f"socks5h://{opts.proxy}",
-            "https": f"socks5h:/{opts.proxy}",
+            "http": f"socks5h://{proxy}",
+            "https": f"socks5h:/{proxy}",
         }
         session.proxies.update(proxies)
 
