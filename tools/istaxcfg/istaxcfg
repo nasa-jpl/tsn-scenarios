@@ -68,7 +68,9 @@ def parse_opts():
     )
     download.add_argument(
         "--output", "-o", help="output file"
-    ).completer = argcomplete.FilesCompleter # ty: ignore[unresolved-attribute] on completer
+    ).completer = (  # ty: ignore[unresolved-attribute] on completer
+        argcomplete.FilesCompleter
+    )
     download.add_argument("host", help="hostname or IP address of the switch")
 
     upload = commands.add_parser(
@@ -94,7 +96,9 @@ def parse_opts():
         "files",
         nargs="*",
         help="configuration file, multiple files are concatenated.",
-    ).completer = argcomplete.FilesCompleter # ty: ignore[unresolved-attribute] on completer
+    ).completer = (  # ty: ignore[unresolved-attribute] on completer
+        argcomplete.FilesCompleter
+    )
 
     argcomplete.autocomplete(parser)
 
@@ -245,7 +249,9 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except requests.exceptions.ConnectionError as e: # ty: ignore[unresolved-attribute] on exceptions
+    except (
+        requests.exceptions.ConnectionError  # ty: ignore[unresolved-attribute] on exceptions
+    ) as e:
         eprint("error: " + str(e))
         sys.exit(1)
     except ApplicationError as e:
