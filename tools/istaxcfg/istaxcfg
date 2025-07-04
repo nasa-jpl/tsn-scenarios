@@ -71,6 +71,12 @@ def parse_opts():
     ).completer = (  # ty: ignore[unresolved-attribute] on completer
         argcomplete.FilesCompleter
     )
+    download.add_argument(
+        "--filename",
+        "-f",
+        default="running-config",
+        help="switch filename to download",
+    )
     download.add_argument("host", help="hostname or IP address of the switch")
 
     upload = commands.add_parser(
@@ -90,6 +96,12 @@ def parse_opts():
         "-m",
         action=argparse.BooleanOptionalAction,
         help="merge uploaded configuration with running configuration instead of replacing it",
+    )
+    upload.add_argument(
+        "--filename",
+        "-f",
+        default="running-config",
+        help="switch filename to upload to",
     )
     upload.add_argument("host", help="hostname or IP address of the switch")
     upload.add_argument(
@@ -148,9 +160,9 @@ def istax_config_activate(session, host: str, filename: str):
     istax_config_activate_status(session, host)
 
 
-def istax_config_download(session, host: str):
+def istax_config_download(session, host: str, filename: str):
     data = {
-        "file_name": "running-config",
+        "file_name": filename,
     }
 
     response = session.post(f"http://{host}/config/icfg_conf_download", data=data)
@@ -187,8 +199,7 @@ def istax_config_activate_status(session, host: str):
             raise ApplicationError(f"activation failed with:\n{response.text.strip()}")
 
 
-def istax_upload_config(session, host: str, merge: bool, config: TextIO):
-    filename = "running-config"
+def istax_upload_config(session, host: str, filename: str, merge: bool, config: TextIO):
     data = {
         "file_name": filename,
         "merge": str(merge).lower(),
@@ -214,7 +225,7 @@ def command_activate(opts):
 def command_download(opts):
     session = create_session(opts)
     istax_login(session, opts.host, opts.username, opts.password)
-    istax_config_download(session, opts.host)
+    istax_config_download(session, opts.host, opts.filename)
 
 
 def command_upload(opts):
@@ -232,7 +243,7 @@ def command_upload(opts):
 
     session = create_session(opts)
     istax_login(session, opts.host, opts.username, opts.password)
-    istax_upload_config(session, opts.host, opts.merge, config)
+    istax_upload_config(session, opts.host, opts.filename, opts.merge, config)
 
 
 def main():
