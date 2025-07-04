@@ -33,11 +33,13 @@ def eprint(*args, **kwargs):
 
 def parse_opts():
     parser = argparse.ArgumentParser(
-        prog="istaxcfg", description="IStaX configuration tool"
+        prog="istaxcfg",
+        description="IStaX configuration tool",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
-    parser.add_argument("--username", "-u", default="admin")
-    parser.add_argument("--password", "-p", default="")
+    parser.add_argument("--username", "-u", default="admin", help="host username")
+    parser.add_argument("--password", "-p", default="", help="host password")
     parser.add_argument(
         "--proxy",
         "-x",
@@ -47,15 +49,22 @@ def parse_opts():
 
     commands = parser.add_subparsers(dest="command")
 
-    activate = commands.add_parser("activate", help="activate a stored configuration")
+    activate = commands.add_parser(
+        "activate",
+        help="activate a stored configuration",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
     activate.add_argument("host", help="hostname or IP address of the switch")
     activate.add_argument(
         "filename",
-        help="filename of the configuration stored on the switch",
+        help="switch filename to activate",
     )
 
     download = commands.add_parser(
-        "download", aliases=["dl"], help="download the running configuration"
+        "download",
+        aliases=["dl"],
+        help="download the running configuration",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     download.add_argument(
         "--output", "-o", help="output file"
@@ -63,7 +72,10 @@ def parse_opts():
     download.add_argument("host", help="hostname or IP address of the switch")
 
     upload = commands.add_parser(
-        "upload", aliases=["ul"], help="upload the running configuration"
+        "upload",
+        aliases=["ul"],
+        help="upload the running configuration",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     upload.add_argument(
         "--dry-run",
