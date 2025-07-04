@@ -59,7 +59,7 @@ def parse_opts():
     )
     download.add_argument(
         "--output", "-o", help="output file"
-    ).completer = argcomplete.FilesCompleter
+    ).completer = argcomplete.FilesCompleter # ty: ignore[unresolved-attribute] on completer
     download.add_argument("host", help="hostname or IP address of the switch")
 
     upload = commands.add_parser(
@@ -82,7 +82,7 @@ def parse_opts():
         "files",
         nargs="*",
         help="configuration file, multiple files are concatenated.",
-    ).completer = argcomplete.FilesCompleter
+    ).completer = argcomplete.FilesCompleter # ty: ignore[unresolved-attribute] on completer
 
     argcomplete.autocomplete(parser)
 
@@ -111,7 +111,7 @@ def create_session(opts) -> requests.Session:
     return session
 
 
-def istax_login(session, host, username, password):
+def istax_login(session, host: str, username: str, password: str):
     data = {
         "user": username,
         "password": password,
@@ -122,7 +122,7 @@ def istax_login(session, host, username, password):
         raise ApplicationError(f"unable to login to '{host}'")
 
 
-def istax_config_activate(session, host, filename):
+def istax_config_activate(session, host: str, filename: str):
     data = {
         "file_name": filename,
     }
@@ -132,7 +132,7 @@ def istax_config_activate(session, host, filename):
     istax_config_activate_status(session, host)
 
 
-def istax_config_download(session, host):
+def istax_config_download(session, host: str):
     data = {
         "file_name": "running-config",
     }
@@ -141,7 +141,7 @@ def istax_config_download(session, host):
     print(response.text)
 
 
-def istax_config_activate_status(session, host):
+def istax_config_activate_status(session, host: str):
     eprint("activating configuration...", end="", flush=True)
 
     timeout = time.time() + 90
@@ -171,7 +171,7 @@ def istax_config_activate_status(session, host):
             raise ApplicationError(f"activation failed with:\n{response.text.strip()}")
 
 
-def istax_upload_config(session, host, merge, config: TextIO):
+def istax_upload_config(session, host: str, merge: bool, config: TextIO):
     filename = "running-config"
     data = {
         "file_name": filename,
@@ -233,7 +233,7 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except requests.exceptions.ConnectionError as e:
+    except requests.exceptions.ConnectionError as e: # ty: ignore[unresolved-attribute] on exceptions
         eprint("error: " + str(e))
         sys.exit(1)
     except ApplicationError as e:
