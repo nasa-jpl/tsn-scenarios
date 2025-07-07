@@ -5,6 +5,7 @@
 # dependencies = [
 #   "argcomplete>=3.5.3",
 #   "requests[socks]>=2.32.4",
+#   "Jinja2>=3.1.6"
 # ]
 # ///
 
@@ -16,6 +17,7 @@ from http.cookiejar import CookieJar
 import requests
 import time
 from typing import TextIO
+from jinja2 import Template 
 
 import argcomplete
 
@@ -199,7 +201,7 @@ def istax_config_activate_status(session, host: str):
             raise ApplicationError(f"activation failed with:\n{response.text.strip()}")
 
 
-def istax_upload_config(session, host: str, filename: str, merge: bool, config: TextIO):
+def istax_upload_config(session, host: str, filename: str, merge: bool, config: TextIO, opts):
     data = {
         "file_name": filename,
         "merge": str(merge).lower(),
@@ -208,13 +210,11 @@ def istax_upload_config(session, host: str, filename: str, merge: bool, config: 
     files = {
         "source_file": config,
     }
-
     eprint("uploading configuration...")
     session.post(f"http://{host}/config/icfg_conf_upload", data=data, files=files)
 
     if filename == "running-config":
         istax_config_activate_status(session, host)
-
 
 def command_activate(opts):
     session = create_session(opts)
@@ -227,6 +227,13 @@ def command_download(opts):
     istax_login(session, opts.host, opts.username, opts.password)
     istax_config_download(session, opts.host, opts.filename)
 
+def template_config(config, opts):
+    template = Template(config.read())
+    ports={
+        "port1":{"name":"10GigabitEthernet 1/1"}, "port2":{"name":"10GigabitEthernet 1/2"}, "port3":{"name":"GigabitEthernet 1/1"}}
+    data = {"hostname":opts.host, "ports":ports}
+    rendered_config = template.render(data)
+    print(rendered_config)
 
 def command_upload(opts):
     # Concat inputs and insure only one end statement
@@ -236,6 +243,8 @@ def command_upload(opts):
             config.write(line)
     config.write("end\n")
     config.seek(0)
+    
+    template_config(config, opts)
 
     if opts.dry_run:
         print(config.read())
