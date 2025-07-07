@@ -10,21 +10,33 @@ endif::[]
 
 This document provides specific instructions for implementing the TAS demo with the Keysight Novus One Plus network emulator acting as the end-points, and the Microchip VSC5640EV switch hardware running iStax software.
 
-The specific port assignments shown may need to be modified to match how the Keysight is cabled to the switch.  For these steps, it is assuming Keysight ports 5-8 are cabled to switch ports 1-4.
+The specific port assignments shown may need to be modified to match how the Keysight is cabled to the switch.  For these steps, it is assuming Keysight ports 5-8 are cabled to switch ports 1-4 (using switch ngatsnsw1).
 
 == Detailed Steps
 === Scenario 1
 TAS disabled, non-overlapping critical traffic, non-saturated end-point
 
 ==== Detailed Switch Configuration
-This demonstration only requires the base switch configuration that sets up appropriate VLANs to isolate the traffic for the demo from the rest of the network.  Instructions can be found at xref:base_switch_config.adoc[].
+This demonstration requires the base switch configuration that sets up appropriate VLANs to isolate the traffic for the demo from the rest of the network.  Instructions can be found xref:base_switch_config.adoc[here].
+
+After the base configuration, port classification settings for VLAN priority need to be adjusted for the TAS scenario on the ports in use—in this case, we assume that we are utilizing ports 1-4. 
+
+On the switch configuration portal, navigate to QoS Port Classification.
+
+.Navigate to QoS Port Classifaction, and click on Enabled under Tag Class for port 1
+image::802.1Qbv/
+
+.Adjust CoS column from 11 00 22 33 44 55 66 77 (0s and 1s out of order) to be 00 11 22 33 44 55 66 77 (increasing order)
+image::802.1Qbv/
+
+Now repeat these steps for each port in use. The switch is now configured for the following 802.1Qbv scenarios.
 
 ==== Detailed Novus Configuration
 include::partial$keysight_tas_demo_scenario_1.adoc[]
 
 ==== Test Execution and Results
 
-.Start test
+.Start test. First navigate to the Statistics screen and click Test to begin the test session. When the statistics selector panel appears at the left, select “Flow Statistics” for the metrics to be displayed.
 image::802.1Qbv/keysight_microchip_scenario1/scenario1_start_test.png[]
 
 .Check stats on TSN switch
@@ -44,6 +56,12 @@ image::802.1Qbv/keysight_microchip_scenario1/scenario1_switch_detailed_stats_por
 
 .Check latencies
 image::802.1Qbv/keysight_microchip_scenario1/scenario1_keysight_latency.png[]
+
++
+[NOTE]
+====
+hello fortnite
+====
 
 
 === Scenario 2

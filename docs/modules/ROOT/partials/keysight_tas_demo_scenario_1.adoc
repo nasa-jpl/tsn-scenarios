@@ -73,10 +73,10 @@ image::802.1Qbv/keysight_scenario1/step14_configure_src_dest.png[]
 .Step 15 - Add Endpoint Sets
 image::802.1Qbv/keysight_scenario1/step15_add_endpoint_set.png[]
 
-.Step 15b - Add Endpoint Sets
+.Step 15b - Add Endpoint Sets. Perform this step a total of 3 times to add 3 additional Endpoints  for the scheduled traffic. The end result will be to have four scheduled traffic streams from Ethernet 3 to timeReceiver 
 image::802.1Qbv/keysight_scenario1/step15b_add_endpoint_set.png[]
 
-.Step 15c - Check traffic configuration
+.Step 15c - Check the traffic configuration screen to verify four scheduled traffic streams with Ethernet3 as the source and timeReceiver as the destination (i.e. Ethernet2). Note: If there are less than four streams after performing step 15b three times, there is likely an issue with the port queues in the switch (see Fig 13 in the switch configuration steps) and/or port classification/quality of service (see Fig 13a in the switch configuration steps).
 image::802.1Qbv/keysight_scenario1/step15c_check_traffic_item.png[]
 
 .Step 16 - Add traffic (prioritized background)
@@ -97,28 +97,28 @@ image::802.1Qbv/keysight_scenario1/step19_stats_tracking.png[]
 .Step 20 - Set periodic traffic
 image::802.1Qbv/keysight_scenario1/step20_periodic_traffic.png[]
 
-.Step 21 - Set random frame size
+.Step 21 - Set a random frame size for the unscheduled, unprioritized (i.e. vanilla) traffic sourced from Ethernet 4 to be between 64 and 1518 bytes
 image::802.1Qbv/keysight_scenario1/step21_vanilla_random_frame_size.png[]
 
-.Step 22 - Set percentage line rate
+.Step 22 - Set percentage line rate for the vanilla traffic to 50% of the line rate
 image::802.1Qbv/keysight_scenario1/step22_vanilla_line_rate.png[]
 
-.Step 23 - Set VLAN ID to 0
+.Step 23 - Open the Ethernet 3 details view
 image::802.1Qbv/keysight_scenario1/step23_set_vlan_0.png[]
 
-.Step 23b - Set VLAN ID to 0
+.Step 23b - Set VLAN ID to 0 for Ethernet 3. Doing so eliminates the VID tag in the scheduled, prioritized packets and allows the switch to select which VLAN(s) to traverse to route these packet to the destination
 image::802.1Qbv/keysight_scenario1/step23b_set_vlan_0.png[]
 
 .Step 23c - Set VLAN ID to 0
 image::802.1Qbv/keysight_scenario1/step23c_set_vlan_0.png[]
 
-.Step 24 - Set VLAN priority tags
+.Step 24 - Set VLAN priority tags. Steps 1-3 are performed for the seven streams with prioritized traffic. The top four rows are for the scheduled traffic with step 3 set to priority level 1 for the first row and ending with priority level 4 in the fourth row. The next three rows are for the unscheduled traffic with step 3 set to priority level 5 for the fifth row and ending with priority level 7 in the seventh row.
 image::802.1Qbv/keysight_scenario1/step24_set_vlan_tags.png[]
 
 .Step 25 - Apply traffic settings
 image::802.1Qbv/keysight_scenario1/step25_apply_traffic_settings.png[]
 
-.Step 26 - Enable scheduled transmissions
+.Step 26 - Open the global options menu
 image::802.1Qbv/keysight_scenario1/step26_enable_scheduled_transmission.png[]
 
 .Step 26b - Enable scheduled transmissions

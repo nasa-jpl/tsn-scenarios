@@ -20,10 +20,10 @@ The base configuration needs to
 ** To keep it simple, devices generating TSN / demo traffic should not use VLAN tagged frames.  Rather, use priority tagged frames.  That would be frames that have a 802.1Q tag but the VLAN ID is 0.  This is a special VID that effectively means no VID is specified.  This allows the talker to specify the priority, and the switch to specify the VLAN.
 ** To isolate traffic mirrored to a network analyzer, setup a separate VLAN (will use 200) for those ports
 * Disable switch background traffic (i.e., LLDP, MSTP) to avoid unexpected traffic.
-* Configure a PTP instance on VLAN 2
+* Configure a Precision Time Protocol (PTP) instance on VLAN 2
 * Disable MAC learning
 ** Needs to be disabled on network analyzer ports if they are configured to pass all traffic through, or the traffic will create a loop.  For the screenshots shown below, the analyzer was connected to ports 6 and 8.
-** For test, it might be simpler initially to keep MAC learning enabled on other ports, but for flight will most likely disable this so eventually will need to update switch configs to match.
+** For testing, it might be simpler initially to keep MAC learning enabled on other ports, but for flight will most likely disable this so eventually will need to update switch configs to match.
 ** Prefer disabled on other ports to ensure complete control and match flight-like use-case.  If MAC learning is desired, be sure to set up learning phase on whatever is part of the demo (if something is only a receiver, then the MAC learning cannot happen, Keysight has a way to make all ports send a "no-op" essentially, but have not gotten that to work yet.)
 * Enable port classification
 ** This enables the switch to honor the priority tag
@@ -44,6 +44,14 @@ image::base_switch_config/wireshark_after_fixes.png[]
 
 
 == Detailed Steps, Microchip TSN Switch
+
+=== Factory Reset
+
+Resetting the switch to factory settings is an optional step but ensures that any modifications made by other users do not impact your configuration.
+
+To follow the instructions to reset and provision the switch, go to the HPSC switch equipment documentation, found https://github.jpl.nasa.gov/pages/hpsc/lab/docs/main/equipment/microchip-sparx-5i-evb/[here].
+
+=== Configuration
 
 .Disable LLDP
 image::base_switch_config/disable_lldp.png[]
