@@ -201,7 +201,7 @@ def istax_config_activate_status(session, host: str):
             raise ApplicationError(f"activation failed with:\n{response.text.strip()}")
 
 
-def istax_upload_config(session, host: str, filename: str, merge: bool, config: TextIO, opts):
+def istax_upload_config(session, host: str, filename: str, merge: bool, config: TextIO):
     data = {
         "file_name": filename,
         "merge": str(merge).lower(),
