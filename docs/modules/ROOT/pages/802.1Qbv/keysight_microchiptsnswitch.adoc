@@ -57,13 +57,6 @@ image::802.1Qbv/keysight_microchip_scenario1/scenario1_switch_detailed_stats_por
 .Check latencies
 image::802.1Qbv/keysight_microchip_scenario1/scenario1_keysight_latency.png[]
 
-+
-[NOTE]
-====
-hello fortnite
-====
-
-
 === Scenario 2
 TAS disabled, non-overlapping critical traffic, saturated end-point
 
