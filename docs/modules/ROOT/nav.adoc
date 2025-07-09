@@ -15,3 +15,4 @@
 ** xref:stream_id/stream_id_summary.adoc[]
 *** xref:stream_id/keysight_microchiptsnswitch.adoc[]
 ** xref:802.1Qci/psfp_demo_summary.adoc[]
+*** xref:802.1Qci/keysight_microchiptsnswitch.adoc[]
