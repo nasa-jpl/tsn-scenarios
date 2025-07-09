@@ -13,4 +13,5 @@
 *** xref:802.1Qbv/keysight_microchiptsnswitch.adoc[]
 *** xref:802.1Qbv/linux_microchiptsnswitch.adoc[]
 ** xref:stream_id/stream_id_summary.adoc[]
+*** xref:stream_id/keysight_microchiptsnswitch.adoc[]
 ** xref:802.1Qci/psfp_demo_summary.adoc[]
