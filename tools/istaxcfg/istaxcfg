@@ -5,7 +5,7 @@
 # dependencies = [
 #   "argcomplete>=3.5.3",
 #   "requests[socks]>=2.32.4",
-#   "Jinja2>=3.1.6"
+#   "jinja2>=3.1.6"
 # ]
 # ///
 
@@ -17,9 +17,10 @@ from http.cookiejar import CookieJar
 import requests
 import time
 from typing import TextIO
-from jinja2 import Template 
+import yaml
 
 import argcomplete
+from jinja2 import Template 
 
 VERSION = "0.2.0"
 
@@ -42,6 +43,7 @@ def parse_opts():
     parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
     parser.add_argument("--username", "-u", default="admin", help="host username")
     parser.add_argument("--password", "-p", default="", help="host password")
+    parser.add_argument("--part", default="sparx5i", choices=["sparx5i","lan969x"],help="switch part id")
     parser.add_argument(
         "--proxy",
         "-x",
@@ -227,13 +229,16 @@ def command_download(opts):
     istax_login(session, opts.host, opts.username, opts.password)
     istax_config_download(session, opts.host, opts.filename)
 
-def template_config(config, opts):
+def read_yaml():
+    with open("board_info.yaml") as stream:
+        return (yaml.safe_load(stream))
+
+def render_config(opts,config):
     template = Template(config.read())
-    ports={
-        "port1":{"name":"10GigabitEthernet 1/1"}, "port2":{"name":"10GigabitEthernet 1/2"}, "port3":{"name":"GigabitEthernet 1/1"}}
-    data = {"hostname":opts.host, "ports":ports}
-    rendered_config = template.render(data)
-    print(rendered_config)
+    boards = read_yaml()
+    data = {"hostname":opts.host, "ports":boards[opts.part]["ports"]}
+    rendered_template = template.render(data)
+    return StringIO(rendered_template)
 
 def command_upload(opts):
     # Concat inputs and insure only one end statement
@@ -244,7 +249,7 @@ def command_upload(opts):
     config.write("end\n")
     config.seek(0)
     
-    template_config(config, opts)
+    config = render_config(opts, config)
 
     if opts.dry_run:
         print(config.read())
