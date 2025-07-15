@@ -17,10 +17,9 @@ from http.cookiejar import CookieJar
 import requests
 import time
 from typing import TextIO
-import yaml
 
 import argcomplete
-from jinja2 import Template 
+from jinja2 import Template
 
 VERSION = "0.2.0"
 
@@ -43,7 +42,12 @@ def parse_opts():
     parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
     parser.add_argument("--username", "-u", default="admin", help="host username")
     parser.add_argument("--password", "-p", default="", help="host password")
-    parser.add_argument("--part", default="sparx5i", choices=["sparx5i","lan969x"],help="switch part id")
+    parser.add_argument(
+        "--part",
+        default="VSC5640EV",
+        choices=["VSC5640EV", "EVB-LAN9696-24port"],
+        help="switch part id",
+    )
     parser.add_argument(
         "--proxy",
         "-x",
@@ -70,9 +74,7 @@ def parse_opts():
         help="download the running configuration",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    download.add_argument(
-        "--output", "-o", help="output file"
-    ).completer = (  # ty: ignore[unresolved-attribute] on completer
+    download.add_argument("--output", "-o", help="output file").completer = (  # ty: ignore[unresolved-attribute] on completer
         argcomplete.FilesCompleter
     )
     download.add_argument(
@@ -218,6 +220,7 @@ def istax_upload_config(session, host: str, filename: str, merge: bool, config: 
     if filename == "running-config":
         istax_config_activate_status(session, host)
 
+
 def command_activate(opts):
     session = create_session(opts)
     istax_login(session, opts.host, opts.username, opts.password)
@@ -229,16 +232,73 @@ def command_download(opts):
     istax_login(session, opts.host, opts.username, opts.password)
     istax_config_download(session, opts.host, opts.filename)
 
-def read_yaml():
-    with open("board_info.yaml") as stream:
-        return (yaml.safe_load(stream))
 
-def render_config(opts,config):
+def render_config(opts, config):
     template = Template(config.read())
-    boards = read_yaml()
-    data = {"hostname":opts.host, "ports":boards[opts.part]["ports"]}
+    parts = {
+        "VSC5640EV": {
+            "ports": [
+                {"name": "GigabitEthernet 1/1"},
+                {"name": "10GigabitEthernet 1/1"},
+                {"name": "10GigabitEthernet 1/2"},
+                {"name": "10GigabitEthernet 1/3"},
+                {"name": "10GigabitEthernet 1/4"},
+                {"name": "10GigabitEthernet 1/5"},
+                {"name": "10GigabitEthernet 1/6"},
+                {"name": "10GigabitEthernet 1/7"},
+                {"name": "10GigabitEthernet 1/8"},
+                {"name": "10GigabitEthernet 1/9"},
+                {"name": "10GigabitEthernet 1/10"},
+                {"name": "10GigabitEthernet 1/11"},
+                {"name": "10GigabitEthernet 1/12"},
+                {"name": "10GigabitEthernet 1/13"},
+                {"name": "10GigabitEthernet 1/14"},
+                {"name": "10GigabitEthernet 1/15"},
+                {"name": "10GigabitEthernet 1/16"},
+                {"name": "10GigabitEthernet 1/17"},
+                {"name": "10GigabitEthernet 1/18"},
+                {"name": "10GigabitEthernet 1/19"},
+                {"name": "10GigabitEthernet 1/20"},
+            ]
+        },
+        "EVB-LAN9696-24port": {
+            "ports": [
+                {"name": "GigabitEthernet 1/1"},
+                {"name": "GigabitEthernet 1/2"},
+                {"name": "GigabitEthernet 1/3"},
+                {"name": "GigabitEthernet 1/4"},
+                {"name": "GigabitEthernet 1/5"},
+                {"name": "GigabitEthernet 1/6"},
+                {"name": "GigabitEthernet 1/7"},
+                {"name": "GigabitEthernet 1/8"},
+                {"name": "GigabitEthernet 1/9"},
+                {"name": "GigabitEthernet 1/10"},
+                {"name": "GigabitEthernet 1/11"},
+                {"name": "GigabitEthernet 1/12"},
+                {"name": "GigabitEthernet 1/13"},
+                {"name": "GigabitEthernet 1/14"},
+                {"name": "GigabitEthernet 1/15"},
+                {"name": "GigabitEthernet 1/16"},
+                {"name": "GigabitEthernet 1/17"},
+                {"name": "GigabitEthernet 1/18"},
+                {"name": "GigabitEthernet 1/19"},
+                {"name": "GigabitEthernet 1/20"},
+                {"name": "GigabitEthernet 1/21"},
+                {"name": "GigabitEthernet 1/22"},
+                {"name": "GigabitEthernet 1/23"},
+                {"name": "GigabitEthernet 1/24"},
+                {"name": "GigabitEthernet 1/25"},
+                {"name": "10GigabitEthernet 1/1"},
+                {"name": "10GigabitEthernet 1/2"},
+                {"name": "10GigabitEthernet 1/3"},
+                {"name": "10GigabitEthernet 1/4"},
+            ]
+        },
+    }
+    data = {"hostname": opts.host, "ports": parts[opts.part]["ports"]}
     rendered_template = template.render(data)
     return StringIO(rendered_template)
+
 
 def command_upload(opts):
     # Concat inputs and insure only one end statement
@@ -248,7 +308,7 @@ def command_upload(opts):
             config.write(line)
     config.write("end\n")
     config.seek(0)
-    
+
     config = render_config(opts, config)
 
     if opts.dry_run:
