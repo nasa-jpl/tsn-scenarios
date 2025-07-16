@@ -38,7 +38,7 @@ image::topo-layer-base.drawio.svg[]
 
 The time layer provides time to the Network Under Test.
 
-Three scenarios are supportted:
+Three scenarios are supported:
 
 * TimeProvider is Grandmaster
 * EP~1~ is Grandmaster with TimeProvider reference via PPS and optionally ToD
