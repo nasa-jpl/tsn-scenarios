@@ -3,8 +3,10 @@
     daemon_reload: true
     name: systemd-journal-remote
     state: restarted
+    enabled: true
 
 - name: Restart systemd-journal-upload service
   service:
     name: systemd-journal-upload
     state: restarted
+    enabled: true
