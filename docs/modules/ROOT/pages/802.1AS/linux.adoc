@@ -49,7 +49,7 @@ Sections with `USER` comments indicate where you should add your device informat
 
 Our example inventory, matching the same configuration as the Keysight Venue, looks like this:
 
-(remember to change the hostnames!)
+(remember to change the hostnames and user!)
 [source,yml]
 ----
 all:
@@ -355,6 +355,7 @@ Just use `Ctrl+C` in the terminal you started `ptp4l` in to stop the process. Yo
 
 === Additional verification, testing, and analysis using `tcpdump`
 You can use `tcpdump` to verify that the PTP packets are being sent and received correctly. This can be useful for debugging and analysis.
+
 .Step 1 Install `tcpdump`:
 [source,sh]
 ----
