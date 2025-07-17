@@ -111,6 +111,17 @@ es1:
 ----
 ansible-playbook logging.yml
 ----
+[NOTE] 
+.Ansible SSH agent
+====
+If you are using SSH to connect remotely to the Ansible controller, you may run into an issue where your public key is not being used for Ansible to connect to the devices. If this is the case manually starting the SSH agent may help. For windows, this can be done by running the following command in an *admin elevated* PowerShell terminal:
+[source,sh]
+----
+Get-Service -Name ssh-agent | Set-Service -StartupType Manual
+Start-Service ssh-agent
+----
+====
+
 .Step 5 Test the logging server:
 From one of the end systems, run the following command:
 [source,sh]
@@ -255,7 +266,7 @@ ansible-playbook AS-stop.yml
 ----
 
 === Manual configuration
-Similar to the Ansible configuration, you will need to designate and grand master and and end instance.
+Similar to the Ansible configuration, you will need to designate and grand master and an end instance.
 
 .Step 1 Install the `linuxptp` package:
 [source,sh]
@@ -313,7 +324,7 @@ ptp4l -i enp1s0 -f ptp4l-ei.conf -ml6
 [NOTE] 
 .Network Interface
 ====
-You may want to change `enp1s0` to the name of the network interface connected to the TSN switch. You can find the name of the interface by running `ip a`
+You may want to change `enp1s0` to the name of the network interface connected to the TSN switch. You can find the name of interfaces by running `ip a`
 ====
 
 .Step 8 Verify the PTP logs in the terminal you started `phc2sys` on:
