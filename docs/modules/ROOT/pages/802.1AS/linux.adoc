@@ -2,13 +2,10 @@
 
 == Overview
 * For the TSN switch, the base configuration covers basic time sync.  See xref::base_switch_config.adoc[]
-* Both automated and manual configuration options are available to enable 802.1AS time synchronization on Linux systems. This guide walks through both of them.
+* Both automated and manual configuration options are available to enable 802.1AS time synchronization on Linux systems, this guide walks through both of them.
 * This guide is focused on Ubuntu Linux, but any platform that supports the `linuxptp` package may also be compatible, although with limited support and testing.
 
 == Detailed steps to setup and enable time synchronization
-
-=== Ubuntu Linux lab network provisioning
-It is recommended to use the automated Ubuntu server installer with link:https://github.jpl.nasa.gov/hpsc/lab/tree/main/ventoy[Ventoy], and link:https://github.jpl.nasa.gov/pages/hpsc/lab/docs/main/network/add-device/[provision the devices] for the lab network if they have not been already. You may encounter issues if you do not use the Ventoy installer, see this link:https://github.jpl.nasa.gov/hpsc/lab/issues/516[GitHub issue] for more details.
 
 === Automated Ansible configuration
 The easiest way to configure a set of Linux systems for 802.1AS time synchronization is to use the link:https://github.jpl.nasa.gov/hpsc/tsn-scenarios/tree/main/ansible#ansible[Ansible playbook] provided in the TSN scenarios repository. This playbook will install the necessary packages and configure the system for 802.1AS time synchronization. To do this you will need to designate:
@@ -43,84 +40,30 @@ cd tsn-scenarios/ansible
 .Step 3 Modify the `inventory` file to include the devices you want to configure. 
 [source,sh]
 ----
-nano inventory
+$EDITOR inventory
 ----
-Sections with `USER` comments indicate where you should add your device information, the comments explain what each section does. The inventory file is designed so that it can be used to configure as many devices as you want, with each device being an "end system" or 'es' for short. If your configuration needs more or less devices you can add entries at the bottom of the file for each end system, defined in the same way as the others in the file. Importantly, you also need to add them under `children:` of the `eis:` and `duts:` section of the inventory.
+Copy and modify the link:https://github.jpl.nasa.gov/hpsc/tsn-scenarios/blob/main/ansible/inventory[ansible inventory file]:
 
-Our example inventory, matching the same configuration as the Keysight Venue, looks like this:
-
-(remember to change the hostnames and user!)
 [source,yml]
 ----
-all:
-  children:
-    logging_server:
-    duts:
-
-logging_server:
-  vars:
-    # USER: If the logging server and the Ansible control node are different
-    # systems, then comment out this line.
-    ansible_connection: local
-  hosts:
-    # USER: If the logging server and the Ansible control node are different
-    # systems, then set this line to the hostname of logging server.
-    localhost
-
-logging_clients:
-  children:
-    duts:
-
-duts:
-  vars:
-    # USER: Set to name of the interface connected to the TSN network
-    tsn_interface: enp1s0
-    # USER: Set to the hostname of the logging server
-    logging_server: hpsctsnes0
-    # USER: Set to username that exists on all systems with passwordless sudo access
-    ansible_user: ansible
-  children:
-    es0:
-    es1:
-
-gms:
-  vars:
-    ptp_role: gm
-  children:
-    es0:
-
-eis:
-  vars:
-    ptp_role: ei
-  children:
-    es1:
-
-es0:
-  hosts:
-    # USER: Set to the hostname of end system 0
-    hpsctsnes0:
-
-es1:
-  hosts:
-    # USER: Set to the hostname of end system 1
-    hpsctsnes1:
+include::example$802.1AS/ansible-inventory.yml[]
 ----
+
+Sections with `USER` comments indicate where you should add your device information, the comments explain what each section does. The inventory file is designed so that it can be used to configure as many devices as you want, with each device being an "end system" or 'es' for short. If your configuration needs more or less devices you can add entries at the bottom of the file for each end system, defined in the same way as the others in the file. Importantly, you also need to add them under `children:` of the `eis:` and `duts:` section of the inventory.
+
+To match the example in this guide, make the following changes to the default inventory file:
+
+* Change `logging_server: work-desktop` to `logging_server: hpsctsnes1` (or the specific hostname of your master clock / ansible controller / logging server).
+* Change `ansible_user: ansible` to `ansible_user: your_username` note that this user must have passwordless sudo access on the devices you are configuring.
+* Delete `es2:` under `children:` of the `duts:` and `eis:` section.
+* Delete the entry for `es2:` and its associated host.
+* Change all mentions of `hpsctsnesX` hostnames to match those of your devices.
 
 .Step 4 Run the Ansible logging setup playbook:
 [source,sh]
 ----
 ansible-playbook logging.yml
 ----
-[NOTE] 
-.Ansible SSH agent
-====
-If you are using SSH to connect remotely to the Ansible controller, you may run into an issue where your public key is not being used for Ansible to connect to the devices. If this is the case manually starting the SSH agent may help. For windows, this can be done by running the following command in an *admin elevated* PowerShell terminal:
-[source,sh]
-----
-Get-Service -Name ssh-agent | Set-Service -StartupType Manual
-Start-Service ssh-agent
-----
-====
 
 .Step 5 Test the logging server:
 From one of the end systems, run the following command:
@@ -162,7 +105,7 @@ ok: [hpsctsnes0]
 ok: [hpsctsnes2]
 
 TASK [AS : Start 802.1AS] *****************************************************************************************************************************************************************
-included: /home/rdonnell/repos/hpsc/tsn-scenarios/ansible/roles/AS/tasks/start.yml for hpsctsnes0, hpsctsnes1, hpsctsnes2
+included: /home/user/tsn-scenarios/ansible/roles/AS/tasks/start.yml for hpsctsnes0, hpsctsnes1, hpsctsnes2
 
 TASK [AS : Install ptp4l] *****************************************************************************************************************************************************************
 ok: [hpsctsnes0]
@@ -268,7 +211,7 @@ ansible-playbook AS-stop.yml
 === Manual configuration
 Similar to the Ansible configuration, you will need to designate and grand master and an end instance.
 
-.Step 1 Install the `linuxptp` package:
+.Step 1 Install the `linuxptp` package  on each device:
 [source,sh]
 ----
 sudo apt update
@@ -351,7 +294,7 @@ phc2sys[4829.676]: CLOCK_REALTIME phc offset         2 s2 freq  -22738 delay    
 image::802.1AS/keysight/step16_switch_test_running.png[]
 
 .Step 10 Stop the scenario:
-Just use `Ctrl+C` in the terminal you started `ptp4l` in to stop the process. You can also stop `phc2sys` in the same way.
+Terminate the `ptp4l` and `phc2sys` processes.
 
 === Additional verification, testing, and analysis using `tcpdump`
 You can use `tcpdump` to verify that the PTP packets are being sent and received correctly. This can be useful for debugging and analysis.
@@ -372,11 +315,10 @@ sudo tcpdump -i enp1s0 -w log.pcap
 ====
 There are various ways of using `tcpdump` to monitor network traffic, it's essentially a CLI version of Wireshark. The command above captures traffic and stores it to a .pcap (packet capture) file which we will open with a Wireshark client, but see the tcpdump link:https://www.tcpdump.org/manpages/tcpdump.1.html[man page] for more options.
 ====
-.Step 3 Close `tcpdump` and download the log file with `SCP`:
-Use `Ctrl+C` to stop `tcpdump`, then download the resulting .pcap file to your local machine, we will be using SCP on a host machine with Wireshark installed:
-[source,sh]
-----
-scp user@remote:/path/to/log.pcap /local/path/to/log.pcap
-----
+.Step 3 Close `tcpdump` and analyze the log file:
+Terminate `tcpdump` and analyze the log file. We will use Wireshark, but you can also use tshark or even `tcpdump` itself to analyze the log file.
+
 .Step 4 Open the log file in Wireshark:
 image::802.1AS/linux/step4_Open_the_log_file_in_Wireshark.png[]
+
+Above is the expected output in Wireshark.
