@@ -2,8 +2,329 @@
 
 == Overview
 * For the TSN switch, the base configuration covers basic time sync.  See xref::base_switch_config.adoc[]
-* TBD overview of configuring Linux with a TSN NIC to support time sync
+* Both automated and manual configuration options are available to enable 802.1AS time synchronization on Linux systems, this guide walks through both of them.
+* This guide is focused on Ubuntu Linux, but any platform that supports the `linuxptp` package may also be compatible, although with limited support and testing.
 
 == Detailed steps to setup and enable time synchronization
 
-TODO
+=== Automated Ansible configuration
+The easiest way to configure a set of Linux systems for 802.1AS time synchronization is to use the link:https://github.jpl.nasa.gov/hpsc/tsn-scenarios/tree/main/ansible#ansible[Ansible playbook] provided in the TSN scenarios repository. This playbook will install the necessary packages and configure the system for 802.1AS time synchronization. To do this you will need to designate:
+
+* One device/hostname to serve as the grand master clock source
+* One device/hostname to host the PTP process logging server
+* One device/hostname to be the Ansible controller
+* One or more devices to be configured as PTP clients or end instances
+
+Devices on the network can serve as multiple roles at the same times, with the exception of the grand master clock which cannot simoultaneously be a PTP end instance. For this guide, we will have the Ansible controller, PTP logging server, and grand master clock all on the same device, and the PTP end instance on a separate device.
+
+[NOTE] 
+.Clock Source
+====
+This grand master doesn't necessarily have to have accurate GPS synchronized time for TSN features to work, however it is recommended if your intended use case requires accurate real world time.
+====
+
+.Step 1 Install Ansible and systemd on the controller device:
+[source,sh]
+----
+sudo apt update
+sudo apt install ansible systemd
+----
+
+.Step 2 Clone the TSN scenarios repository:
+[source,sh]
+----
+git clone https://github.jpl.nasa.gov/hpsc/tsn-scenarios.git
+cd tsn-scenarios/ansible
+----
+
+.Step 3 Modify the `inventory` file to include the devices you want to configure. 
+[source,sh]
+----
+$EDITOR inventory
+----
+Copy and modify the link:https://github.jpl.nasa.gov/hpsc/tsn-scenarios/blob/main/ansible/inventory[ansible inventory file]:
+
+[source,yml]
+----
+include::example$802.1AS/ansible-inventory.yml[]
+----
+
+Sections with `USER` comments indicate where you should add your device information, the comments explain what each section does. The inventory file is designed so that it can be used to configure as many devices as you want, with each device being an "end system" or 'es' for short. If your configuration needs more or less devices you can add entries at the bottom of the file for each end system, defined in the same way as the others in the file. Importantly, you also need to add them under `children:` of the `eis:` and `duts:` section of the inventory.
+
+To match the example in this guide, make the following changes to the default inventory file:
+
+* Change `logging_server: work-desktop` to `logging_server: hpsctsnes1` (or the specific hostname of your master clock / ansible controller / logging server).
+* Change `ansible_user: ansible` to `ansible_user: your_username` note that this user must have passwordless sudo access on the devices you are configuring.
+* Delete `es2:` under `children:` of the `duts:` and `eis:` section.
+* Delete the entry for `es2:` and its associated host.
+* Change all mentions of `hpsctsnesX` hostnames to match those of your devices.
+
+.Step 4 Run the Ansible logging setup playbook:
+[source,sh]
+----
+ansible-playbook logging.yml
+----
+
+.Step 5 Test the logging server:
+From one of the end systems, run the following command:
+[source,sh]
+----
+systemd-cat echo test
+----
+On the logging server, check the logs:
+[source,sh]
+----
+sudo journalctl --directory /var/log/journal/remote --merge -n1
+----
+Expected output:
+[source,sh]
+----
+user@logging-server:~$ sudo journalctl --directory /var/log/journal/remote --merge -n1
+Jun 09 17:08:13 hpsctsnes1 echo[39637]: test
+----
+.Step 6 Monitor the logs on the logging server:
+[source,sh]
+----
+sudo journalctl --file /var/log/journal/remote/all.journal -mf _COMM=ptp4l
+----
+.Step 7 Run the Ansible playbook to configure the devices for PTP:
+[source,sh]
+----
+ansible-playbook AS-start.yml
+----
+Expected output:
+[source,sh]
+----
+user@ansible-control-node:~$ ansible-playbook AS-start.yml
+
+PLAY [802.1AS] ****************************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ********************************************************************************************************************************************************************
+ok: [hpsctsnes1]
+ok: [hpsctsnes0]
+ok: [hpsctsnes2]
+
+TASK [AS : Start 802.1AS] *****************************************************************************************************************************************************************
+included: /home/user/tsn-scenarios/ansible/roles/AS/tasks/start.yml for hpsctsnes0, hpsctsnes1, hpsctsnes2
+
+TASK [AS : Install ptp4l] *****************************************************************************************************************************************************************
+ok: [hpsctsnes0]
+ok: [hpsctsnes2]
+ok: [hpsctsnes1]
+
+TASK [AS : Copy configuration] ************************************************************************************************************************************************************
+ok: [hpsctsnes2] => (item=ptp4l-gm.conf)
+ok: [hpsctsnes1] => (item=ptp4l-gm.conf)
+ok: [hpsctsnes0] => (item=ptp4l-gm.conf)
+ok: [hpsctsnes0] => (item=ptp4l-ei.conf)
+ok: [hpsctsnes2] => (item=ptp4l-ei.conf)
+ok: [hpsctsnes1] => (item=ptp4l-ei.conf)
+
+TASK [AS : Start ntp for Grandmasters] ****************************************************************************************************************************************************
+skipping: [hpsctsnes1]
+skipping: [hpsctsnes2]
+ok: [hpsctsnes0]
+
+TASK [AS : Stop ntp for End Instances] ****************************************************************************************************************************************************
+skipping: [hpsctsnes0]
+ok: [hpsctsnes2]
+ok: [hpsctsnes1]
+
+TASK [AS : Check phc2sys status] **********************************************************************************************************************************************************
+ok: [hpsctsnes0]
+ok: [hpsctsnes2]
+ok: [hpsctsnes1]
+
+TASK [AS : Check ptp4l status] ************************************************************************************************************************************************************
+ok: [hpsctsnes0]
+ok: [hpsctsnes1]
+ok: [hpsctsnes2]
+
+TASK [AS : Start phc2sys] *****************************************************************************************************************************************************************
+changed: [hpsctsnes1]
+changed: [hpsctsnes0]
+changed: [hpsctsnes2]
+
+TASK [AS : Start ptp4l] *******************************************************************************************************************************************************************
+changed: [hpsctsnes1]
+changed: [hpsctsnes0]
+changed: [hpsctsnes2]
+
+TASK [AS : Stop 802.1AS] ******************************************************************************************************************************************************************
+skipping: [hpsctsnes0]
+skipping: [hpsctsnes1]
+skipping: [hpsctsnes2]
+
+PLAY RECAP ********************************************************************************************************************************************************************************
+hpsctsnes0                 : ok=9    changed=2    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+hpsctsnes1                 : ok=9    changed=2    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+hpsctsnes2                 : ok=9    changed=2    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0
+----
+.Step 8 Verify the PTP logs:
+[source,sh]
+----
+user@logging-server:~$ sudo journalctl --file /var/log/journal/remote/all.journal -mf _COMM=ptp4l
+Jun 09 17:46:35 hpsctsnes2 ptp4l[49875]: [964662.848] selected /dev/ptp0 as PTP clock
+Jun 09 17:46:35 hpsctsnes2 ptp4l[49875]: [964662.862] port 1 (enp1s0): INITIALIZING to SLAVE on INIT_COMPLETE
+Jun 09 17:46:35 hpsctsnes2 ptp4l[49875]: [964662.862] port 0 (/var/run/ptp4l): INITIALIZING to LISTENING on INIT_COMPLETE
+Jun 09 17:46:35 hpsctsnes2 ptp4l[49875]: [964662.862] port 0 (/var/run/ptp4lro): INITIALIZING to LISTENING on INIT_COMPLETE
+Jun 09 17:46:35 hpsctsnes0 ptp4l[49834]: [964670.526] selected /dev/ptp0 as PTP clock
+Jun 09 17:46:35 hpsctsnes0 ptp4l[49834]: [964670.555] port 1 (enp1s0): INITIALIZING to MASTER on INIT_COMPLETE
+Jun 09 17:46:35 hpsctsnes0 ptp4l[49834]: [964670.555] port 0 (/var/run/ptp4l): INITIALIZING to LISTENING on INIT_COMPLETE
+Jun 09 17:46:35 hpsctsnes0 ptp4l[49834]: [964670.555] port 0 (/var/run/ptp4lro): INITIALIZING to LISTENING on INIT_COMPLETE
+Jun 09 17:46:35 hpsctsnes1 ptp4l[43870]: [964678.810] selected /dev/ptp0 as PTP clock
+Jun 09 17:46:35 hpsctsnes1 ptp4l[43870]: [964678.833] port 1 (enp1s0): INITIALIZING to SLAVE on INIT_COMPLETE
+Jun 09 17:46:35 hpsctsnes1 ptp4l[43870]: [964678.833] port 0 (/var/run/ptp4l): INITIALIZING to LISTENING on INIT_COMPLETE
+Jun 09 17:46:35 hpsctsnes1 ptp4l[43870]: [964678.833] port 0 (/var/run/ptp4lro): INITIALIZING to LISTENING on INIT_COMPLETE
+Jun 09 17:46:39 hpsctsnes2 ptp4l[49875]: [964666.829] selected local clock 000732.fffe.c059ea as best master
+Jun 09 17:46:39 hpsctsnes2 ptp4l[49875]: [964666.871] port 1 (enp1s0): new foreign master 0004a3.fffe.010000-6
+Jun 09 17:46:39 hpsctsnes1 ptp4l[43870]: [964682.550] selected local clock 000732.fffe.c059d4 as best master
+Jun 09 17:46:39 hpsctsnes1 ptp4l[43870]: [964682.844] port 1 (enp1s0): new foreign master 0004a3.fffe.010000-4
+Jun 09 17:46:40 hpsctsnes1 ptp4l[43870]: [964683.786] selected best master clock 000732.fffe.c059d8
+Jun 09 17:46:41 hpsctsnes2 ptp4l[49875]: [964668.610] selected best master clock 000732.fffe.c059d8
+Jun 09 17:46:42 hpsctsnes2 ptp4l[49875]: [964669.754] rms 1090 max 1440 freq -16799 +/- 773 delay   319 +/-   0
+Jun 09 17:46:42 hpsctsnes1 ptp4l[43870]: [964685.727] rms  964 max 1276 freq -14230 +/- 684 delay   317 +/-   1
+Jun 09 17:46:43 hpsctsnes2 ptp4l[49875]: [964670.757] rms  203 max  306 freq -16153 +/- 277 delay   318 +/-   0
+Jun 09 17:46:43 hpsctsnes1 ptp4l[43870]: [964686.730] rms  182 max  281 freq -13656 +/- 246 delay   316 +/-   0
+Jun 09 17:46:44 hpsctsnes2 ptp4l[49875]: [964671.760] rms  333 max  351 freq -15545 +/-  82 delay   319 +/-   0
+Jun 09 17:46:44 hpsctsnes1 ptp4l[43870]: [964687.733] rms  295 max  309 freq -13122 +/-  82 delay   318 +/-   0
+Jun 09 17:46:45 hpsctsnes2 ptp4l[49875]: [964672.763] rms  204 max  272 freq -15443 +/-  17 delay   319 +/-   0
+Jun 09 17:46:45 hpsctsnes1 ptp4l[43870]: [964688.736] rms  181 max  247 freq -13030 +/-  14 delay   318 +/-   0
+Jun 09 17:46:46 hpsctsnes2 ptp4l[49875]: [964673.766] rms   55 max  100 freq -15534 +/-  35 delay   319 +/-   0
+Jun 09 17:46:46 hpsctsnes1 ptp4l[43870]: [964689.739] rms   48 max   81 freq -13109 +/-  24 delay   318 +/-   0
+Jun 09 17:46:47 hpsctsnes2 ptp4l[49875]: [964674.769] rms   27 max   37 freq -15626 +/-  18 delay   319 +/-   0
+Jun 09 17:46:47 hpsctsnes1 ptp4l[43870]: [964690.742] rms   29 max   39 freq -13199 +/-  21 delay   318 +/-   0
+Jun 09 17:46:48 hpsctsnes2 ptp4l[49875]: [964675.772] rms   37 max   42 freq -15677 +/-  14 delay   320 +/-   0
+Jun 09 17:46:48 hpsctsnes1 ptp4l[43870]: [964691.745] rms   34 max   45 freq -13243 +/-  11 delay   319 +/-   0
+Jun 09 17:46:49 hpsctsnes2 ptp4l[49875]: [964676.774] rms   21 max   32 freq -15684 +/-   7 delay   320 +/-   0
+Jun 09 17:46:49 hpsctsnes1 ptp4l[43870]: [964692.748] rms   20 max   31 freq -13252 +/-   5 delay   319 +/-   0
+----
+.Step 9 - Verify test is running (TSN switch)
+image::802.1AS/keysight/step16_switch_test_running.png[]
+
+.Step 10 Stop the scenario:
+[source,sh]
+----
+ansible-playbook AS-stop.yml
+----
+
+=== Manual configuration
+Similar to the Ansible configuration, you will need to designate and grand master and an end instance.
+
+.Step 1 Install the `linuxptp` package  on each device:
+[source,sh]
+----
+sudo apt update
+sudo apt install linuxptp
+----
+
+.Step 2 Ensure NTP is stopped for *end instances* (do not stop NTP on the grand master):
+[source,sh]
+----
+sudo timedatectl set-ntp false
+----
+
+.Step 3 Download the ptp4l-gm.conf and ptp4l-ei.conf files from the TSN scenarios repository onto their respective devices:
+[source,sh]
+----
+wget https://github.jpl.nasa.gov/raw/hpsc/tsn-scenarios/main/ansible/roles/AS/templates/ptp4l-gm.conf
+----
+[source,sh]
+----
+wget https://github.jpl.nasa.gov/raw/hpsc/tsn-scenarios/main/ansible/roles/AS/templates/ptp4l-ei.conf
+----
+
+You will need to replace the last line of these files to match the network interface you are using. For example, if your network interface is `enp1s0`, the last line should be:
+[source,sh]
+----
+[enp1s0]
+----
+
+.Step 4 Check if any other PTP processes are running:
+[source,sh]
+----
+pgrep ptp4l
+pgrep phc2sys
+----
+If any processes are running, stop them:
+[source,sh]
+----
+sudo kill [pid]
+----
+
+.Step 5 Start `phc2sys` on both devices (in a separate terminal):
+[source,sh]
+----
+sudo phc2sys -s enp1s0 -c CLOCK_REALTIME --step_threshold=1 --transportSpecific=1 -w -m
+----
+
+.Step 6 Start `ptp4l` on the grand master device:
+[source,sh]
+----
+ptp4l -i enp1s0 -f ptp4l-gm.conf -ml6
+----
+
+.Step 7 Start `ptp4l` on the end instance device:
+[source,sh]
+----
+ptp4l -i enp1s0 -f ptp4l-ei.conf -ml6
+----
+
+[NOTE] 
+.Network Interface
+====
+You may want to change `enp1s0` to the name of the network interface connected to the TSN switch. You can find the name of interfaces by running `ip a`
+====
+
+.Step 8 Verify the PTP logs in the terminal you started `phc2sys` on:
+Expected output:
+[source,sh]
+----
+phc2sys[4816.670]: CLOCK_REALTIME phc offset       -10 s2 freq  -22740 delay      0
+phc2sys[4817.671]: CLOCK_REALTIME phc offset       -13 s2 freq  -22746 delay      0
+phc2sys[4818.671]: CLOCK_REALTIME phc offset        -3 s2 freq  -22740 delay      0
+phc2sys[4819.671]: CLOCK_REALTIME phc offset        -3 s2 freq  -22741 delay      0
+phc2sys[4820.672]: CLOCK_REALTIME phc offset         2 s2 freq  -22737 delay      0
+phc2sys[4821.672]: CLOCK_REALTIME phc offset        -3 s2 freq  -22741 delay      0
+phc2sys[4822.673]: CLOCK_REALTIME phc offset         5 s2 freq  -22734 delay      0
+phc2sys[4823.673]: CLOCK_REALTIME phc offset        -3 s2 freq  -22740 delay      0
+phc2sys[4824.674]: CLOCK_REALTIME phc offset        -4 s2 freq  -22742 delay      0
+phc2sys[4825.674]: CLOCK_REALTIME phc offset         3 s2 freq  -22737 delay      0
+phc2sys[4826.675]: CLOCK_REALTIME phc offset         3 s2 freq  -22736 delay      0
+phc2sys[4827.675]: CLOCK_REALTIME phc offset        -5 s2 freq  -22743 delay      0
+phc2sys[4828.676]: CLOCK_REALTIME phc offset        -1 s2 freq  -22740 delay      0
+phc2sys[4829.676]: CLOCK_REALTIME phc offset         2 s2 freq  -22738 delay      0
+----
+
+.Step 9 - Verify test is running (TSN switch)
+image::802.1AS/keysight/step16_switch_test_running.png[]
+
+.Step 10 Stop the scenario:
+Terminate the `ptp4l` and `phc2sys` processes.
+
+=== Additional verification, testing, and analysis using `tcpdump`
+You can use `tcpdump` to verify that the PTP packets are being sent and received correctly. This can be useful for debugging and analysis.
+
+.Step 1 Install `tcpdump`:
+[source,sh]
+----
+sudo apt update
+sudo apt install tcpdump
+----
+.Step 2 Start `tcpdump` on a device:
+[source,sh]
+----
+sudo tcpdump -i enp1s0 -w log.pcap
+----
+[NOTE] 
+.`tcpdump` options
+====
+There are various ways of using `tcpdump` to monitor network traffic, it's essentially a CLI version of Wireshark. The command above captures traffic and stores it to a .pcap (packet capture) file which we will open with a Wireshark client, but see the tcpdump link:https://www.tcpdump.org/manpages/tcpdump.1.html[man page] for more options.
+====
+.Step 3 Close `tcpdump` and analyze the log file:
+Terminate `tcpdump` and analyze the log file. We will use Wireshark, but you can also use tshark or even `tcpdump` itself to analyze the log file.
+
+.Step 4 Open the log file in Wireshark:
+image::802.1AS/linux/step4_Open_the_log_file_in_Wireshark.png[]
+
+Above is the expected output in Wireshark.
