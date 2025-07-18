@@ -234,6 +234,12 @@ wget https://github.jpl.nasa.gov/raw/hpsc/tsn-scenarios/main/ansible/roles/AS/te
 wget https://github.jpl.nasa.gov/raw/hpsc/tsn-scenarios/main/ansible/roles/AS/templates/ptp4l-ei.conf
 ----
 
+You will need to replace the last line of these files to match the network interface you are using. For example, if your network interface is `enp1s0`, the last line should be:
+[source,sh]
+----
+[enp1s0]
+----
+
 .Step 4 Check if any other PTP processes are running:
 [source,sh]
 ----
