@@ -1,0 +1,18 @@
+= Dependencies
+
+== All Venues
+
+A TSN switch is needed for all venues.
+
+Switch configs are provided for the https://www.microchip.com/en-us/development-tool/vsc5640ev[Microchip VSC5640EV] and the https://www.microchip.com/en-us/development-tool/ev23x71a[Microchip EV23X71A] running https://www.microchip.com/en-us/software-library/vsc6817[Microchip IStaX] 2025.03 or later.
+
+== Emulation Venue
+
+The https://www.keysight.com/us/en/products/network-test/network-test-hardware/novus-one-plus-l2-7-fixed-chassis.html[Keysight Novus ONE PLUS] with TSN license and https://www.keysight.com/us/en/library/demos/demo/ixnetwork-web-edition-overview.html[IxNetwork Web] 11.00 is used to emulate TSN talkers and listeners.
+
+== COTS Venue
+
+* At least 3 end systems with an Intel i226-IT/LM (e.g., https://up-board.org/up-squared-pro-7000/[AAEON Up Squared Pro 7000])
+* Ubuntu 24.04 LTS
+** ptp4l 4.0
+** ansible 2.16

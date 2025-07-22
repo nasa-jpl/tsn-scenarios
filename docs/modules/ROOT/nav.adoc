@@ -2,6 +2,7 @@
 * xref:terminology.adoc[]
 * xref:topology.adoc[]
 * xref:venues.adoc[]
+* xref:dependencies.adoc[]
 * xref:switch-config.adoc[]
 * Scenarios
 ** xref:802.1AS/index.adoc[]
