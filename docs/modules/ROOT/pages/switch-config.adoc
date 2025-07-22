@@ -1,4 +1,4 @@
-= TSN Switch Base Configuration
+= Switch Configuration
 :toc: macro
 :idprefix:
 :idseparator: -
@@ -33,13 +33,13 @@ The base configuration needs to
 Some wireshark captures showing traffic before and after these changes:
 
 .Before disabling LLDP and MSTP
-image::base_switch_config/wireshark_before_disabling_lldp_mstp.png[]
+image::switch-config/wireshark_before_disabling_lldp_mstp.png[]
 
 .Before isolating TSN network ports on their own VLAN
-image::base_switch_config/wireshark_before_isolating_TSN_traffic.png[]
+image::switch-config/wireshark_before_isolating_TSN_traffic.png[]
 
 .After making these changes
-image::base_switch_config/wireshark_after_fixes.png[]
+image::switch-config/wireshark_after_fixes.png[]
 
 
 
@@ -54,34 +54,34 @@ To follow the instructions to reset and provision the switch, go to the HPSC swi
 === Configuration
 
 .Disable LLDP
-image::base_switch_config/disable_lldp.png[]
+image::switch-config/disable_lldp.png[]
 
 .Disable MSTP
-image::base_switch_config/disable_mstp.png[]
+image::switch-config/disable_mstp.png[]
 
 .New VLAN Config
-image::base_switch_config/vlan_config.png[]
+image::switch-config/vlan_config.png[]
 
 .Create PTP instance on VLAN 2
-image::base_switch_config/ptp_instance_create.png[]
+image::switch-config/ptp_instance_create.png[]
 
 .Configure PTP instance VID and Profile
-image::base_switch_config/ptp_instance_vid_profile.png[]
+image::switch-config/ptp_instance_vid_profile.png[]
 
 .Edit PTP instance
-image::base_switch_config/ptp_instance_edit.png[]
+image::switch-config/ptp_instance_edit.png[]
 
 .Configure PTP instance
-image::base_switch_config/ptp_instance_configure.png[]
+image::switch-config/ptp_instance_configure.png[]
 
 .Disable MAC learning
-image::base_switch_config/disable_mac_learning.png[]
+image::switch-config/disable_mac_learning.png[]
 
 .Disable web interface timeout
-image::base_switch_config/tsn_switch_web_security_setting.png[]
+image::switch-config/tsn_switch_web_security_setting.png[]
 
 .Enable Port Classification
-image::base_switch_config/enable_port_classification.png[]
+image::switch-config/enable_port_classification.png[]
 
 
 ----

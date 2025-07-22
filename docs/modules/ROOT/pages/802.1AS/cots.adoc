@@ -1,7 +1,7 @@
-= Linux Venue
+= 802.1AS: COTS Implementation
 
 == Overview
-* For the TSN switch, the base configuration covers basic time sync.  See xref::base_switch_config.adoc[]
+* For the TSN switch, the base configuration covers basic time sync.  See xref::switch-config.adoc[]
 * Both automated and manual configuration options are available to enable 802.1AS time synchronization on Linux systems, this guide walks through both of them.
 * This guide is focused on Ubuntu Linux, but any platform that supports the `linuxptp` package may also be compatible, although with limited support and testing.
 
@@ -200,7 +200,7 @@ Jun 09 17:46:49 hpsctsnes2 ptp4l[49875]: [964676.774] rms   21 max   32 freq -15
 Jun 09 17:46:49 hpsctsnes1 ptp4l[43870]: [964692.748] rms   20 max   31 freq -13252 +/-   5 delay   319 +/-   0
 ----
 .Step 9 - Verify test is running (TSN switch)
-image::802.1AS/keysight/step16_switch_test_running.png[]
+image::802.1AS/emulation/step16_switch_test_running.png[]
 
 .Step 10 Stop the scenario:
 [source,sh]
@@ -297,7 +297,7 @@ phc2sys[4829.676]: CLOCK_REALTIME phc offset         2 s2 freq  -22738 delay    
 ----
 
 .Step 9 - Verify test is running (TSN switch)
-image::802.1AS/keysight/step16_switch_test_running.png[]
+image::802.1AS/emulation/step16_switch_test_running.png[]
 
 .Step 10 Stop the scenario:
 Terminate the `ptp4l` and `phc2sys` processes.
@@ -325,6 +325,6 @@ There are various ways of using `tcpdump` to monitor network traffic, it's essen
 Terminate `tcpdump` and analyze the log file. We will use Wireshark, but you can also use tshark or even `tcpdump` itself to analyze the log file.
 
 .Step 4 Open the log file in Wireshark:
-image::802.1AS/linux/step4_Open_the_log_file_in_Wireshark.png[]
+image::802.1AS/cots/step4_Open_the_log_file_in_Wireshark.png[]
 
 Above is the expected output in Wireshark.

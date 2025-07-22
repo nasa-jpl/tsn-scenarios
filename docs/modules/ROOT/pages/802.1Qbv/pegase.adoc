@@ -1,4 +1,4 @@
-= Pegase (Modeled) Venue
+= 802.1Qbv: Pegase Implementation
 
 :toc: macro
 :idprefix:

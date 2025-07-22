@@ -1,52 +1,52 @@
 The following steps configure the Keysight to implement scenario 1 of Time Aware Shaping.  
 
-These steps start with the Keysight configuration implementing basic time synchronization found at xref:802.1AS/keysight.adoc[]
+These steps start with the Keysight configuration implementing basic time synchronization found at xref:802.1AS/emulation.adoc[]
 
 PTP frames are not allowed to include VLAN tags, but for our scheduled and prioritized traffic we need to include that.  Therefore, we need to add a new Ethernet protocol stack, with VLAN enabled, to the port that is acting as the time transmitter.  We will use this to generate scheduled traffic.  Alternatively, one could add a second device group to the same port.
 
 
 .Step 1 - Add Ethernet Stack
-image::802.1Qbv/keysight_scenario1/step1_add_ethernet_stack.png[]
+image::802.1Qbv/emulation/1/step1_add_ethernet_stack.png[]
 
 .Step 2 - Add Ethernet Stack
-image::802.1Qbv/keysight_scenario1/step2_add_ethernet_stack.png[]
+image::802.1Qbv/emulation/1/step2_add_ethernet_stack.png[]
 
 .Step 3 - Enable VLAN
-image::802.1Qbv/keysight_scenario1/step3_enable_vlan.png[]
+image::802.1Qbv/emulation/1/step3_enable_vlan.png[]
 
 .Step 3b - Enable VLAN
-image::802.1Qbv/keysight_scenario1/step3b_enable_vlan.png[]
+image::802.1Qbv/emulation/1/step3b_enable_vlan.png[]
 
 For the demonstration we want some traffic coming from 2 different ports, so we need to add a new port (topology).  This will be used to generate both prioritized but un-scheduled traffic, and vanilla Ethernet traffic.  Vanilla Ethernet traffic will have no VLAN / priority tag, so we need to create 2 Ethernet stacks on this device, one with VLAN enabled.  Since this port is generating un-scheduled traffic, it doesn't need to be synchronized to the network time.  We are not going to setup 802.1AS on this port.  It is not clear, given the same physical device (Keysight) is operating all of these ports, it might get synchronized anyway just because one of the ports is.  It doesn't matter to this scenario, but for more complex scenarios it will be important to use physically separate devices with physically separate oscillators to ensure we are covering more flight-like use cases.
 
 .Step 4 - Add Topology
-image::802.1Qbv/keysight_scenario1/step4_add_topology.png[]
+image::802.1Qbv/emulation/1/step4_add_topology.png[]
 
 .Step 5 - Add Topology
-image::802.1Qbv/keysight_scenario1/step5_add_topology.png[]
+image::802.1Qbv/emulation/1/step5_add_topology.png[]
 
 .Step 6 - Rename Topology
-image::802.1Qbv/keysight_scenario1/step6_rename_topology.png[]
+image::802.1Qbv/emulation/1/step6_rename_topology.png[]
 
 .Step 7 - Add Ethernet Stack
-image::802.1Qbv/keysight_scenario1/step7_add_ethernet_stack.png[]
+image::802.1Qbv/emulation/1/step7_add_ethernet_stack.png[]
 
 .Step 8 - Add Ethernet Stack
-image::802.1Qbv/keysight_scenario1/step8_add_ethernet_stack.png[]
+image::802.1Qbv/emulation/1/step8_add_ethernet_stack.png[]
 
 .Step 9 - Enable VLAN
-image::802.1Qbv/keysight_scenario1/step9_enable_vlan.png[]
+image::802.1Qbv/emulation/1/step9_enable_vlan.png[]
 
 .Step 9b - Enable VLAN
-image::802.1Qbv/keysight_scenario1/step9b_enable_vlan.png[]
+image::802.1Qbv/emulation/1/step9b_enable_vlan.png[]
 
 Now we rename ports to make certain dialogs easier to follow.
 
 .Step 10 - Rename Ports
-image::802.1Qbv/keysight_scenario1/step10_rename_ports.png[]
+image::802.1Qbv/emulation/1/step10_rename_ports.png[]
 
 .Step 10b - Rename Ports
-image::802.1Qbv/keysight_scenario1/step10b_rename_ports.png[]
+image::802.1Qbv/emulation/1/step10b_rename_ports.png[]
 
 The network definition is now complete.  Next steps are to add the various traffic flows.  A total of 8 separate traffic flows will be added.  
 
@@ -59,79 +59,79 @@ The network definition is now complete.  Next steps are to add the various traff
 * Have not yet figured out how to rename protocol stacks, so for now you have to pay attention on the Overview screen, which "Ethernet N" to use as source and destination when creating traffic.
 
 .Step 11 - Source / Destination naming reminder
-image::802.1Qbv/keysight_scenario1/step11_src_dest_naming.png[]
+image::802.1Qbv/emulation/1/step11_src_dest_naming.png[]
 
 .Step 12 - View Traffic Tab
-image::802.1Qbv/keysight_scenario1/step12_traffic_view.png[]
+image::802.1Qbv/emulation/1/step12_traffic_view.png[]
 
 .Step 13 - Add Traffic Item (Scheduled Traffic)
-image::802.1Qbv/keysight_scenario1/step13_add_traffic_scheduled.png[]
+image::802.1Qbv/emulation/1/step13_add_traffic_scheduled.png[]
 
 .Step 14 - Configure Source & Destination (Scheduled Traffic)
-image::802.1Qbv/keysight_scenario1/step14_configure_src_dest.png[]
+image::802.1Qbv/emulation/1/step14_configure_src_dest.png[]
 
 .Step 15 - Add Endpoint Sets
-image::802.1Qbv/keysight_scenario1/step15_add_endpoint_set.png[]
+image::802.1Qbv/emulation/1/step15_add_endpoint_set.png[]
 
 .Step 15b - Add Endpoint Sets. Perform this step a total of 3 times to add 3 additional Endpoints  for the scheduled traffic. The end result will be to have four scheduled traffic streams from Ethernet 3 to timeReceiver 
-image::802.1Qbv/keysight_scenario1/step15b_add_endpoint_set.png[]
+image::802.1Qbv/emulation/1/step15b_add_endpoint_set.png[]
 
 .Step 15c - Check the traffic configuration screen to verify four scheduled traffic streams with Ethernet3 as the source and timeReceiver as the destination (i.e. Ethernet2). Note: If there are less than four streams after performing step 15b three times, there is likely an issue with the port queues in the switch (see Fig 13 in the switch configuration steps) and/or port classification/quality of service (see Fig 13a in the switch configuration steps).
-image::802.1Qbv/keysight_scenario1/step15c_check_traffic_item.png[]
+image::802.1Qbv/emulation/1/step15c_check_traffic_item.png[]
 
 .Step 16 - Add traffic (prioritized background)
-image::802.1Qbv/keysight_scenario1/step16_add_traffic_prioritized_background.png[]
+image::802.1Qbv/emulation/1/step16_add_traffic_prioritized_background.png[]
 
 .Step 17 - Add traffic (vanilla ethernet)
-image::802.1Qbv/keysight_scenario1/step17_add_traffic_vanilla_ethernet.png[]
+image::802.1Qbv/emulation/1/step17_add_traffic_vanilla_ethernet.png[]
 
 .Step 17b - Check traffic configuration
-image::802.1Qbv/keysight_scenario1/step17b_check_traffic_items.png[]
+image::802.1Qbv/emulation/1/step17b_check_traffic_items.png[]
 
 .Step 18 - Rename traffic items
-image::802.1Qbv/keysight_scenario1/step18_rename_traffic_items.png[]
+image::802.1Qbv/emulation/1/step18_rename_traffic_items.png[]
 
 .Step 19 - Add stats tracking
-image::802.1Qbv/keysight_scenario1/step19_stats_tracking.png[]
+image::802.1Qbv/emulation/1/step19_stats_tracking.png[]
 
 .Step 20 - Set periodic traffic
-image::802.1Qbv/keysight_scenario1/step20_periodic_traffic.png[]
+image::802.1Qbv/emulation/1/step20_periodic_traffic.png[]
 
 .Step 21 - Set a random frame size for the unscheduled, unprioritized (i.e. vanilla) traffic sourced from Ethernet 4 to be between 64 and 1518 bytes
-image::802.1Qbv/keysight_scenario1/step21_vanilla_random_frame_size.png[]
+image::802.1Qbv/emulation/1/step21_vanilla_random_frame_size.png[]
 
 .Step 22 - Set percentage line rate for the vanilla traffic to 50% of the line rate
-image::802.1Qbv/keysight_scenario1/step22_vanilla_line_rate.png[]
+image::802.1Qbv/emulation/1/step22_vanilla_line_rate.png[]
 
 .Step 23 - Open the Ethernet 3 details view
-image::802.1Qbv/keysight_scenario1/step23_set_vlan_0.png[]
+image::802.1Qbv/emulation/1/step23_set_vlan_0.png[]
 
 .Step 23b - Set VLAN ID to 0 for Ethernet 3. Doing so eliminates the VID tag in the scheduled, prioritized packets and allows the switch to select which VLAN(s) to traverse to route these packet to the destination
-image::802.1Qbv/keysight_scenario1/step23b_set_vlan_0.png[]
+image::802.1Qbv/emulation/1/step23b_set_vlan_0.png[]
 
 .Step 23c - Set VLAN ID to 0
-image::802.1Qbv/keysight_scenario1/step23c_set_vlan_0.png[]
+image::802.1Qbv/emulation/1/step23c_set_vlan_0.png[]
 
 .Step 24 - Set VLAN priority tags. Steps 1-3 are performed for the seven streams with prioritized traffic. The top four rows are for the scheduled traffic with step 3 set to priority level 1 for the first row and ending with priority level 4 in the fourth row. The next three rows are for the unscheduled traffic with step 3 set to priority level 5 for the fifth row and ending with priority level 7 in the seventh row.
-image::802.1Qbv/keysight_scenario1/step24_set_vlan_tags.png[]
+image::802.1Qbv/emulation/1/step24_set_vlan_tags.png[]
 
 .Step 25 - Apply traffic settings
-image::802.1Qbv/keysight_scenario1/step25_apply_traffic_settings.png[]
+image::802.1Qbv/emulation/1/step25_apply_traffic_settings.png[]
 
 .Step 26 - Open the global options menu
-image::802.1Qbv/keysight_scenario1/step26_enable_scheduled_transmission.png[]
+image::802.1Qbv/emulation/1/step26_enable_scheduled_transmission.png[]
 
 .Step 26b - Enable scheduled transmissions
-image::802.1Qbv/keysight_scenario1/step26b_enable_scheduled_transmission.png[]
+image::802.1Qbv/emulation/1/step26b_enable_scheduled_transmission.png[]
 
 .Step 26c - Enable scheduled transmissions
-image::802.1Qbv/keysight_scenario1/step26c_enable_scheduled_transmission.png[]
+image::802.1Qbv/emulation/1/step26c_enable_scheduled_transmission.png[]
 
 .Step 27 - Add Flow Transmission column
-image::802.1Qbv/keysight_scenario1/step27_add_flow_transmission.png[]
+image::802.1Qbv/emulation/1/step27_add_flow_transmission.png[]
 
 .Step 28 - Set output offsets
-image::802.1Qbv/keysight_scenario1/step28_set_output_offsets.png[]
+image::802.1Qbv/emulation/1/step28_set_output_offsets.png[]
 
 This is the end of configuring the keysight.  Now you can run the test and check the results are expected.  
 

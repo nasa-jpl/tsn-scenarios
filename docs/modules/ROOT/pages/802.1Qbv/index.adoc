@@ -1,4 +1,4 @@
-= 802.1 Qbv Time-Aware Shaping Demonstration Overview
+= 802.1Qbv: Time-Aware Shaping
 
 :toc: macro
 :idprefix:

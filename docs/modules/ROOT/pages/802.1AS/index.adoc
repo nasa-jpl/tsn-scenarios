@@ -1,4 +1,4 @@
-= 802.1AS Timing and Synchronization
+= 802.1AS: Timing and Synchronization
 
 *TODO* provide brief summary of how Time Sync works
 
