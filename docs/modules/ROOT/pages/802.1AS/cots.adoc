@@ -1,4 +1,4 @@
-= 802.1AS: COTS Implementation
+= 802.1AS: COTS Venue
 
 == Overview
 * For the TSN switch, the base configuration covers basic time sync.  See xref::switch-config.adoc[]

@@ -1,4 +1,4 @@
-= 802.1CB: Stream Identification: Emulation Implementation
+= 802.1CB: Stream Identification: Emulation Venue
 
 :toc: macro
 :idprefix:

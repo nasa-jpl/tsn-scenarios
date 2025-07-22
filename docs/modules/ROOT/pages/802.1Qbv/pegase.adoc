@@ -1,4 +1,4 @@
-= 802.1Qbv: Pegase Implementation
+= 802.1Qbv: Pegase Venue
 
 :toc: macro
 :idprefix:

@@ -1,4 +1,4 @@
-= 802.1Qbv: Emulation Implementation
+= 802.1Qbv: Emulation Venue
 
 :toc: macro
 :idprefix:
