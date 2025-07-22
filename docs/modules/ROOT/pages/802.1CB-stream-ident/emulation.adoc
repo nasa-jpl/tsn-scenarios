@@ -1,4 +1,4 @@
-= Stream Identification: Keysight Network Emulator / Microchip iStax TSN Switch Venue
+= 802.1CB: Stream Identification: Emulation Venue
 
 :toc: macro
 :idprefix:
@@ -12,9 +12,9 @@ This document provides specific instructions for implementing the Stream Identif
 
 It is assumed that there is basic familiarity with the Keysight and switch.  If not, the TAS scenario instructions are much more detailed and provide specific steps for how to create topologies and traffic items in Keysight, etc.
 
-All scenarios assume the base switch configuration has already been performed.  Instructions can be found here: xref:base_switch_config.adoc[].
+All scenarios assume the base switch configuration has already been performed.  Instructions can be found here: xref:switch-config.adoc[].
 
-All scenarios assume the Keysight is starting with the base 802.1AS time synchronization setup, found here: xref:802.1AS/802.1AS.adoc[].
+All scenarios assume the Keysight is starting with the base 802.1AS time synchronization setup, found here: xref:802.1AS/index.adoc[].
 
 == General Microchip switch Stream Identification configuration overview
 
@@ -52,10 +52,10 @@ The results do match that as shown in the screenshots below.
 Note that the bit rate being received slightly exceeds 200 Kbps.  It is not fully understood why that is.  Ticket was opened https://github.jpl.nasa.gov/hpsc/tsn-scenarios/issues/3.  The same effect is expected for any tests using flow meters, but will not repeat this text for every scenario.  This idiosyncrasy will just be captured here.
 
 .Switch QoS Stats
-image::stream_id/keysight_microchip_streamid_scenario1/switch_qos_stats.png[]
+image::802.1CB-stream-ident/emulation/1/switch_qos_stats.png[]
 
 .Keysight Stats
-image::stream_id/keysight_microchip_streamid_scenario1/keysight_stats.png[]
+image::802.1CB-stream-ident/emulation/1/keysight_stats.png[]
 
 === Scenario 2
 Destination MAC matching
@@ -76,7 +76,7 @@ General scenario description should be sufficient.  Need to add the 4 specific d
 Results match expected - the 2 traffic flows matching the DMAC, combined, are reduced to ~50 Kbps.  The other traffic flows are not affected.
 
 .Keysight Stats
-image::stream_id/keysight_microchip_streamid_scenario2/keysight_stats.png[]
+image::802.1CB-stream-ident/emulation/2/keysight_stats.png[]
 
 === Scenario 3
 Source MAC matching
@@ -96,9 +96,9 @@ General scenario description should be sufficient.
 Results match expected - the 2 traffic flows matching the SMAC, combined, are reduced to ~500 Kbps.  The other traffic flows are not affected.
 
 .Keysight Stats
-image::stream_id/keysight_microchip_streamid_scenario3/keysight_stats.png[]
+image::802.1CB-stream-ident/emulation/3/keysight_stats.png[]
 
 .Switch Stats
-image::stream_id/keysight_microchip_streamid_scenario3/switch_stats.png[]
+image::802.1CB-stream-ident/emulation/3/switch_stats.png[]
 
 ----

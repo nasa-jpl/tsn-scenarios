@@ -1,4 +1,4 @@
-= 802.1 Qci Per Stream Filtering and Policing Demonstration Overview
+= 802.1Qci: Per-Stream Filtering and Policing
 
 :toc: macro
 :idprefix:

@@ -1,7 +1,7 @@
-= Keysight Venue
+= 802.1AS: Emulation Venue
 
 == Overview
-* For the TSN switch, the base configuration covers basic time sync.  See xref::base_switch_config.adoc[]
+* For the TSN switch, the base configuration covers basic time sync.  See xref::switch-config.adoc[]
 * Configuring Keysight to support 802.1AS-2020 time sync is very straight forward.  Only a couple of items need to be configured - selecting which device will act as the time transmitter, and for the time receivers adjusting the mean link delay threshold parameter.
 * The instructions below show how to setup a simple 2 end point network, with one end point as the time transmitter and the other as a time receiver (the switch as well is a time receiver).  For more complex networks with additional time receivers, simply repeat the necessary steps to add the gPTP protocol to each ethernet device.
 * Note that the specific port mapping used may need to be modified to match how the Keysight is cabled to the switch.  The example here is where Keysight ports 5-8 are cabled to TSN switch ports 1-4.
@@ -9,55 +9,55 @@
 == Detailed steps to setup and enable time synchronization
 
 .Step 1 - Connect to ixNetwork
-image::802.1AS/keysight/step1_ixnetwork.png[]
+image::802.1AS/emulation/step1_ixnetwork.png[]
 
 .Step 2 - Create new session
-image::802.1AS/keysight/step2_newsession.png[]
+image::802.1AS/emulation/step2_newsession.png[]
 
 .Step 3 - Add 2 Ethernet topologies
-image::802.1AS/keysight/step3_2_eth_topologies.png[]
+image::802.1AS/emulation/step3_2_eth_topologies.png[]
 
 .Step 4 - Connect chassis
-image::802.1AS/keysight/step4_connect_chassis.png[]
+image::802.1AS/emulation/step4_connect_chassis.png[]
 
 .Step 5 - Connect port 1
-image::802.1AS/keysight/step5_connect_port_1.png[]
+image::802.1AS/emulation/step5_connect_port_1.png[]
 
 .Step 6 - Connect port 2
-image::802.1AS/keysight/step6_connect_port_2.png[]
+image::802.1AS/emulation/step6_connect_port_2.png[]
 
 .Step 7 - Add protocol stack, time transmitter
-image::802.1AS/keysight/step7_add_stack_left.png[]
+image::802.1AS/emulation/step7_add_stack_left.png[]
 
 .Step 8 - Add GPTP, time transmitter
-image::802.1AS/keysight/step8_add_gptp_left.png[]
+image::802.1AS/emulation/step8_add_gptp_left.png[]
 
 .Step 9 - Add GPTP, time receiver
-image::802.1AS/keysight/step9_add_gptp_right.png[]
+image::802.1AS/emulation/step9_add_gptp_right.png[]
 
 .Step 10 - View PTP Details, time transmitter
-image::802.1AS/keysight/step10_ptp_details_left.png[]
+image::802.1AS/emulation/step10_ptp_details_left.png[]
 
 .Step 11 - Configure time transmitter
-image::802.1AS/keysight/step11_ptp_master_left.png[]
+image::802.1AS/emulation/step11_ptp_master_left.png[]
 
 .Step 12 - View PTP Details, time receiver
-image::802.1AS/keysight/step12_ptp_details_right.png[]
+image::802.1AS/emulation/step12_ptp_details_right.png[]
 
 .Step 13 - Configure time receiver
-image::802.1AS/keysight/step13_ptp_right_mean_link_delay_threshold.png[]
+image::802.1AS/emulation/step13_ptp_right_mean_link_delay_threshold.png[]
 
 .Step 14 - Start test
-image::802.1AS/keysight/step14_start_test.png[]
+image::802.1AS/emulation/step14_start_test.png[]
 
 .Step 15 - Verify test is running (keysight)
-image::802.1AS/keysight/step15_test_running.png[]
+image::802.1AS/emulation/step15_test_running.png[]
 
 .Step 16 - Verify test is running (TSN switch)
-image::802.1AS/keysight/step16_switch_test_running.png[]
+image::802.1AS/emulation/step16_switch_test_running.png[]
 
 As a note, you can rename topologies and device groups which may help.  Double click the name to rename it.  For the example we have saved to the Keysight, we renamed the timing grand master as timeTransmitter, and the slave as timeReceiver.  
 
 .Step 17 - Rename topologies
-image::802.1AS/keysight/step17_rename_topologies.png[]
+image::802.1AS/emulation/step17_rename_topologies.png[]
 

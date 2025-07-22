@@ -1,4 +1,4 @@
-= Stream Identification Demonstration Overview
+= 802.1CB: Stream Identification
 
 :toc: macro
 :idprefix:

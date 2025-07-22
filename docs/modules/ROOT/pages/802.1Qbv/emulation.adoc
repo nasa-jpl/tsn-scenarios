@@ -1,4 +1,4 @@
-= 802.1Qbv Time-Aware Shaping (TAS): Keysight Network Emulator / Microchip iStax TSN Switch Venue
+= 802.1Qbv: Emulation Venue
 
 :toc: macro
 :idprefix:
@@ -17,7 +17,7 @@ The specific port assignments shown may need to be modified to match how the Key
 TAS disabled, non-overlapping critical traffic, non-saturated end-point
 
 ==== Detailed Switch Configuration
-This demonstration requires the base switch configuration that sets up appropriate VLANs to isolate the traffic for the demo from the rest of the network.  Instructions can be found xref:base_switch_config.adoc[here].
+This demonstration requires the base switch configuration that sets up appropriate VLANs to isolate the traffic for the demo from the rest of the network.  Instructions can be found xref:switch-config.adoc[here].
 
 After the base configuration, port classification settings for VLAN priority need to be adjusted for the TAS scenario on the ports in use—in this case, we assume that we are utilizing ports 1-4. 
 
@@ -37,25 +37,25 @@ include::partial$keysight_tas_demo_scenario_1.adoc[]
 ==== Test Execution and Results
 
 .Start test. First navigate to the Statistics screen and click Test to begin the test session. When the statistics selector panel appears at the left, select “Flow Statistics” for the metrics to be displayed.
-image::802.1Qbv/keysight_microchip_scenario1/scenario1_start_test.png[]
+image::802.1Qbv/emulation/1/scenario1_start_test.png[]
 
 .Check stats on TSN switch
-image::802.1Qbv/keysight_microchip_scenario1/scenario1_switch_check_stats.png[]
+image::802.1Qbv/emulation/1/scenario1_switch_check_stats.png[]
 
 .Check QOS stats on TSN switch
-image::802.1Qbv/keysight_microchip_scenario1/scenario1_switch_qos_stats.png[]
+image::802.1Qbv/emulation/1/scenario1_switch_qos_stats.png[]
 
 .Check port 1 detailed stats on TSN switch
-image::802.1Qbv/keysight_microchip_scenario1/scenario1_switch_detailed_stats_port_1.png[]
+image::802.1Qbv/emulation/1/scenario1_switch_detailed_stats_port_1.png[]
 
 .Check port 2 detailed stats on TSN switch
-image::802.1Qbv/keysight_microchip_scenario1/scenario1_switch_detailed_stats_port_2.png[]
+image::802.1Qbv/emulation/1/scenario1_switch_detailed_stats_port_2.png[]
 
 .Check port 3 detailed stats on TSN switch
-image::802.1Qbv/keysight_microchip_scenario1/scenario1_switch_detailed_stats_port_3.png[]
+image::802.1Qbv/emulation/1/scenario1_switch_detailed_stats_port_3.png[]
 
 .Check latencies
-image::802.1Qbv/keysight_microchip_scenario1/scenario1_keysight_latency.png[]
+image::802.1Qbv/emulation/1/scenario1_keysight_latency.png[]
 
 === Scenario 2
 TAS disabled, non-overlapping critical traffic, saturated end-point
@@ -102,17 +102,17 @@ Same as <<Scenario 1>>.
 Now that TAS gating is enabled on the switch, we expect to see an effect on latencies.
 
 .Scenario 5 latencies
-image::802.1Qbv/keysight_microchip_scenario5/scenario5_keysight_latency.png[]
+image::802.1Qbv/emulation/5/scenario5_keysight_latency.png[]
 
 The scheduled traffic latencies are reduced relative to scenario 1, which had the same traffic generation configuration but TAS gating disabled on the switch.  (Average latency reduced from 8 micro-seconds to 2 micro-seconds).  The gating reserves the time for these frames, so the switch never has to wait for another frame to complete first.  This can in particular be seen with the reduced average latency, which is very close to the minimum latency.  The max latency is a bit higher, and it is believed this is due to a single longer latency frame at the start of test while things are still being synchronized.  
 
 As a sanity check, set the 4 scheduled traffic streams on the keysight to all output at the same time, and keep TAS gating enabled on the switch.  Latencies for the 4 scheduled traffic streams should be ~0, 250, 500, and 750 micro-seconds respectively.  Keysight is outputting all 4 frames at the start of each network cycle, and they get queued by the switch waiting for the gate to open.
 
 .Scenario 5 - Output all frames at same time
-image::802.1Qbv/keysight_microchip_scenario5/scenario5_remove_offsets.png[]
+image::802.1Qbv/emulation/5/scenario5_remove_offsets.png[]
 
 .Scenario 5 - Check latencies to see expected offsets
-image::802.1Qbv/keysight_microchip_scenario5/scenario5_offset_latencies.png[]
+image::802.1Qbv/emulation/5/scenario5_offset_latencies.png[]
 
 === Scenario 6
 TAS enabled, non-overlapping critical traffic, saturated end-point

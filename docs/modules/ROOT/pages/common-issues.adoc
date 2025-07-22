@@ -27,7 +27,7 @@ TODO: Add more information about what to look for.  Maybe a section on symptoms 
 ** This is due to VLAN priority ordering being such that there can be a priority lower than vanilla ethernet (priority ethernet). In the ethernet standard, this is priority 1. 
 ** This means that setting a traffic item priority 1 ultimately gives it lower priority than vanilla ethernet.
 ** The solution is scenario-dependent. For the majority of scenarios, make sure that you are not using VLAN priority 1, unless you intend a lower priority than vanilla ethernet.
-*** For the TAS demo, make sure that you have followed the CoS settings as outlined in xref:802.1Qbv/keysight_microchiptsnswitch.adoc#detailed-switch-configuration[the keysight documentation for 802.1Qbv scenario 1].
+*** For the TAS demo, make sure that you have followed the CoS settings as outlined in xref:802.1Qbv/emulation.adoc#detailed-switch-configuration[the keysight documentation for 802.1Qbv scenario 1].
 
 == Harware-specific tips
 * Keysight

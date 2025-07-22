@@ -1,4 +1,4 @@
-= 802.1Qci Per Stream Filtering and Policing (PSFP): Keysight Network Emulator / Microchip iStax TSN Switch Venue
+= 802.1Qci: Emulation Venue
 
 :toc: macro
 :idprefix:
@@ -12,9 +12,9 @@ This document provides specific instructions for implementing the PSFP scenarios
 
 It is assumed that there is basic familiarity with the Keysight and switch.  If not, the TAS scenario instructions are much more detailed and provide specific steps for how to create topologies and traffic items in Keysight, etc.
 
-All scenarios assume the base switch configuration has already been performed.  Instructions can be found here: xref:base_switch_config.adoc[].
+All scenarios assume the base switch configuration has already been performed.  Instructions can be found here: xref:switch-config.adoc[].
 
-All scenarios assume the Keysight is starting with the base 802.1AS time synchronization setup, found here: xref:802.1AS/802.1AS.adoc[].
+All scenarios assume the Keysight is starting with the base 802.1AS time synchronization setup, found here: xref:802.1AS/index.adoc[].
 
 == General Microchip switch PSFP configuration overview
 
@@ -67,10 +67,10 @@ The expectation is that the traffic item will only see 200 Kbps get through, as 
 The results do match that as shown in the screenshots below.  Note that the bit rate being received slightly exceeds 200 Kbps.  It is not understood why that is.
 
 .Switch QoS Stats
-image::802.1Qci/keysight_microchip_mapping_scenario1/switch_qos_stats.png[]
+image::802.1Qci/emulation/1/switch_qos_stats.png[]
 
 .Keysight Stats
-image::802.1Qci/keysight_microchip_mapping_scenario1/keysight_stats.png[]
+image::802.1Qci/emulation/1/keysight_stats.png[]
 
 == Detailed Steps, Flow Metering
 
