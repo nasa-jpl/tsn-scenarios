@@ -1,6 +1,6 @@
 = Venues
 
-There are 3 major venues and various transitional venues.
+There are 3 major venues and various transitional venues, as well as an entirely software modeled venue provided for some scenarios.
 
 == Emulation Venue
 
@@ -31,6 +31,10 @@ The HPSC venue will use both switched end points (switch ports) and non-switched
 image::venue-hpsc.drawio.svg[]
 
 Because the HPSC has 16 switch ports and 4 end point ports, this venue could theoretically be implemented using a single HPSC evaluation board.
+
+== Modeled Venue
+
+Using RealTime-at-Work Pegase software, some scenarios are modeled in order to compare the modeled results with actual results.  The end points and switch are both modeled.
 
 == Transitional Venues
 

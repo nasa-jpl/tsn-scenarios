@@ -7,6 +7,8 @@ Each scenario consists of an English description and 3 implementations: one impl
 
 The scenarios are designed to be simple to aid in understanding.
 
+Time-Aware Shaping Scenarios 1 and 5, specifically, provide very detailed step-by-step instructions with screenshots and are the best place to start if unfamiliar with the equipment.
+
 The standards covered by this repository are as follows.
 
 * Core standards
