@@ -1,0 +1,28 @@
+site:
+  title: HPSC Lab
+  url: https://github.jpl.nasa.gov/pages/hpsc/lab
+  start_page: docs:ROOT:index.adoc
+
+content:
+  edit_url: '{web_url}/edit/main/{path}'
+  sources:
+    - url: ./../
+      start_path: docs
+
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+  supplemental_files: ./supplemental-ui
+
+asciidoc:
+  attributes:
+    idprefix: ''
+    idseparator: '-'
+    page-pagination: true
+
+antora:
+  extensions:
+    - "@antora/lunr-extension"
+
+urls:
+  html_extension_style: indexify

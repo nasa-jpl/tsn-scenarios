@@ -1,0 +1,36 @@
+= Antora
+
+Antora-based documentation site.
+
+== Build
+
+[listing]
+.Install dependencies
+----
+just init
+----
+
+[listing]
+.Build site
+----
+just build
+----
+
+[listing]
+.Preview site
+----
+just dev
+----
+
+== Publish
+
+[listing]
+.Publish to GitHub Pages using pages
+----
+just deploy
+----
+
+== Development Dependencies
+
+* https://apptainer.org/[Apptainer]
+* https://just.systems/[Just]

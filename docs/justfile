@@ -1,0 +1,22 @@
+init:
+    apptainer exec docker://antora/antora npm i @antora/lunr-extension
+
+build:
+    apptainer run docker://antora/antora antora-playbook-local.yml
+
+serve:
+    (cd build/site/; echo "Serving on http://localhost:8080"; python3 -m http.server 8080)
+
+dev:
+    #!/bin/sh
+    watchexec just build &
+    just serve &
+    trap 'kill $(jobs -pr)' EXIT
+    wait
+
+deploy:
+    # Prevent GitHub Pages from removing underscore directories
+    touch build/site/.nojekyll
+    rm -rf jfve-pages
+    git clone git@github.jpl.nasa.gov:jfve/pages.git jfve-pages
+    jfve-pages/exe/pages publish build/site .
