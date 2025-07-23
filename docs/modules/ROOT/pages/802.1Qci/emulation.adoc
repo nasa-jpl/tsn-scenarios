@@ -1,6 +1,6 @@
 = 802.1Qci: Emulation Venue
- 
- :toc: macro
+
+:toc: macro
 :idprefix:
 :idseparator: -
 
