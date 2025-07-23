@@ -34,45 +34,66 @@ image::802.1Qci/PSFP_tutorial/microchip_switch_stream_gate_dialog.png[]
 .Stream Filter Dialog
 image::802.1Qci/PSFP_tutorial/microchip_switch_stream_filter_dialog.png[]
 
-== Detailed Steps, Stream Mapping
-=== Scenario 1
-Rule Order-Of-Execution
+== Detailed Steps, Flow Metering
+
+=== Scenario 1 - Basic CIR / CBS
 
 ==== Detailed Switch Configuration
 
-*It is critical that the streams be created with the IDs shown and in the order listed*
+Configure a stream with Stream ID 1. Within the configuration window, set the following settings:
 
-* Create stream ID 10 that matches everything on EP~1~
-* Create stream ID 5 that matches everything on EP~1~
-* Create stream ID 20 that matches everything on EP~1~
-* Create 3 flow meters
-** Use rates CIR of 100, 200, and 400 Kbps.  To make things easy to keep straight, use flow meter IDs 1, 2, and 4 for those.
-** Use CBS of 8192 for all 3
-* Create 3 stream filters, also with IDs 1, 2, and 4, with the following Stream ID / flow meter / CIR mappings
-** Stream ID 5: Flow Meter 1: 100 Kbps
-** Stream ID 3: Flow Meter 2: 200 Kbps
-** Stream ID 7: Flow Meter 4: 400 Kbps
+* Set SMAC type to `MAC/Mask`.
+* Input the MAC to be the source MAC of the ethernet transmitter on the keysight. The SMAC can be found by clicking on the "Ethernet" protocol box within the Topology in the Keysight, then referencing the "MAC" box in the bottom window.
+* DMAC type should remain as `Any`
+* Finally, select port 1 (assuming that port 5 of the Keysight is connected ot port 1 of the switch).
+* Default remaining settings
+
+Create a flow meter with ID 1:
+
+* CIR = 1000 (1Mbps)
+* CBS = 1000000
+* EIR = 0
+* EBS = 0
+* Default remaining settings
+
+To connect the flow meter to the stream, Navigate to TSN -> PSFP -> Stream Filters. Create a stream filter with:
+
+* Stream ID = 1
+* Flow Meter Enabled
+* Flow Meter ID = 1
+* Default remaining settings
 
 ==== Detailed Novus Configuration
 
-* Create a single traffic flow
-** EP~1~ to EP~3~
-** 1% line rate
-** fixed 64 byte frames
+Create a standard traffic item from the transmitter stack to the receiver. 
 
-==== Test Execution and Results
+For the trafcic item, enable the following settings:
 
-The expectation is that the traffic item will only see 200 Kbps get through, as the switch should be checking the frame against stream rules in ascending numeric order, regardless of the order in which they were created.
+* Under Flow Transmission, click Burst(Custom).
+** Set the Duration to be in units of packetCount, with value 1000.
+** Enable Inter Burst Gap, with duration 10 seconds.
+* Set the frame size to be Fixed: 1000 (Bytes)
 
-The results do match that as shown in the screenshots below.  Note that the bit rate being received slightly exceeds 200 Kbps.  It is not understood why that is.
+This enables 1,000,000 Byte burst traffic (1,000 packets of 1,000 bytes = 1,000,000 bytes).
 
-.Switch QoS Stats
-image::802.1Qci/emulation/1/switch_qos_stats.png[]
+==== Running the Scenario & Expected Results
 
-.Keysight Stats
-image::802.1Qci/emulation/1/keysight_stats.png[]
+===== Test 1
 
-== Detailed Steps, Flow Metering
+Generate, Apply, and Run the Novus configuration. Either in the switch Port Statistics Overview, or in the Keysight statistics overview, view the Tx and Rx byte count.
+
+Every 10 seconds the transmitted/received bytes should tick up by 1,000,000. No frames should be dropped, as the bit rate fits within the flow meter's bucket. We are sending it at an average 0.8 Mbps, but filling the bucket with tokens at 1 Mbps, so we should never run out of tokens. Therefore, we should see equal amounts of transmit and recevied bytes.
+
+===== Test 2
+
+Now, in the keysight, change the burst spacing to be every 7 seconds, and rerun the scenario.
+
+The first burst should be fully transmitted and received as the bit rate fits within the flow meter's bucket. However, with each successive burst, the flow will be metered to stay under the 1,000,000 byte bucket size. The expected result should see frames dropped from the burst but not all frames. The data rate is approximately 1.14 Mbps, so we should see an oversaturation of the flow meter bucket, and only receive 1 Mbps out.
+
+To see a more drastic effect, reduce the inter burst gap to <5 seconds.
+
+
+
 
 == Detailed Steps, Stream Gating
 
