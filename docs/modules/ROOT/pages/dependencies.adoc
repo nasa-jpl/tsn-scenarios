@@ -4,7 +4,7 @@
 
 A TSN switch is needed for all venues.
 
-Switch configs are provided for the https://www.microchip.com/en-us/development-tool/vsc5640ev[Microchip VSC5640EV] and the https://www.microchip.com/en-us/development-tool/ev23x71a[Microchip EV23X71A] running https://www.microchip.com/en-us/software-library/vsc6817[Microchip IStaX] 2025.03 or later.
+Switch configs are provided for the https://www.microchip.com/en-us/development-tool/vsc5640ev[Microchip VSC5640EV] and the https://www.microchip.com/en-us/development-tool/ev23x71a[Microchip EV23X71A] running https://www.microchip.com/en-us/software-library/vsc6817[Microchip IStaX] 2024.12 or later.
 
 == Emulation Venue
 
