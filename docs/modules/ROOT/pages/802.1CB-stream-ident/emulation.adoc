@@ -29,8 +29,7 @@ image::802.1Qci/PSFP_tutorial/microchip_switch_config_screens.png[]
 image::802.1Qci/PSFP_tutorial/microchip_switch_stream_dialog.png[]
 
 == Detailed Steps, Stream Mapping
-=== Scenario 1
-Rule Order-Of-Execution
+=== Scenario 1 - Order-Of-Execution
 
 ==== Detailed Switch Configuration
 
@@ -57,8 +56,7 @@ image::802.1CB-stream-ident/emulation/1/switch_qos_stats.png[]
 .Keysight Stats
 image::802.1CB-stream-ident/emulation/1/keysight_stats.png[]
 
-=== Scenario 2
-Destination MAC matching
+=== Scenario 2 - Destination MAC matching
 
 ==== Detailed Switch Configuration
 
@@ -69,8 +67,6 @@ General scenario description should be sufficient.  Need to add the 4 specific d
 * For the most part, the general scenario description should be sufficient.
 * Need to have 4 destination MAC addresses on EP~3~.  To do this, you can add 4 additional Ethernet protocol stacks to that device group, and then set the MAC address of each.
 
-
-
 ==== Test Execution and Results
 
 Results match expected - the 2 traffic flows matching the DMAC, combined, are reduced to ~50 Kbps.  The other traffic flows are not affected.
@@ -78,8 +74,9 @@ Results match expected - the 2 traffic flows matching the DMAC, combined, are re
 .Keysight Stats
 image::802.1CB-stream-ident/emulation/2/keysight_stats.png[]
 
-=== Scenario 3
-Source MAC matching
+
+
+=== Scenario 3 - Source MAC matching
 
 ==== Detailed Switch Configuration
 
@@ -100,5 +97,111 @@ image::802.1CB-stream-ident/emulation/3/keysight_stats.png[]
 
 .Switch Stats
 image::802.1CB-stream-ident/emulation/3/switch_stats.png[]
+
+
+=== Scenario 4 - IP based matching
+
+==== Detailed Switch Configuration
+
+The only setup on the switch, on top of the base switch configuration, is to defined the streams & flow meters, and then stream filters that map them together.  2 screenshots below show examples of how to configure streams 1 & 2.  
+
+The remaining streams should be straight-forward to configure.  How to create the flow meters and stream filters are covered by the previous scenarios.  The table in the general scenario description should be sufficient, with the following basic steps
+
+* Create the 6 streams with matching based on the Source IP, Destination IP, and Destination Port columns from the general scenario description
+** To match any IP address, use the default prefix length = 0 (this is the number of most-significant bits of the address that must match)
+** To match a specific IP address, use prefix length = 32, meaning all bits must match
+** To match a subnet, use prefix length = 24, meaning the most significant 24 bits must match.  In other words if IP address is entered in the stream ID dialog as x.y.z.0, frames received by the switch with any IP address x.y.z.* will match to that stream
+** Don't forget to select the ports the frames will be received on.  In the example, I just always picked both ports 1 & 2 rather than the specific port it will be received on.
+* Create 6 flow meters with the CIR value specified in the general scenario description (suggest using numbering matching the stream ID it will map to)
+* Create 6 stream filters, mapping each stream to the associated flow meter
+
+.Stream ID 1 steps
+image::802.1CB-stream-ident/emulation/4/switch_streamid1.png[]
+
+.Stream ID 2 steps
+image::802.1CB-stream-ident/emulation/4/switch_streamid2.png[]
+
+
+==== Detailed Novus Configuration
+
+Start with a new session.  Time synchronization does not need to be configured for this to work.
+
+* Create the topology
+** Create the 3nd end points / topologies
+** EP~1~ and EP~2~ should each have 1 IPv4 protocol stack
+** EP~3~ should have 2 IPv4 protocol stacks
+* While optional, it can be very useful to rename each topology, device group, port, and protocol stack so the numbering all aligns with the standard topology and scenario description.
+** This is time consuming but well worth it when later creating traffic classes, and trying to debug issues!
+** Sometimes you have to temporarily rename something and then rename it again.  You cannot have for example 2 topologies with the same name, and one topology may already have the name you want.  For example, Keysight may name the device groups, "Device Group 1", "Device Group 2", and "Device Group 3".  But with the numbering not aligned to the EP~n~ numbering.  So you have to reverse the names "Device Group 2" and "Device Group 3".  So you may need to rename "Device Group 2" to "Device Group 100", then rename "Device Group 3" to "Device Group 2", then rename "Device Group 100" to "Device Group 3".
+** Not all items can be renamed through the GUI, some must be through the "API Browser"
+** The following screenshots show basic steps to be able to rename everything.
+** Note that when this scenario was constructed, something messed up the ports, and they had to be recreated.  It is possible renaming the ports did this.  In the final provided example, the ports were not renamed as a result.  Your mileage may vary.
+
+.Right-Click to Rename
+image::802.1CB-stream-ident/emulation/4/keysight_right_click_rename.png[]
+
+.Rename Topology
+image::802.1CB-stream-ident/emulation/4/keysight_rename_topology.png[]
+
+.Enter API Browser
+image::802.1CB-stream-ident/emulation/4/keysight_apibrowser.png[]
+
+.Navigate API Browser
+image::802.1CB-stream-ident/emulation/4/keysight_api_navigate.png[]
+
+.Rename within API Browser
+image::802.1CB-stream-ident/emulation/4/keysight_api_rename_item.png[]
+
+* In the end, make the topology match the following screen shot (with matching names being optional).  Notice how the numbering lines up between topology, device group, ethernet stack, and IPv4 stack.
+
+.Keysight Topology
+image::802.1CB-stream-ident/emulation/4/keysight_topology.png[]
+
+* Next, setup the IP addresses.  
+** Note that keysight will periodically warn that destination MACs are invalid or unreachable.  Currently there is no known way to eliminate these messages, but the scenario will work.
+** It is important to set each IP address to be on the same subnet, but a unique IP.  
+** The gateway must also be a unique IP on the same subnet
+** It is recommended the IP addresses match the rest of the numbering (e.g. IP1 in the general scenario description, use IP address x.y.z.1, IP2 use x.y.z.2, etc)
+** Uncheck resolve gateway for each entry
+** Update the protocol tab, to match the following screenshot
+
+.Protocol Configuration
+image::802.1CB-stream-ident/emulation/4/keysight_protocols.png[]
+
+* Next, define the traffic items
+** Create 10 IPv4 traffic items with the source and destination as specified in the general scenario description
+** Create 11th traffic item, raw ethernet, with the appropriate source and destination
+** If the traffic items are created in the order listed in the scenario, then one only need rename "Traffic Item" to "Traffic Item 0" to match the scenario numbering
+** Update the stats tracking column to show traffic item, source IP, and destination IP for each IPv4 row, and showing traffic item for the raw ethernet row.  As shown in a screenshot below, all rows can be updated at once to save time.
+
+.Traffic Items Stats Tracking
+image::802.1CB-stream-ident/emulation/4/keysight_stats_tracking.png[]
+
+** Double-click on the Stack column for each IPv4 traffic item, and configure it as UDP with the appropriate destination port, see screenshot below for an example
+
+.Configure Stack
+image::802.1CB-stream-ident/emulation/4/keysight_traffic_stack.png[]
+
+.UDP Port Settings
+image::802.1CB-stream-ident/emulation/4/keysight_udp_dest_port.png[]
+
+** Update the frame rate to match the scenario description
+** In the end, the traffic item tab should look like the screenshot below with the items matching the contents of the dashed red boxes.
+
+.UDP Port Settings
+image::802.1CB-stream-ident/emulation/4/keysight_traffic_final.png[]
+
+
+==== Test Execution and Results
+
+At this point the scenario can be executed (start the traffic on the Keysight)
+
+Results should match expected - the data rates of each traffic flow, added up by stream, match the flow meter settings.
+
+.Keysight Stats
+image::802.1CB-stream-ident/emulation/4/keysight_stats.png[]
+
+.Switch Stats
+image::802.1CB-stream-ident/emulation/4/switch_stream_filter_stats.png[]
 
 ----
