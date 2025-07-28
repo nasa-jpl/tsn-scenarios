@@ -126,12 +126,12 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 . Run the scenario.
 .. Verify in switch statistics that SDUs are matching to the expected streams
 .. Verify via destination bit-rate statistics, that the frames are matching and being filtered as expected
-... Traffic items 1, 2, 3, 4 should total 2000 Kbps
-... Traffic item 5 should be 5000 Kbps
-... Traffic item 6 should be 1000 Kbps
-... Traffic item 7, 8 should total 4000 Kbps
-... Traffic item 9, 10 should drop 100% of frames
-... Traffic item 11 should not be filtered and see 20,000 Kbps.
+... Traffic items 0, 1, 2, 3 should total 2000 Kbps
+... Traffic item 4 should be 5000 Kbps
+... Traffic item 5 should be 1000 Kbps
+... Traffic item 6, 7 should total 4000 Kbps
+... Traffic item 8, 9 should drop 100% of frames
+... Traffic item 10 should not be filtered and see 20,000 Kbps.
 .. Check switch resource availability vs the base switch config, to see what % of capabilities this is using.
 
 === Scenario 5 - Source Port
