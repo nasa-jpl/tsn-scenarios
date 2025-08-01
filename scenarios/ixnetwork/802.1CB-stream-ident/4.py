@@ -19,8 +19,6 @@ Supports IxNetwork API servers:
 Requirements:
    - Minimum IxNetwork 8.50
    - Python 2.7 and 3+
-   - pip install requests
-   - pip install ixnetwork_restpy (minimum version 1.0.51)
 
 RestPy Doc:
     https://www.openixia.github.io/ixnetwork_restpy/#/
