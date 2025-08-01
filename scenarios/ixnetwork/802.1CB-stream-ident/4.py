@@ -2,7 +2,8 @@
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [
-#   "ixnetwork-restpy >= 1.7.0"
+#   "ixnetwork-restpy >= 1.7.0",
+#   "python-dotenv >= 1.1.1"
 # ]
 # ///
 # 
@@ -10,7 +11,7 @@
 stream_id_scenario4_keysight.py:
 
    Configure Keysight for Stream Identification, Scenario 4 - IP matching
-   Usage of 'nga' user on Keysight, and ports 5,6,7 are hardcoded.  Port 5 = EP1, 6 = EP2, 7 = EP3
+   Usage of ports 5,6,7 are hardcoded.  Port 5 = EP1, 6 = EP2, 7 = EP3
 
 Supports IxNetwork API servers:
    - Windows, Windows Connection Mgr and Linux
@@ -25,6 +26,7 @@ RestPy Doc:
     https://www.openixia.github.io/ixnetwork_restpy/#/
 
 Usage:
+   - Create .env file containing the username and password for the keysight
    - chmod +x <script.py>
    - ./<script.py>
    
@@ -32,11 +34,15 @@ Usage:
 
 import sys, os, time, traceback
 
+from dotenv import load_dotenv
+
 from ixnetwork_restpy import *
 
 # Provide username and password to login to Keysight
-username = ''
-password = ''
+load_dotenv()
+
+username = os.getenv('username')
+password = os.getenv('password')
 
 # Provide a name for the keysight session
 scenarioName = 'stream_id-4-ip_matching'
