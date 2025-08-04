@@ -71,6 +71,9 @@ debugMode = True
 # Forcefully take port ownership if the portList are owned by other users.
 forceTakePortOwnership = True
 
+# How verbose do we want the output
+verbosity = SessionAssistant.LOGLEVEL_NONE
+
 try:
     def createPacketHeader(trafficItemObj, packetHeaderToAdd=None, appendToStack=None): 
         configElement = trafficItemObj.ConfigElement.find()
@@ -109,12 +112,14 @@ try:
     
     # LogLevel: none, info, warning, request, request_response, all
     # all can be useful for debugging issues but is very verbose
+    print("Starting Session...")
     session = SessionAssistant(IpAddress=apiServerIp, RestPort=None, UserName=username, Password=password, 
                                SessionName=scenarioName, SessionId=None, ApiKey=None,
-                               ClearConfig=True, LogLevel=SessionAssistant.LOGLEVEL_INFO, LogFilename=outLogFile)
+                               ClearConfig=True, LogLevel=verbosity, LogFilename=outLogFile)
 
     ixNetwork = session.Ixnetwork
    
+    print("Assigning Ports...",end="")
     ixNetwork.info('Assign ports')
     portMap = session.PortMapAssistant()
     vport = dict()
@@ -122,6 +127,7 @@ try:
         portName = 'Port_EP{}'.format(index+1)
         vport[portName] = portMap.Map(IpAddress=port[0], CardId=port[1], PortId=port[2], Name=portName)
 
+    print("Connecting Ports...")
     portMap.Connect(forceTakePortOwnership)
 
     # TODO: Figure out a better way to organize (end point class???) and consider if there is a better naming convention
@@ -134,6 +140,7 @@ try:
     # To send or receive data on a port on Keysight, you need a 'topology' which contains 1 or more 'device groups' 
     # which contains 1 or more 'protocol stacks'.  The protocol stacks for TSN scenarios always start with Ethernet.
     # If using raw ethernet (with or without VLANs), that is all that is needed.  If using IPv4, that is added on top of the Ethernet.
+    print("Creating Topology 1 of 3...",end="")
     ixNetwork.info('Creating Topology Group 1')
     ep1_topology = ixNetwork.Topology.add(Name='EP1', Ports=vport['Port_EP1'])
     ep1_dg1 = ep1_topology.DeviceGroup.add(Name='EP1.DG1', Multiplier='1')
@@ -160,6 +167,7 @@ try:
 
     # Setup EP3
     # For this scenario there are 2 separate stacks with separate IP addresses
+    print(f"\rCreating Topology 2 of 3...",end="")
 
     ixNetwork.info('Creating Topology Group 3')
     ep3_topology = ixNetwork.Topology.add(Name='EP3', Ports=vport['Port_EP3'])
@@ -186,6 +194,8 @@ try:
 
 
     # Setup EP2
+    print(f"\rCreating Topology 3 of 3...")
+
     ixNetwork.info('Creating Topology Group 2')
     ep2_topology = ixNetwork.Topology.add(Name='EP2', Ports=vport['Port_EP2'])
     ep2_dg1 = ep2_topology.DeviceGroup.add(Name='EP2.DG1', Multiplier='1')
@@ -202,15 +212,21 @@ try:
 
     # Configure UDP Traffic items.  Comments further down explain some of this.
     trafficTypeList = ['ipv4', 'ipv4', 'ipv4', 'ipv4', 'ipv4', 'ipv4', 'ipv4', 'ipv4', 'ipv4', 'ipv4', 'ethernetVlan']
+    
+    # Using ep1_topology just demonstrates how, if there is a single protocol stack, you can specify the entire topology,
+    # and the keysight will know to use the IPv4 stack as the source since we are generating IPv4 (UDP) packets.
+    # The last traffic item, we want raw ethernet frames.  
     sourceList = [ep1_topology, ip1, ip1, ip1, ip2, ip2, ip2, ip2, ip2, ip2, ep1_eth1]
     destList = [ip3, ip3, ip4, ip4, ip3, ip3, ip4, ip4, ip4, ip3, ep3_eth1]
     udpList = [True, True, True, True, True, True, True, True, True, True, False]
     destPort = [1000, 1100, 2000, 2200, 3000, 3300, 4000, 4400, 5000, 5000, 0]
     txRate = [10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000]
-    
+
     ixNetwork.info('Create Traffic Items')
     trafficItem = []
-    for i in range(len(sourceList)-1):
+    print("Creating Traffic Item 1 of",len(sourceList),"...",end="")
+    for i in range(len(sourceList)):
+        print(f"\rCreating Traffic Item",i+1,"of",len(sourceList),"...",end="")
         # Create a traffic item.  This scenario, all traffic is uni-directional.  
         # Need to specify the type so that the appropriate packet headers are applied.
         trafficItem.append(ixNetwork.Traffic.TrafficItem.add(Name='Traffic Item '+str(i), BiDirectional=False, TrafficType=trafficTypeList[i]))
@@ -247,42 +263,91 @@ try:
 
         # This generates the frames based on the previous configuration.
         trafficItem[i].Generate()
+    print()
 
-
-    # ixNetwork.Traffic.TrafficItem.Generate(trafficItem)
-    ixNetwork.Traffic.Apply()
+    # Not clear why the following steps don't work, but not all the traffic starts.
+    # ixNetwork.Traffic.Apply()
     # ixNetwork.StartAllProtocols(Arg1='sync')
-    time.sleep(1)
+    # ixNetwork.Traffic.Start()
 
-    # TODO: Something is not working.  When executing this, it only starts the non-IPv4 traffic item.  
-    # But I can get it to work from the GUI so it seems the end points and traffic items are all created correctly.
+    # This does work, and was discovered using firefox inspector, as what the Web UI is doing when the Green Test Start button is pressed.
+    # arg2 = True means to forcefully grab the ports
+    # Note that this is non-blocking, but any further operation that relies on the traffic will block until the traffic is started
+    
+    print("Starting traffic...")
+    ixNetwork.Globals.Testworkflow.Start(arg2=True)
+    
+    # Wait until traffic is running
+    print("Waiting for traffic to start",end="")
+    while(not ixNetwork.Traffic.IsTrafficRunning):
+        print(".",end="")
+        time.sleep(0.5)
+    print()
+    
+    # Wait additional time because if we grab traffic stats instantly, the switch won't have had an 
+    # opportunity to do the flow metering, and it can take a little while for the keysight stats 
+    # "moving average" to not reflect the startup transient
 
-    # ixNetwork.Traffic.StartStatelessTrafficBlocking()
-    ixNetwork.Traffic.Start()
-    time.sleep(1)
+    # TODO: Using this code snippet, sometimes the rates are settled by 2 seconds, usually 3, sometimes more
+    # Leaving this in for debugging purposes.
+    # One possibility is to make a scenario-specific check, like wait until some rate is within tolerance of
+    # the expected value, but that might just get stuck waiting if the switch or keysight are not configured correctly
+    # Another method could be to calculate the rate of change of every stats item of interest and wait until some convergence across the majority of them.
 
-    flowStatistics = session.StatViewAssistant('Flow Statistics')
+    print("Waiting for statistics to settle...")
+    for i in range(10):
+        statsView = ixNetwork.Statistics.View.find(Caption='Flow Statistics')
+        RxRates = statsView.GetColumnValues(Arg2='Rx Rate (Kbps)')
+        print(RxRates)
+        time.sleep(1)
 
-    # StatViewAssistant could also filter by REGEX, LESS_THAN, GREATER_THAN, EQUAL. 
-    # Examples:
-    #    flowStatistics.AddRowFilter('Port Name', flowStatistics.REGEX, '^Port 1$')
-    #    flowStatistics.AddRowFilter('Tx Frames', flowStatistics.GREATER_THAN, "5000")
+    # time.sleep(3)
 
-    ixNetwork.info('{}\n'.format(flowStatistics))
+    statsView = ixNetwork.Statistics.View.find(Caption='Flow Statistics')
+    # print(statsView)
 
-    for rowNumber,flowStat in enumerate(flowStatistics.Rows):
-        ixNetwork.info('\n\nSTATS: {}\n\n'.format(flowStat))
-        ixNetwork.info('\nRow:{}  TxPort:{}  RxPort:{}  TxFrames:{}  RxFrames:{}\n'.format(
-            rowNumber, flowStat['Tx Port'], flowStat['Rx Port'],
-            flowStat['Tx Frames'], flowStat['Rx Frames']))
+    # For this scenario, success/failure is based on the receive bit rate of each traffic
+    # item to see that the proper flow meters are applied by the switch.
+    RxRates = statsView.GetColumnValues(Arg2='Rx Rate (Kbps)')
+    # print("RxRates: ", RxRates)
 
-    time.sleep(1)
-    ixNetwork.Traffic.Stop()
-    time.sleep(1)
-    # ixNetwork.Traffic.StopStatelessTrafficBlocking()
-    # time.sleep(1)
-    # ixNetwork.StopAllProtocols(Arg1='sync')
-    # time.sleep(1)
+    streamName = ["1", "2", "3", "4", "5", "6", "N/A (unmetered)"]
+    streamTrafficMembers = [[5],[0,1,2,3],[],[6,7],[4],[8,9],[10]]
+    streamExpectedRxRate = [1000.0, 2000.0, 3000.0, 4000.0, 5000.0, 0.0, 20000.0]
+    streamRateUnits = ["Kbps", "Kbps", "Kbps", "Kbps", "Kbps", "Kbps", "Kbps"]
+
+    # A tolerance needs to be applied as the values won't be exact based on how the flow meter is applied.
+    # Currently, there seems to be some source of error we have not figured out, so the tolerance
+    # needs to be a bit higher than ideal.  For example, a flow restricted to 5000 Kbps we might see 5020 Kbps.
+    # The error seems to be more a constant than a ratio of the traffic, so a flow restricted to 100 Kbps might see 120 Kbps.
+    # For now, using a constant tolerance of 1% but that might not work for scenarios using lower flow meter rates.
+
+    longestName = len(max(streamName, key=len))
+
+    for i in range(len(streamName)):
+        rate = 0.0
+        expectedRxRate = float(streamExpectedRxRate[i])
+        tolerance = expectedRxRate * 0.01
+        
+        # Pad with spaces so all names are same length to make output look nice
+        name = streamName[i].ljust(longestName)
+        if (len(streamTrafficMembers[i]) == 0):
+            emptyStream = True
+        else:
+            emptyStream = False
+            for j in range(len(streamTrafficMembers[i])):
+                rate += float(RxRates[streamTrafficMembers[i][j]])
+        testResult = abs(rate-expectedRxRate)<=tolerance
+        if(emptyStream):
+            print("N/A : Stream",name,"- scenario does not match any traffic items to this stream")
+        else:
+            if(testResult):
+                print("PASS: ",end="")
+            else:
+                print("FAIL: ",end="")
+            print("Stream",name,"- expected rate:", expectedRxRate, streamRateUnits[i], "actual rate:", rate, streamRateUnits[i])
+
+    ixNetwork.Globals.Testworkflow.Stop()
 
     if debugMode == False:
         for vport in ixNetwork.Vport.find():
