@@ -285,11 +285,11 @@ Apply the following changes in the Mirroring screen to mirror traffic from port 
 ==== Detailed Remote Desktop Configuration for LeCroy Networ Analyzer
 
 * Used Windows powershell to connect to the LeCroy network analyzer:
-** Enter command â€œssh -NL 10001:hpscsierravm:3389 aalabâ€ 
+** Enter command 'ssh -NL 10001:hpscsierravm:3389 aalab'
 * Use remote desktop with the modified settings:
 ** Display =1280x800 and 15-bit color, Experience=56Kbps
-** Computer is â€œlocalhost:10001â€
-* When prompted, User is â€œuserâ€, Pass is â€œuserâ€
+** Computer is 'localhost:10001'
+* When prompted, User is 'user', Pass is 'user'
 * Documentation is at Teledyne LeCroy SierraNet M328 :: HPSC Lab
 * In the desktop of the analyzer:
 ** Open the Teledyne LeCroy Net Protocl Suite icon
