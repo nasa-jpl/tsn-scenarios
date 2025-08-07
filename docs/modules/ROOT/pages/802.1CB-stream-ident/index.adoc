@@ -109,20 +109,20 @@ Unless explicitly defined otherwise, for every scenario, every traffic item prod
 +
 .IP Based Matching Traffic Items
 |===  
-|Traffic Item |Source IP |Destination IP |Destination Port |TX Rate |Expected Stream| RX Rate
-|0 |IP1 |IP3 |1000 |10000 Kbps | 2 | ~500 Kbps
-|1 |IP1 |IP3 |1100 |11000 Kbps | 2 | ~500 Kbps
-|2 |IP1 |IP4 |2000 |12000 Kbps | 2 | ~500 Kbps
-|3 |IP1 |IP4 |2200 |13000 Kbps | 2 | ~500 Kbps
-|4 |IP2 |IP3 |3000 |14000 Kbps | 5 | 5000 Kbps
-|5 |IP2 |IP3 |3300 |15000 Kbps | 1 | 1000 Kbps
-|6 |IP2 |IP4 |4000 |16000 Kbps | 4 | ~2000 Kbps
-|7 |IP2 |IP4 |4400 |17000 Kbps | 4 | ~2000 Kbps
-|8 |IP2 |IP4 |5000 |18000 Kbps | 6 | 0 Kbps
-|9 |IP2 |IP3 |5000 |19000 Kbps | 6 | 0 Kbps
+|Traffic Item |Source IP |Destination IP |Protocol |Destination Port |TX Rate |Expected Stream| RX Rate
+|0 |IP1 |IP3 |UDP |1000 |10000 Kbps | 2 | ~500 Kbps
+|1 |IP1 |IP3 |UDP |1100 |11000 Kbps | 2 | ~500 Kbps
+|2 |IP1 |IP4 |UDP |2000 |12000 Kbps | 2 | ~500 Kbps
+|3 |IP1 |IP4 |UDP |2200 |13000 Kbps | 2 | ~500 Kbps
+|4 |IP2 |IP3 |UDP |3000 |14000 Kbps | 5 | 5000 Kbps
+|5 |IP2 |IP3 |UDP |3300 |15000 Kbps | 1 | 1000 Kbps
+|6 |IP2 |IP4 |UDP |4000 |16000 Kbps | 4 | ~2000 Kbps
+|7 |IP2 |IP4 |UDP |4400 |17000 Kbps | 4 | ~2000 Kbps
+|8 |IP2 |IP4 |UDP |5000 |18000 Kbps | 6 | 0 Kbps
+|9 |IP2 |IP3 |UDP |5000 |19000 Kbps | 6 | 0 Kbps
+|10 |EP1 Eth |EP3 Eth3 |Ethernet |N/A |20000 Kbps | None | 20000 Kbps
 |===
 +
-. Create an 11th traffic item (item 10), which is raw ethernet (not IPv4) with a rate of 20,000 Kbps.
 . Run the scenario.
 .. Verify in switch statistics that SDUs are matching to the expected streams
 .. Verify via destination bit-rate statistics, that the frames are matching and being filtered as expected
