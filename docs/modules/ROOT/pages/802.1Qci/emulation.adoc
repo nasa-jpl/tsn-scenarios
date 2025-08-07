@@ -97,6 +97,226 @@ To see a more drastic effect, reduce the inter burst gap to <5 seconds.
 
 == Detailed Steps, Stream Gating
 
+=== Scenario 1 - Basic Gating
+
+==== Detailed Switch Configuration
+
+Configure two streams with Stream ID 1 and Stream ID 2. Within the configuration window for each stream, set the following settings:
+
+* Set SMAC type to `MAC/Mask`.
+* Input the MAC to be the source MAC of the ethernet transmitter on the keysight. The SMAC can be found by clicking on the "Ethernet" protocol box within the Topology in the Keysight, then referencing the "MAC" box in the bottom window.
+* DMAC type should remain as `Any`
+* For Stream ID 1, select port 1 (assuming that port 1 of the Keysight is connected to port 1 of the switch).
+* For Stream ID 2, select port 2 (assuming that port 2 of the Keysight is connected to port 2 of the switch).
+* Default remaining settings
+
+Create a Stream Gate with ID 1 and a Stream Gate ID2. Within the configuration window for each stream gate, set the following settings:
+
+* Enable box is checked
+* Cycle Time = 1 ms
+* GCL Length = 3
+* Gate States = Closed, Open, Closed
+* For Stream Gate 1, Time Interval Values = 250, 25, 725
+* For Stream Gate 2, Time Interval Values = 500, 25, 475
+* Time Interval Unit = us (for all three time interval values)
+* Default remaining settings and click Save
+* Check Config Change and click Save to activate GCL operation
+
+Configure two stream filters with Stream Filter ID 1 and Stream Filter ID 2. Within the configuration window for each stream filter, set the following settings:
+
+* For Stream Filter 1, set Stream ID to 1
+* For Stream Filter 2, set Stream ID to 2
+* Check Stream Gate Enable box
+* For Stream Filter 1, set Stream Gate ID to 1
+* For Stream Filter 2, set Stream Gate ID to 2
+* Set Maximum SDU Size to 1536
+* Note that LED at right should be green
+
+==== Detailed Novus Configuration
+
+Create two standard traffic items using gPTP (one timing master, one slave) with Ethernet stack, no VLAN tags for the sources, with both traffic items routed to the same receiver (gPTP slave, Ethernet).
+
+For the traffic items, enable the following settings:
+
+* Under Frame Rate, set to 1000 fps.
+* Under Flow Transmission, for both streams, keep the continuous mode.
+** Set the start time to 1us for both traffic items.
+** Leave other entriws in the default setting.
+* The frame size is Fixed: 64 (Bytes)
+
+This set up enables 1,000 fps traffic for both Stream 1 and Stream 2.
+
+==== Running the Scenario & Expected Results
+
+===== Test 1
+
+Generate, Apply, and Run the Novus configuration.  Either in the switch Port Statistics Overview, or in the Keysight flow statistics, view the Tx and Rx byte counts.
+
+Expected to see all packets being passed for both streams but with delays of 249us for stream 1 and 499us for stream2. No packets were passed for either traffic stream. It was found that a stream gate passes packets in the respective stream only when the packets arrive during the open interval of the gate.
+
+Changed the traffic timing so Stream 1 packets are delayed by 255us and Stream 2 packets by 505us. Now all packets are passed but with nominally 2us latency. Additionally defined TAS for the receive port (port 4 for the Keysight and switch) to generate 245us and 505us latencies for stream 1 and 2 respectively.
+
+
+=== Scenario 2 - Invalid Rx
+
+==== Detailed Switch Configuration
+
+Disable the TAS configuration for port 4. Turn on the RxInvalid flag and activate the updated configuration for both stream gates as per the following steps:
+
+* Check the RxInvalid box and click the Save button
+* Check the "Config Change" box and click the Save button
+
+===== Test 1
+
+Clear the switch Port Statistics Overview and run the Novus without any modifications. Either in the switch Port Statistics Overview, or in the Keysight flow statistics, view the Tx and Rx byte counts to confirm that both traffics streams are passed by their stream gates.
+
+==== Detailed Novus Configuration
+
+Chenge the delay in the Stream 2 timing from 505us delay to 5us to align pakets with a closed gate interval for Stream Gate 2.
+
+===== Test 2
+
+Clear the switch Port Statistics Overview and run the Novus. Either in the switch Port Statistics Overview, or in the Keysight flow statistics, view the Tx and Rx byte counts to confirm that Stream 1 packets are being passed but Stream 2 packets are blocked.
+
+==== Detailed Novus Configuration
+
+Chenge the delay in the Stream 2 timing from 5us delay to 505us to align pakets with the open gate interval of Stream Gate 2.
+
+===== Test 3
+
+Clear the switch Port Statistics Overview and run the Novus. Either in the switch Port Statistics Overview, or in the Keysight flow statistics, view the Tx and Rx byte counts to confirm that Stream 1 packets are being passed but Stream 2 packets are still blocked.
+
+==== Detailed Switch Configuration
+
+Clear the Invalid Rx flag for Stream gate 2 in the TSN>PSFP>Stream Gate Status screen.
+
+===== Test 4
+
+Clear the switch Port Statistics Overview and run the Novus. Either in the switch Port Statistics Overview, or in the Keysight flow statistics, view the Tx and Rx byte counts to confirm that both traffic streams are being passed by their stream gates.
+
+Note: It was found that the RxInvalid flag does not clear reliably if packets arrive at the stream gate less than 2us after the start of the open gate interval. Vendor testing has confirmed this is a bug and is looking into a fix.
+
+
+=== Scenario 3 - Octets Exceeded
+
+==== Detailed Switch Configuration
+
+For Stream Gate 2, turn off the RxInvalid flag, set the Octet Max value to 511 and activate the updated configuration for the stream gate as per the following steps:
+
+* Uncheck the RxInvalid box
+* Enter 511 in the Octet Max box for each GCL index
+* Click the Save button
+* Check the "Config Change" box and click the Save button
+
+==== Detailed Novus Configuration
+
+Modify traffic item 2 (Stream 2 traffic) to have random packet sizes from 64 to 600 bytes. 
+
+===== Test 1
+
+Clear the switch Detailed Port Statistics and run the Novus as modified. Either in the switch Detailed Port Statistics, or in the Keysight flow statistics, view the Tx and Rx byte counts to confirm that all packets for Stream 1 are being passed but not all packets for Stream 2 traffic are passed. In the switch Detailed Port Statistics for the receiver (switch port 4), confirm that only packets of 64-511 bytes are passed and all packets from 512-600 bytes are blocked.
+
+==== Detailed Switch Configuration
+
+For Stream Gate 2 modify the switch configurations as follow:
+
+* Turn on the Octets Exceeded flag and click the Save button
+* Check the "Config Change" box and click the Save button
+
+===== Test 2
+
+Clear the switch PSFP Stream FIlter Statistics and run the Novus. Either in the switch PSFP Stream FIlter Statistics, or in the Keysight flow statistics, view the Tx and Rx byte counts to confirm that all packets for Stream 1 are being passed but only a few packets for Stream 2 traffic are passed.
+
+==== Detailed Novus Configuration
+
+Modify traffic item 2 (Stream 2 traffic) to have a fixed packet size of 64 bytes. 
+
+===== Test 3
+
+Clear the switch PSFP Stream FIlter Statistics and run the Novus. Either in the switch PSFP Stream FIlter Statistics, or in the Keysight flow statistics, view the Tx and Rx byte counts to confirm that no packets for Stream 2 traffic are being passed. 
+
+==== Detailed Switch Configuration
+
+Clear the Octets Exceeded flag for Stream Gate 2.
+
+===== Test 4
+
+Clear the switch PSFP Stream FIlter Statistics and run the Novus. Either in the switch PSFP Stream FIlter Statistics, or in the Keysight flow statistics, view the Tx and Rx byte counts to confirm that all packets for Stream 2 traffic are being passed.
+
+
+=== Scenario 4 - Re-prioritization
+
+==== Detailed Switch Configuration
+
+Apply the following changes:
+
+* Change the SMAC filter Any for the Stream 1 definition
+* Change the Stream Gate 1 GCL to 4
+* Set all four gate states to Open
+* Set the IPV entries to 4,5,6,7 for successive GCL indices
+* Set the interval time for all GCL indices to 250us
+* Click the Save button
+* Check the "Config Change" box and click the Save button
+
+==== Detailed Novus Configuration
+
+Add additional traffic items as follows:
+
+* Add three Endpoint sets to traffic item 1 (i.e. Stream 1)
+* Stagger the delay in the original traffic item and the newly added endpoints with delays of 5us, 255us, 505us, and 755us
+* Do not include a VLAN priority for these four traffic items
+* Delete traffic item 2 (i.e. Stream 2)
+
+===== Test 1
+
+Clear the switch Detailed Port Statistics and run the Novus. Looking at the Keysight flow statistics and switch Detailed Port Statistics, verify that all packet traffic for Stream 1 is passed in the flow statistics and that all packets for Stream 1 are input to switch port 1 (transmitter for Stream 1) at Q0 from the Detailed Port Statistics. Then check switch port 4 statistics to verify that Q4-Q7 are the queues used to send to port 4 of the Keysight (i.e. receiver). Also, the packet latencies in the Keysight flow statistics were 2-3us.
+
+==== Detailed Switch Configuration
+
+Apply the following changes in the Mirroring screen to mirror traffic from port 1 to port 6:
+
+* Set the Session ID to 1
+* Mode is set to Enabled
+* Type is set to Mirror
+* Under the Source column set Ports 1 and 8 to Both, port 6 is Disabled
+* Check the Destination box for port 6
+* Click the Save button
+
+==== Detailed Remote Desktop Configuration for LeCroy Networ Analyzer
+
+* Used Windows powershell to connect to the LeCroy network analyzer:
+** Enter command 'ssh -NL 10001:hpscsierravm:3389 aalab'
+* Use remote desktop with the modified settings:
+** Display =1280x800 and 15-bit color, Experience=56Kbps
+** Computer is 'localhost:10001'
+* When prompted, User is 'user', Pass is 'user'
+* Documentation is at Teledyne LeCroy SierraNet M328 :: HPSC Lab
+* In the desktop of the analyzer:
+** Open the Teledyne LeCroy Net Protocl Suite icon
+** Run it in a manual record mode to capture incoming packets (switch port 6 as per the switch configuration above)
+
+===== Test 2
+
+Clear the switch Detailed Port Statistics, set the LeCroy in record mode and run the Novus. The LeCroy recorded packets coming out of switch port 6 and displays the chronological list of packets when the recorder hits the limit of it's capacity.
+
+In the LeCroy UI, the first several hundred packets are PTP frames (listed as PTP in the Frame column) while time synchronization is ongoing. Ethernet frames/packets (listed as Any in the Frame column) are then seen with occassional PTP frames to maintain time sync. 
+
+In selecting an ethernet packet in the LeCroy UI and looking at the User Prioty value, it is 0, which is the priority value as set in the Keysight configuration. The detailed traffic statistics for switch port 1 show that all four traffic items were received at Q0 as would be expected for a user priority of 0. However, the detailed statistics for switch port 6 (which is the port the LeCroy is monitoring) show that the four traffic items are received in queues Q4-Q7 as per the Stream Gate 1 IPVs of 4-7. Consequently Stream Gate 1 temporarily reprioritiezed the packets to route through the switch.
+
+==== Detailed Novus Configuration
+
+Change the traffic items from priority 0 to priority 1 for the first two items and priority 2 for the second two items.
+
+===== Test 3
+
+Run the same test as Test 1. From the switch port 1 detailed statistcs, it was verified that now the packets incoming to switch port 0 are equally split between Q1 and Q2 (as opposed to Q0 in Test 1). This difference is due to assigning priorites 1 for two traffic items and 2 for the other two. Other than the input queues, Test 3 matches the results of Test 1.
+
+===== Test 4
+
+Additonally run the LeCroy network analyzer with the Test 3 configuration to check the packet priorities as in Test 2. This time, the packet priorities from the captured packets had a repeating pattern of 1,1,2,2 but were still output to Q4-Q7 at port six. So again the user priorities were preserved but the switch repriotized based on the Stream Gate 1 IPVs as in Test 2.
+
+
+
 == Detailed Steps, Stream Filtering
 
 ----
