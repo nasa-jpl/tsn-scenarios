@@ -1,77 +1,110 @@
 traffic_items:
   - name: "Traffic1"
-    src: ep1
-    dest: ep3.eth2.ip
+    type: "ipv4"
+    src:
+      - "ep1"
+    dst:
+      - "ep3.eth2.ip"
     upd: True
     dst_port: 1000
     tx_rate: 10000
 
   - name: "Traffic2"
-    src: ep1.eth1.ip
-    dest: ep3.eth2.ip
+    type: "ipv4"
+    src:
+      - "ep1.eth1.ip"
+    dst:
+      - "ep3.eth2.ip"
     upd: True
     dst_port: 1100
     tx_rate: 11000
 
   - name: "Traffic3"
-    src: ep1.eth1.ip
-    dest: ep2.eth1.ip
+    type: "ipv4"
+    src:
+      - "ep1.eth1.ip"
+    dst:
+      - "ep2.eth1.ip"
     upd: True
     dst_port: 2000
     tx_rate: 12000
 
   - name: "Traffic4"
-    src: ep1.eth1.ip
-    dest: ep2.eth1.ip
+    type: "ipv4"
+    src:
+      - "ep1.eth1.ip"
+    dst:
+      - "ep2.eth1.ip"
     upd: True
     dst_port: 2200
     tx_rate: 13000
 
   - name: "Traffic5"
-    src: ep2.eth1.ip
-    dest: ep3.eth2.ip
+    type: "ipv4"
+    src:
+      - "ep2.eth1.ip"
+    dst:
+      - "ep3.eth2.ip"
     upd: True
     dst_port: 3000
     tx_rate: 14000
 
   - name: "Traffic6"
-    src: ep2.eth1.ip
-    dest: ep3.eth2.ip
+    type: "ipv4"
+    src:
+      - "ep2.eth1.ip"
+    dst:
+      - "ep3.eth2.ip"
     upd: True
     dst_port: 3300
     tx_rate: 15000
 
   - name: "Traffic7"
-    src: ep2.eth1.ip
-    dest: ep2.eth1.ip
+    type: "ipv4"
+    src:
+      - "ep2.eth1.ip"
+    dst:
+      - "ep2.eth1.ip"
     upd: True
     dst_port: 4000
     tx_rate: 16000
 
   - name: "Traffic8"
-    src: ep2.eth1.ip
-    dest: ep2.eth1.ip
+    type: "ipv4"
+    src:
+      - "ep2.eth1.ip"
+    dst:
+      - "ep2.eth1.ip"
     upd: True
     dst_port: 4400
     tx_rate: 17000
 
   - name: "Traffic9"
-    src: ep2.eth1.ip
-    dest: ep2.eth1.ip
+    type: "ipv4"
+    src:
+      - "ep2.eth1.ip"
+    dst:
+      - "ep2.eth1.ip"
     upd: True
     dst_port: 5000
     tx_rate: 18000
 
   - name: "Traffic10"
-    src: ep2.eth1.ip
-    dest: ep3.eth2.ip
+    type: "ipv4"
+    src:
+      - "ep2.eth1.ip"
+    dst:
+      - "ep3.eth2.ip"
     upd: True
     dst_port: 5000
     tx_rate: 19000
 
   - name: "Traffic11"
-    src: ep1.eth1
-    dest: ep3.eth1
+    type: "ethernetVlan"
+    src:
+      - "ep1.eth1"
+    dst:
+      - "ep3.eth1"
     upd: False
     dst_port: 0
     tx_rate: 20000
