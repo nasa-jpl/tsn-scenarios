@@ -1,0 +1,34 @@
+endpoints:
+  ep1:
+    ix_port: 5
+    device_groups:
+      eth1:
+        mac: '00:11:01:00:00:01'
+        ip: '100.1.0.1'
+        ipv4: True
+        gateway_prefix: 24
+        resolve_gateway: False
+  ep3:
+    ix_port: 7
+    device_groups:
+      eth1:
+        mac: '00:11:01:00:00:03'
+        ip: '100.1.0.3'
+        ipv4: True
+        gateway_prefix: 24
+        resolve_gateway: False
+      eth2:
+        mac: '00:11:01:00:00:04'
+        ip: '100.1.0.4'
+        ipv4: True
+        gateway_prefix: 24
+        resolve_gateway: False
+  ep2:
+    ix_port: 6
+    device_groups:
+      eth1:
+        mac: '00:11:01:00:00:02'
+        ip: '100.1.0.2'
+        ipv4: True
+        gateway_prefix: 24
+        resolve_gateway: False
