@@ -242,7 +242,7 @@ def command_download(opts):
 
 
 def render_config(opts, config):
-    template = Template(config.read())
+    template = Template(config.read(), trim_blocks=True)
     parts = {
         "VSC5640EV": {
             "ports": [
