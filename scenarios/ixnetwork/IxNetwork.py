@@ -76,7 +76,7 @@ class IxNetwork:
                               trafficItemObj,
                               packetHeaderToAdd=None,
                               appendToStack=None):
-        '''This function is used to create packet headers that can then be manipulated by the caller'''
+        """This function is used to create packet headers that can then be manipulated by the caller"""
 
         configElement = trafficItemObj.ConfigElement.find()
 
@@ -119,8 +119,8 @@ class IxNetwork:
         return packetHeaderFieldObj
 
     def _validate_traffic_endpoint(self, traffic_endpoint):
-        '''Takes in an endpoint of the form <EP>.<DG>.<protocol_stack>
-        and makes sure that the corresponding endpoint is in the topology'''
+        """Takes in an endpoint of the form <EP>.<DG>.<protocol_stack>
+        and makes sure that the corresponding endpoint is in the topology"""
         keys = traffic_endpoint.split(".")
 
         # Check endpoint name and device_group
@@ -138,7 +138,7 @@ class IxNetwork:
             eps = eps["key"]
 
     def _validate_configs(self):
-        '''Takes in the endpoints and traffic_items read from the yaml files and validates them'''
+        """Takes in the endpoints and traffic_items read from the yaml files and validates them"""
 
         # Make sure each src and dst lists match in size, and have a corresponding endpoint
         for traffic_item in self._traffic_items.items():
@@ -160,14 +160,14 @@ class IxNetwork:
             for traffic_endpoint in traffic_item["dst"]:
                 self._validate_traffic_endpoint(traffic_endpoint)
 
-    def setup_session(self,
-                      topology_file,
-                      traffic_file,
-                      log_file,
-                      debug_mode=False,
-                      force_take_port_ownership=True,
-                      verbosity=SessionAssistant.LOGLEVEL_NONE):
-        '''Creates a session with ixnetwork_restpy'''
+    def create_session(self,
+                       topology_file,
+                       traffic_file,
+                       log_file,
+                       debug_mode=False,
+                       force_take_port_ownership=True,
+                       verbosity=SessionAssistant.LOGLEVEL_NONE):
+        """Creates a session with ixnetwork_restpy"""
         # Forcefully take port ownership if the portList are owned by other users.
         self._force_take_port_ownership = True
 
