@@ -4,6 +4,7 @@
 # requires-python = ">=3.11"
 # dependencies = [
 #   "argcomplete>=3.5.3",
+#   "python-dotenv>=1.1.1",
 #   "requests[socks]>=2.32.4",
 #   "jinja2>=3.1.6"
 # ]
@@ -12,6 +13,7 @@
 import argparse
 import fileinput
 from io import StringIO
+import os
 import sys
 from http.cookiejar import CookieJar
 import requests
@@ -19,9 +21,12 @@ import time
 from typing import TextIO
 
 import argcomplete
+import dotenv
 from jinja2 import Template
 
 VERSION = "0.2.0"
+
+ENVAR_PROXY = "ISTAXCFG_PROXY"
 
 
 class ApplicationError(Exception):
@@ -52,6 +57,7 @@ def parse_opts():
         "--proxy",
         "-x",
         metavar="[HOST:]PORT",
+        default=os.environ.get(ENVAR_PROXY),
         help="proxy requests through a SOCKS5 proxy. HOST part defaults to localhost.",
     )
 
@@ -74,7 +80,9 @@ def parse_opts():
         help="download the running configuration",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    download.add_argument("--output", "-o", help="output file").completer = (  # ty: ignore[unresolved-attribute] on completer
+    download.add_argument(
+        "--output", "-o", help="output file"
+    ).completer = (  # ty: ignore[unresolved-attribute] on completer
         argcomplete.FilesCompleter
     )
     download.add_argument(
@@ -234,7 +242,7 @@ def command_download(opts):
 
 
 def render_config(opts, config):
-    template = Template(config.read())
+    template = Template(config.read(), trim_blocks=True)
     parts = {
         "VSC5640EV": {
             "ports": [
@@ -321,6 +329,7 @@ def command_upload(opts):
 
 
 def main():
+    dotenv.load_dotenv()
     opts = parse_opts()
     match opts.command:
         case "activate":
