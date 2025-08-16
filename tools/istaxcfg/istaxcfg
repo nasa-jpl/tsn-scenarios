@@ -22,7 +22,7 @@ from typing import TextIO
 
 import argcomplete
 import dotenv
-from jinja2 import Template
+import jinja2
 
 VERSION = "0.2.0"
 
@@ -242,7 +242,12 @@ def command_download(opts):
 
 
 def render_config(opts, config):
-    template = Template(config.read(), trim_blocks=True)
+    search_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "scenarios", "istax")
+    )
+    loader = jinja2.FileSystemLoader(search_path)
+    environment = jinja2.Environment(loader=loader, trim_blocks=True)
+    template = environment.from_string(config.read())
     parts = {
         "VSC5640EV": {
             "ports": [
