@@ -1,0 +1,69 @@
+= 802.1CB - Frame Replication and Elimination for Reliability configuration
+
+This document provides specific instructions for implementing the Frame Replication and Elimination scenarios with the Keysight Novus One Plus network emulator acting as the end-points, and the Microchip VSC5640EV switch hardware running iStax software.
+
+image::802.1CB-frame-rep/emulation/FRER.png[]
+
+We are going to be configuring Splitting The Problem, Figure 4 - Scenario for testing sequence generation in network DUT. This deals with sequence generation and sequence recovery. In the adoc, it refers to this scenario and an R-TAG. We will be implementing an R-TAG in this scenario.
+
+== Detailed Steps
+
+Step 1. First, we need to add a protocol. You may see an 802.1CB sample for Frame Replication and Elimination, but you can ignore it. We are going to start from scratch.
+
+image::802.1CB-frame-rep/emulation/step1.png[]
+
+Step 2. Now, we are going to create the topology. We need three topologies - 001 will act as our talker, 002 and 003 will act as our listeners. Choose port 5 for the talker, and create new topology.
+
+image::802.1CB-frame-rep/emulation/step2.png[]
+
+Step 3. Click add, select Ethernet, and select port 6. Repeat this step, and then select port 7. Once these topologies are created, we have our listeners.
+
+image::802.1CB-frame-rep/emulation/step3.png[]
+
+Step 4. Go to protocols and make sure the MAC addresses are what you see below for all of the topologies.
+
+image::802.1CB-frame-rep/emulation/step4.png[]
+
+Step 5. Now, we are going to add Quick Flow Groups. Go to traffic, click Add Quick Flow Group, select Ethernet - 001, and click New Quick Flow.
+
+image::802.1CB-frame-rep/emulation/step5.png[]
+
+Step 6. We are now going to add Egress Only Tracking. Click Add and click Add Egress Only Tracking.
+
+image::802.1CB-frame-rep/emulation/step6.png[]
+
+Step 7. Select Ethernet - 002, and click New Egress Only Tracking. Now, repeat this step and create one for Ethernet - 003.
+
+image::802.1CB-frame-rep/emulation/step7.png[]
+
+Step 8. Go to Egress Only Tracking and make sure that all of the information below matches your own.
+
+image::802.1CB-frame-rep/emulation/step8.png[]
+
+Step 9. Now, we are going to enable tracking. Go to traffic, traffic items, click on the Statistics Tracking, and enable Tracking per Quick Flow Group.
+
+image::802.1CB-frame-rep/emulation/step9.png[]
+
+Step 10. While on this page, go to the Ethernet II stack and make sure for Destination MAC Address and Source MAC Address match what you see below.
+
+image::802.1CB-frame-rep/emulation/step10.png[]
+
+Step 11. Let's go over to the Switch. Check to see if the VLAN membership status matches what you see below.
+
+image::802.1CB-frame-rep/emulation/step11.png[]
+
+Step 12. On the MAC Address table, make sure that we are starting from VLAN 2.
+
+image::802.1CB-frame-rep/emulation/step12.png[]
+
+Step 13. Now, let's edit the packets. Go to traffic, click on the Ethernet II stack, click the plus / add and select custom.
+
+image::802.1CB-frame-rep/emulation/step13.png[]
+
+Step 14. Repeat Step 13 until you have two customs. It's noted to make sure that when you add the second custom, do it from the plus / add of the first custom. Make sure everything matches what you see below.
+
+image::802.1CB-frame-rep/emulation/step14.png[]
+
+Step 15. Let's go over to the Switch configuration. Go to the MAC Table and Add New Static Entry. Make sure the VLAN ID is 2, and we are on port members 2 and 3. Save this.
+
+image::802.1CB-frame-rep/emulation/step15.png[]
