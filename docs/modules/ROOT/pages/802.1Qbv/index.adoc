@@ -97,6 +97,3 @@ Some of the terminology specific to this scenario, in the table below, is define
 For each scenario, frame drop and latency statistics per traffic item are reported.
 
 For each scenario, the general approach is to model it in Pegase, implement it in each hardware venue, export the results back to Pegase, and compare the actual vs model.
-
-
-----

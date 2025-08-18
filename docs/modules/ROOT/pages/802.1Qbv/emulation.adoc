@@ -132,5 +132,3 @@ Same as <<Scenario 5>>.
 
 ==== Detailed Novus Configuration
 Same as <<Scenario 4>>.
-
-----

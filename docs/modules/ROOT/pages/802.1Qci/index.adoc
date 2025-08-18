@@ -130,8 +130,3 @@ These functions were deemed not important at this time, and there are currently 
 * Create flow meter same as scenario 2a
 * Create duplicate set of traffic items on port 1 and port 2 (each the same as in flow meter scenario 1)
 * Run the first test (burst every 10 seconds) from flow meter scenario 1, and should see traffic dropped.
-
-
-
-
-----

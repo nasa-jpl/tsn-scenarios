@@ -318,5 +318,3 @@ Additonally run the LeCroy network analyzer with the Test 3 configuration to che
 
 
 == Detailed Steps, Stream Filtering
-
-----

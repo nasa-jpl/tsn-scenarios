@@ -203,5 +203,3 @@ image::802.1CB-stream-ident/emulation/4/keysight_stats.png[]
 
 .Switch Stats
 image::802.1CB-stream-ident/emulation/4/switch_stream_filter_stats.png[]
-
-----

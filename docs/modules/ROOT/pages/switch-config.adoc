@@ -82,6 +82,3 @@ image::switch-config/tsn_switch_web_security_setting.png[]
 
 .Enable Port Classification
 image::switch-config/enable_port_classification.png[]
-
-
-----
