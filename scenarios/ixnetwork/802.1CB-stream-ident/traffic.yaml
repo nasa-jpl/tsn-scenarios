@@ -4,8 +4,8 @@ traffic_items:
     src:
       - "ep1"
     dst:
-      - "ep3.eth2.ip"
-    upd: True
+      - "ep3.eth1.ip"
+    udp: True
     dst_port: 1000
     tx_rate: 10000
 
@@ -14,8 +14,8 @@ traffic_items:
     src:
       - "ep1.eth1.ip"
     dst:
-      - "ep3.eth2.ip"
-    upd: True
+      - "ep3.eth1.ip"
+    udp: True
     dst_port: 1100
     tx_rate: 11000
 
@@ -24,8 +24,8 @@ traffic_items:
     src:
       - "ep1.eth1.ip"
     dst:
-      - "ep2.eth1.ip"
-    upd: True
+      - "ep3.eth2.ip"
+    udp: True
     dst_port: 2000
     tx_rate: 12000
 
@@ -34,8 +34,8 @@ traffic_items:
     src:
       - "ep1.eth1.ip"
     dst:
-      - "ep2.eth1.ip"
-    upd: True
+      - "ep3.eth2.ip"
+    udp: True
     dst_port: 2200
     tx_rate: 13000
 
@@ -44,8 +44,8 @@ traffic_items:
     src:
       - "ep2.eth1.ip"
     dst:
-      - "ep3.eth2.ip"
-    upd: True
+      - "ep3.eth1.ip"
+    udp: True
     dst_port: 3000
     tx_rate: 14000
 
@@ -54,8 +54,8 @@ traffic_items:
     src:
       - "ep2.eth1.ip"
     dst:
-      - "ep3.eth2.ip"
-    upd: True
+      - "ep3.eth1.ip"
+    udp: True
     dst_port: 3300
     tx_rate: 15000
 
@@ -64,8 +64,8 @@ traffic_items:
     src:
       - "ep2.eth1.ip"
     dst:
-      - "ep2.eth1.ip"
-    upd: True
+      - "ep3.eth2.ip"
+    udp: True
     dst_port: 4000
     tx_rate: 16000
 
@@ -74,8 +74,8 @@ traffic_items:
     src:
       - "ep2.eth1.ip"
     dst:
-      - "ep2.eth1.ip"
-    upd: True
+      - "ep3.eth2.ip"
+    udp: True
     dst_port: 4400
     tx_rate: 17000
 
@@ -84,8 +84,8 @@ traffic_items:
     src:
       - "ep2.eth1.ip"
     dst:
-      - "ep2.eth1.ip"
-    upd: True
+      - "ep3.eth2.ip"
+    udp: True
     dst_port: 5000
     tx_rate: 18000
 
@@ -94,8 +94,8 @@ traffic_items:
     src:
       - "ep2.eth1.ip"
     dst:
-      - "ep3.eth2.ip"
-    upd: True
+      - "ep3.eth1.ip"
+    udp: True
     dst_port: 5000
     tx_rate: 19000
 
@@ -105,6 +105,6 @@ traffic_items:
       - "ep1.eth1"
     dst:
       - "ep3.eth1"
-    upd: False
+    udp: False
     dst_port: 0
     tx_rate: 20000
