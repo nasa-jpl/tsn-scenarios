@@ -12,32 +12,15 @@
 
 from ixnetwork.IxNetwork import IxNetwork
 import argparse
+from dotenv import load_dotenv
 
 
-def create_session(args):
-    """Entry function to create a session"""
-    ix_session = IxNetwork(args.api_server_ip, args.chassis_ip,
-                           args.chassis_slot_number, args.session_name)
-
-    ix_session.create_session(args.topology, args.traffic, args.log,
-                              args.dry_run, args.force_port_ownership,
-                              args.verbosity)
-
-
-def run_session(args):
-    """Entry function to create a session"""
-    ix_session = IxNetwork(args.api_server_ip, args.chassis_ip,
-                           args.chassis_slot_number, args.session_name)
-
-    ix_session.run_session(args.run_time_sec, args.dry_run)
-
-
-def main():
+def parse_opts():
     parser = argparse.ArgumentParser(
         description=
         'Tool to configure and run TSN scenarios. It takes a topology and traffic configuration as input',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    subparsers = parser.add_subparsers(help='Subcommand we want to run')
+    commands = parser.add_subparsers(help='Subcommand we want to run')
 
     # Parent parser for use by multiple subcommands
     parser_base = argparse.ArgumentParser(add_help=False)
@@ -77,7 +60,7 @@ def main():
         affecting the actual traffic or other active users""")
 
     # Parser for create sub-command
-    parser_create = subparsers.add_parser(
+    parser_create = commands.add_parser(
         'create',
         parents=[parser_base],
         help="""Creates a session and configures the network devices for the
@@ -123,7 +106,7 @@ def main():
     parser_create.set_defaults(func=create_session)
 
     # Parser for run sub-command
-    parser_run = subparsers.add_parser(
+    parser_run = commands.add_parser(
         'run',
         parents=[parser_base],
         help="""Runs a previously created session""",
@@ -139,8 +122,31 @@ def main():
 
     parser_run.set_defaults(func=run_session)
 
-    args = parser.parse_args()
-    args.func(args)
+    return parser.parse_args()
+
+
+def create_session(args):
+    """Entry function to create a session"""
+    ix_session = IxNetwork(args.api_server_ip, args.chassis_ip,
+                           args.chassis_slot_number, args.session_name)
+
+    ix_session.create_session(args.topology, args.traffic, args.log,
+                              args.dry_run, args.force_port_ownership,
+                              args.verbosity)
+
+
+def run_session(args):
+    """Entry function to create a session"""
+    ix_session = IxNetwork(args.api_server_ip, args.chassis_ip,
+                           args.chassis_slot_number, args.session_name)
+
+    ix_session.run_session(args.run_time_sec, args.dry_run)
+
+
+def main():
+    load_dotenv()
+    opts = parse_opts()
+    opts.func(opts)
 
 
 if __name__ == "__main__":

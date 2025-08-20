@@ -2,8 +2,6 @@ import os
 import time
 import yaml
 
-from dotenv import load_dotenv
-
 from ixnetwork_restpy import SessionAssistant, TestPlatform
 
 
@@ -11,9 +9,6 @@ class IxNetwork:
 
     def __init__(self, api_server_ip, chassis_ip, chassis_slot_number,
                  session_name):
-
-        # Provide username and password to login to Keysight
-        load_dotenv()
 
         self._username = os.getenv('IX_USER')
         self._password = os.getenv('IX_PASS')
