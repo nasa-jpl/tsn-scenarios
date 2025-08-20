@@ -11,8 +11,10 @@
 #
 
 from ixnetwork.IxNetwork import IxNetwork
-import argparse
 from dotenv import load_dotenv
+
+import argparse
+import sys
 
 
 def parse_opts():
@@ -150,4 +152,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print("Error: " + str(e))
+        if e.__cause__ is not None:
+            print(f"cause: {e.__cause__}")
+        sys.exit(1)
