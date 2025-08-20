@@ -99,7 +99,7 @@ def parse_opts():
         "--dry-run",
         "-n",
         action=argparse.BooleanOptionalAction,
-        help="print config without uploading",
+        help="print config with a dummy port map without uploading",
     )
     upload.add_argument(
         "--merge",
