@@ -149,7 +149,8 @@ def create_session(opts) -> requests.Session:
     return session
 
 
-def istax_login(session, host: str, username: str, password: str):
+def istax_login(session: requests.Session, host: str, username: str, password: str):
+    eprint("logging in...")
     data = {
         "user": username,
         "password": password,
@@ -160,7 +161,7 @@ def istax_login(session, host: str, username: str, password: str):
         raise ApplicationError(f"unable to login to '{host}'")
 
 
-def istax_config_activate(session, host: str, filename: str):
+def istax_config_activate(session: requests.Session, host: str, filename: str):
     data = {
         "file_name": filename,
     }
@@ -170,7 +171,7 @@ def istax_config_activate(session, host: str, filename: str):
     istax_config_activate_status(session, host)
 
 
-def istax_config_download(session, host: str, filename: str):
+def istax_config_download(session: requests.Session, host: str, filename: str):
     data = {
         "file_name": filename,
     }
@@ -179,7 +180,7 @@ def istax_config_download(session, host: str, filename: str):
     print(response.text)
 
 
-def istax_config_activate_status(session, host: str):
+def istax_config_activate_status(session: requests.Session, host: str):
     eprint("activating configuration...", end="", flush=True)
 
     timeout = time.time() + 90
@@ -209,7 +210,9 @@ def istax_config_activate_status(session, host: str):
             raise ApplicationError(f"activation failed with:\n{response.text.strip()}")
 
 
-def istax_upload_config(session, host: str, filename: str, merge: bool, config: TextIO):
+def istax_config_upload(
+    session: requests.Session, host: str, filename: str, merge: bool, config: TextIO
+):
     data = {
         "file_name": filename,
         "merge": str(merge).lower(),
