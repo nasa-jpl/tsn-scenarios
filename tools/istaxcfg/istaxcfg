@@ -16,13 +16,13 @@ from io import StringIO
 import os
 import sys
 from http.cookiejar import CookieJar
-import requests
 import time
 from typing import TextIO
 
 import argcomplete
 import dotenv
 import jinja2
+import requests
 
 VERSION = "0.2.0"
 
