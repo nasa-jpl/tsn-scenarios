@@ -22,7 +22,9 @@ def parse_opts():
         description=
         'Tool to configure and run TSN scenarios. It takes a topology and traffic configuration as input',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    commands = parser.add_subparsers(help='Subcommand we want to run')
+    commands = parser.add_subparsers(help='Subcommand we want to run',
+                                     dest="commands",
+                                     required=True)
 
     # Parent parser for use by multiple subcommands
     parser_base = argparse.ArgumentParser(add_help=False)
@@ -56,10 +58,32 @@ def parse_opts():
     parser_base.add_argument(
         '--dry-run',
         action='store_true',
-        default=True,
         required=False,
         help="""If set then we only interact with the session without
         affecting the actual traffic or other active users""")
+
+    parser_base.add_argument(
+        '--clean',
+        action='store_true',
+        default=False,
+        required=False,
+        help="""If set then clear any current session with the same name""")
+
+    parser_base.add_argument('-l',
+                             '--log',
+                             type=str,
+                             required=False,
+                             help="""Path to the log file to use. Default
+                               will be the session name with an appended
+                               timestamp""")
+
+    parser_base.add_argument('--verbosity',
+                             choices=[
+                                 "none", "info", "warning", "request",
+                                 "request_response", "all"
+                             ],
+                             required=False,
+                             help="""Verbosity level for logging.""")
 
     # Parser for create sub-command
     parser_create = commands.add_parser(
@@ -89,22 +113,6 @@ def parse_opts():
         help="""If set, then take ownership of the ports forcefully
         if necessary""")
 
-    parser_create.add_argument('-l',
-                               '--log',
-                               type=str,
-                               required=False,
-                               help="""Path to the log file to use. Default
-                               will be the session name with an appended
-                               timestamp""")
-
-    parser_create.add_argument('--verbosity',
-                               choices=[
-                                   "none", "info", "warning", "request",
-                                   "request_response", "all"
-                               ],
-                               required=False,
-                               help="""Verbosity level for logging.""")
-
     parser_create.set_defaults(func=create_session)
 
     # Parser for run sub-command
@@ -130,17 +138,18 @@ def parse_opts():
 def create_session(args):
     """Entry function to create a session"""
     ix_session = IxNetwork(args.api_server_ip, args.chassis_ip,
-                           args.chassis_slot_number, args.session_name)
+                           args.chassis_slot_number, args.session_name,
+                           args.clean, args.verbosity, args.log)
 
-    ix_session.create_session(args.topology, args.traffic, args.log,
-                              args.dry_run, args.force_port_ownership,
-                              args.verbosity)
+    ix_session.create_session(args.topology, args.traffic, args.dry_run,
+                              args.force_port_ownership)
 
 
 def run_session(args):
     """Entry function to create a session"""
     ix_session = IxNetwork(args.api_server_ip, args.chassis_ip,
-                           args.chassis_slot_number, args.session_name)
+                           args.chassis_slot_number, args.session_name,
+                           args.clean, args.verbosity, args.log)
 
     ix_session.run_session(args.run_time_sec, args.dry_run)
 
