@@ -8,7 +8,6 @@ traffic_items:
     udp: True
     dst_port: 1000
     tx_rate: 10000
-
   - name: "Traffic2"
     type: "ipv4"
     src:
@@ -18,7 +17,6 @@ traffic_items:
     udp: True
     dst_port: 1100
     tx_rate: 11000
-
   - name: "Traffic3"
     type: "ipv4"
     src:
@@ -28,7 +26,6 @@ traffic_items:
     udp: True
     dst_port: 2000
     tx_rate: 12000
-
   - name: "Traffic4"
     type: "ipv4"
     src:
@@ -38,7 +35,6 @@ traffic_items:
     udp: True
     dst_port: 2200
     tx_rate: 13000
-
   - name: "Traffic5"
     type: "ipv4"
     src:
@@ -48,7 +44,6 @@ traffic_items:
     udp: True
     dst_port: 3000
     tx_rate: 14000
-
   - name: "Traffic6"
     type: "ipv4"
     src:
@@ -58,7 +53,6 @@ traffic_items:
     udp: True
     dst_port: 3300
     tx_rate: 15000
-
   - name: "Traffic7"
     type: "ipv4"
     src:
@@ -68,7 +62,6 @@ traffic_items:
     udp: True
     dst_port: 4000
     tx_rate: 16000
-
   - name: "Traffic8"
     type: "ipv4"
     src:
@@ -78,7 +71,6 @@ traffic_items:
     udp: True
     dst_port: 4400
     tx_rate: 17000
-
   - name: "Traffic9"
     type: "ipv4"
     src:
@@ -88,7 +80,6 @@ traffic_items:
     udp: True
     dst_port: 5000
     tx_rate: 18000
-
   - name: "Traffic10"
     type: "ipv4"
     src:
@@ -98,7 +89,6 @@ traffic_items:
     udp: True
     dst_port: 5000
     tx_rate: 19000
-
   - name: "Traffic11"
     type: "ethernetVlan"
     src:
