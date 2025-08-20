@@ -28,6 +28,8 @@ VERSION = "0.2.0"
 
 ENVAR_PROXY = "ISTAXCFG_PROXY"
 
+PortMap = list[dict[str, str]]
+
 
 class ApplicationError(Exception):
     def __init__(self, message):
@@ -47,12 +49,6 @@ def parse_opts():
     parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
     parser.add_argument("--username", "-u", default="admin", help="host username")
     parser.add_argument("--password", "-p", default="", help="host password")
-    parser.add_argument(
-        "--part",
-        default="VSC5640EV",
-        choices=["VSC5640EV", "EVB-LAN9696-24port"],
-        help="switch part id",
-    )
     parser.add_argument(
         "--proxy",
         "-x",
@@ -229,6 +225,43 @@ def istax_upload_config(session, host: str, filename: str, merge: bool, config: 
         istax_config_activate_status(session, host)
 
 
+def istax_get_port_map(session: requests.Session, host: str) -> PortMap:
+    eprint("fetching port map...")
+    data = {
+        "method": "port.namemap.get",
+        "id": "jsonrpc",
+        "params": [],
+    }
+    # WORKAROUND: IStaX returns a bad response header (extraneous and malformed
+    # HTTP status line).  This causes urllib to raise an internal exception
+    # before it parses the content-length.  Because of this, the post call
+    # below blocks until TCP timeout which takes a few seconds.  We can work
+    # around this by forcing the server to close the connection after
+    # responding with the following header.
+    headers = {"Connection": "close"}
+
+    response = session.post(f"http://{host}/json_rpc", json=data, headers=headers)
+
+    data = response.json()
+    ports = [transform_port_name(entry["key"]) for entry in data["result"]]
+    return ports
+
+
+def dummy_port_map() -> PortMap:
+    return [{"name": f"DummyEthernet 1/{i}"} for i in range(1, 10)]
+
+
+def transform_port_name(name: str) -> dict[str, str]:
+    (speed, index) = name.split()
+    match speed:
+        case "Gi":
+            return {"name": f"GigabitEthernet {index}"}
+        case "10G":
+            return {"name": f"10GigabitEthernet {index}"}
+        case _:
+            raise
+
+
 def command_activate(opts):
     session = create_session(opts)
     istax_login(session, opts.host, opts.username, opts.password)
@@ -241,74 +274,14 @@ def command_download(opts):
     istax_config_download(session, opts.host, opts.filename)
 
 
-def render_config(opts, config):
+def render_config(opts, ports: PortMap, config) -> StringIO:
     search_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "..", "scenarios", "istax")
     )
     loader = jinja2.FileSystemLoader(search_path)
     environment = jinja2.Environment(loader=loader, trim_blocks=True)
     template = environment.from_string(config.read())
-    parts = {
-        "VSC5640EV": {
-            "ports": [
-                {"name": "10GigabitEthernet 1/1"},
-                {"name": "10GigabitEthernet 1/2"},
-                {"name": "10GigabitEthernet 1/3"},
-                {"name": "10GigabitEthernet 1/4"},
-                {"name": "10GigabitEthernet 1/5"},
-                {"name": "10GigabitEthernet 1/6"},
-                {"name": "10GigabitEthernet 1/7"},
-                {"name": "10GigabitEthernet 1/8"},
-                {"name": "10GigabitEthernet 1/9"},
-                {"name": "10GigabitEthernet 1/10"},
-                {"name": "10GigabitEthernet 1/11"},
-                {"name": "10GigabitEthernet 1/12"},
-                {"name": "10GigabitEthernet 1/13"},
-                {"name": "10GigabitEthernet 1/14"},
-                {"name": "10GigabitEthernet 1/15"},
-                {"name": "10GigabitEthernet 1/16"},
-                {"name": "10GigabitEthernet 1/17"},
-                {"name": "10GigabitEthernet 1/18"},
-                {"name": "10GigabitEthernet 1/19"},
-                {"name": "10GigabitEthernet 1/20"},
-                {"name": "GigabitEthernet 1/1"},
-            ]
-        },
-        "EVB-LAN9696-24port": {
-            "ports": [
-                {"name": "GigabitEthernet 1/1"},
-                {"name": "GigabitEthernet 1/2"},
-                {"name": "GigabitEthernet 1/3"},
-                {"name": "GigabitEthernet 1/4"},
-                {"name": "GigabitEthernet 1/5"},
-                {"name": "GigabitEthernet 1/6"},
-                {"name": "GigabitEthernet 1/7"},
-                {"name": "GigabitEthernet 1/8"},
-                {"name": "GigabitEthernet 1/9"},
-                {"name": "GigabitEthernet 1/10"},
-                {"name": "GigabitEthernet 1/11"},
-                {"name": "GigabitEthernet 1/12"},
-                {"name": "GigabitEthernet 1/13"},
-                {"name": "GigabitEthernet 1/14"},
-                {"name": "GigabitEthernet 1/15"},
-                {"name": "GigabitEthernet 1/16"},
-                {"name": "GigabitEthernet 1/17"},
-                {"name": "GigabitEthernet 1/18"},
-                {"name": "GigabitEthernet 1/19"},
-                {"name": "GigabitEthernet 1/20"},
-                {"name": "GigabitEthernet 1/21"},
-                {"name": "GigabitEthernet 1/22"},
-                {"name": "GigabitEthernet 1/23"},
-                {"name": "GigabitEthernet 1/24"},
-                {"name": "10GigabitEthernet 1/1"},
-                {"name": "10GigabitEthernet 1/2"},
-                {"name": "10GigabitEthernet 1/3"},
-                {"name": "10GigabitEthernet 1/4"},
-                {"name": "GigabitEthernet 1/25"},
-            ]
-        },
-    }
-    data = {"hostname": opts.host, "ports": parts[opts.part]["ports"]}
+    data = {"hostname": opts.host, "ports": ports}
     rendered_template = template.render(data)
     return StringIO(rendered_template)
 
@@ -322,15 +295,19 @@ def command_upload(opts):
     config.write("end\n")
     config.seek(0)
 
-    config = render_config(opts, config)
+    if opts.dry_run:
+        ports = dummy_port_map()
+    else:
+        session = create_session(opts)
+        istax_login(session, opts.host, opts.username, opts.password)
+        ports = istax_get_port_map(session, opts.host)
+
+    config = render_config(opts, ports, config)
 
     if opts.dry_run:
         print(config.read())
-        sys.exit()
-
-    session = create_session(opts)
-    istax_login(session, opts.host, opts.username, opts.password)
-    istax_upload_config(session, opts.host, opts.filename, opts.merge, config)
+    else:
+        istax_config_upload(session, opts.host, opts.filename, opts.merge, config)
 
 
 def main():
