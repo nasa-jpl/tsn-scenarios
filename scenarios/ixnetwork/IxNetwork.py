@@ -47,7 +47,8 @@ class IxNetwork:
         self._log_file = log_file
         if self._log_file is None:
             self._log_file = (
-                f"{self._session_name}_{time.strftime('%Y%m%d-%H%M%S')}.log")
+                f"{self._session_name}_{time.strftime('%Y%m%d-%H%M%S')}.log"
+            )
 
         self._ix_session = SessionAssistant(
             IpAddress=self._api_server_ip,
@@ -64,10 +65,9 @@ class IxNetwork:
 
         self._ix_network = self._ix_session.Ixnetwork
 
-    def _create_packet_header(self,
-                              trafficItemObj,
-                              packetHeaderToAdd=None,
-                              appendToStack=None):
+    def _create_packet_header(
+        self, trafficItemObj, packetHeaderToAdd=None, appendToStack=None
+    ):
         """This function is used to create packet headers that can then be manipulated by the caller"""
 
         configElement = trafficItemObj.ConfigElement.find()
@@ -80,21 +80,25 @@ class IxNetwork:
             availableProtocolTemplates.append(protocolHeader.DisplayName)
 
         packetHeaderProtocolTemplate = self._ix_network.Traffic.ProtocolTemplate.find(
-            DisplayName="^{}".format(packetHeaderToAdd))
+            DisplayName="^{}".format(packetHeaderToAdd)
+        )
         if len(packetHeaderProtocolTemplate) == 0:
             self._ix_network.info(
-                "{} protocol template not supported, skipping. Supported procotol templates: {}"
-                .format(packetHeaderToAdd,
-                        "|".join(availableProtocolTemplates)))
+                "{} protocol template not supported, skipping. Supported procotol templates: {}".format(
+                    packetHeaderToAdd, "|".join(availableProtocolTemplates)
+                )
+            )
             return None
 
         # 2> Append the <new packet header> object after the specified packet header stack.
         appendToStackObj = configElement.Stack.find(
-            DisplayName="^{}".format(appendToStack))
+            DisplayName="^{}".format(appendToStack)
+        )
         self._ix_network.info(
             "Adding protocolTemplate: {} on top of stack: {}".format(
-                packetHeaderProtocolTemplate.DisplayName,
-                appendToStackObj.DisplayName))
+                packetHeaderProtocolTemplate.DisplayName, appendToStackObj.DisplayName
+            )
+        )
 
         # if self._debug_mode is True:
         #     self._ix_network.info(format(packetHeaderProtocolTemplate))
@@ -104,7 +108,8 @@ class IxNetwork:
         # 3> Get the new packet header stack to use it for appending an IPv4 stack after it.
         # Look for the packet header object and stack ID.
         packetHeaderStackObj = configElement.Stack.find(
-            DisplayName="^{}".format(packetHeaderToAdd))
+            DisplayName="^{}".format(packetHeaderToAdd)
+        )
 
         # 4> In order to modify the fields, get the field object
         packetHeaderFieldObj = packetHeaderStackObj.Field.find()
@@ -122,8 +127,7 @@ class IxNetwork:
             raise RuntimeError(f"{keys[0]} not a valid endpoint in toplogy")
 
         if not endpoints[keys[0]].get("device_groups", False):
-            raise RuntimeError(
-                f"{keys[0]} does not contain a device_groups in toplogy")
+            raise RuntimeError(f"{keys[0]} does not contain a device_groups in toplogy")
 
         # Check if we are using the whole endpoint and not jus one interface
         if len(keys) == 1:
@@ -143,11 +147,13 @@ class IxNetwork:
         for traffic_item in self._traffic_items["traffic_items"]:
             if not isinstance(traffic_item["src"], list):
                 raise RuntimeError(
-                    f"Traffic source {traffic_item['src']} must be a list")
+                    f"Traffic source {traffic_item['src']} must be a list"
+                )
 
             if not isinstance(traffic_item["dst"], list):
                 raise RuntimeError(
-                    f"Traffic source {traffic_item['dst']} must be a list")
+                    f"Traffic source {traffic_item['dst']} must be a list"
+                )
 
             if len(traffic_item["src"]) != len(traffic_item["dst"]):
                 raise RuntimeError("Traffic src and dst list sizes must match")
@@ -158,11 +164,9 @@ class IxNetwork:
             for traffic_endpoint in traffic_item["dst"]:
                 self._validate_traffic_endpoint(traffic_endpoint)
 
-    def create_session(self,
-                       topology_file,
-                       traffic_file,
-                       dry_run=False,
-                       force_port_ownership=True):
+    def create_session(
+        self, topology_file, traffic_file, dry_run=False, force_port_ownership=True
+    ):
         """Creates a session with ixnetwork_restpy"""
 
         # Load endpoints and traffic items
@@ -204,10 +208,12 @@ class IxNetwork:
 
             if "device_groups" in endpoint:
                 topologies[name] = self._ix_network.Topology.add(
-                    Name=name, Ports=vport[name])
+                    Name=name, Ports=vport[name]
+                )
                 ix_endpoints[name] = topologies[name]
-                ix_group = topologies[name].DeviceGroup.add(Name=f"{name}.DG",
-                                                            Multiplier="1")
+                ix_group = topologies[name].DeviceGroup.add(
+                    Name=f"{name}.DG", Multiplier="1"
+                )
 
                 # Go through all protocol stacks in this endpoint
                 device_groups = endpoint["device_groups"]
@@ -215,22 +221,20 @@ class IxNetwork:
                     self._ix_network.info(f"Creating {name}.{protocol_stack}")
                     if protocol_stack.startswith("eth"):
                         eth_stack = device_groups[protocol_stack]
-                        ix_eth = ix_group.Ethernet.add(
-                            Name=f"{name}.{protocol_stack}")
+                        ix_eth = ix_group.Ethernet.add(Name=f"{name}.{protocol_stack}")
                         ix_eth.Mac.Single(value="00:11:01:00:00:01")
 
                         if "vlan" in eth_stack:
                             ix_eth.EnableVlans.Single(True)
-                            ix_eth_vlan = ix_eth.Vlan.find(
-                            )[0].VlanId.SingleValue(eth_stack["vlan"])
+                            ix_eth_vlan = ix_eth.Vlan.find()[0].VlanId.SingleValue(
+                                eth_stack["vlan"]
+                            )
 
                         if eth_stack["ipv4"] is True:
                             self._ix_network.info(f"Configuring {name} IP{j}")
-                            ipv4 = ix_eth.Ipv4.add(
-                                Name=f"{name}.{protocol_stack}.ip")
+                            ipv4 = ix_eth.Ipv4.add(Name=f"{name}.{protocol_stack}.ip")
                             ipv4.Address.Single(value=eth_stack["ip"])
-                            ipv4.Prefix.Single(
-                                value=str(eth_stack["gateway_prefix"]))
+                            ipv4.Prefix.Single(value=str(eth_stack["gateway_prefix"]))
 
                             ipv4.GatewayIp.Single(value=eth_stack["gateway"])
                             ipv4.ResolveGateway.Single(False)
@@ -251,7 +255,8 @@ class IxNetwork:
                     Name=f"Traffic Item {i + 1}",
                     BiDirectional=False,
                     TrafficType=traffic_item["type"],
-                ))
+                )
+            )
 
             # Add the source and destination.  Note that a variety of types are supported here -
             # you can specify a topology, or a stack like ethernet or IPv4.
@@ -261,18 +266,18 @@ class IxNetwork:
 
             # So for example if a topology ep3_topology has 2 IPv4 stacks, you need to provide
             # the specific IPv4 stack you want to use.
-            for (src, dst) in zip(traffic_item["src"], traffic_item["dst"]):
-                trafficItem[i].EndpointSet.add(Sources=ix_endpoints[src],
-                                               Destinations=ix_endpoints[dst])
+            for src, dst in zip(traffic_item["src"], traffic_item["dst"]):
+                trafficItem[i].EndpointSet.add(
+                    Sources=ix_endpoints[src], Destinations=ix_endpoints[dst]
+                )
                 configElement = trafficItem[i].ConfigElement.find()[0]
 
             # If this traffic item is UDP, add the UDP packet header with appropriate destination port.
             # Our scenario doesn't care about the source port.
             if traffic_item["udp"]:
                 udpFieldObj = self._create_packet_header(
-                    trafficItem[i],
-                    packetHeaderToAdd="UDP",
-                    appendToStack="IPv4")
+                    trafficItem[i], packetHeaderToAdd="UDP", appendToStack="IPv4"
+                )
                 udpDstField = udpFieldObj.find(DisplayName="UDP-Dest-Port")
                 udpDstField.Auto = False
                 udpDstField.SingleValue = traffic_item["dst_port"]
@@ -289,9 +294,7 @@ class IxNetwork:
             # This adds Traffic Item to the Statistics Tracking field.
             # Without this, keysight will not track frame drops, latencies, etc.
             for j in range(0, len(traffic_item["src"])):
-                trafficItem[i].Tracking.find()[j].TrackBy = [
-                    f"trackingenabled{j}"
-                ]
+                trafficItem[i].Tracking.find()[j].TrackBy = [f"trackingenabled{j}"]
 
             # This generates the frames based on the previous configuration.
             trafficItem[i].Generate()
@@ -330,14 +333,16 @@ class IxNetwork:
 
                 for i in range(10):
                     statsView = self._ix_network.Statistics.View.find(
-                        Caption="Flow Statistics")
+                        Caption="Flow Statistics"
+                    )
                     RxRates = statsView.GetColumnValues(Arg2="Rx Rate (Kbps)")
                     print(RxRates)
                     time.sleep(1)
 
                 # TODO: Invoke script to test the scenario
                 statsView = self._ix_network.Statistics.View.find(
-                    Caption="Flow Statistics")
+                    Caption="Flow Statistics"
+                )
                 # print(statsView)
 
                 # For this scenario, success/failure is based on the receive bit rate of each traffic
