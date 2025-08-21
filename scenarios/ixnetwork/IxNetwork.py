@@ -2,7 +2,12 @@ import os
 import time
 import yaml
 
-from ixnetwork_restpy import SessionAssistant
+from ixnetwork_restpy import SessionAssistant, TestPlatform
+
+
+class IxNetworkError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
 
 
 class IxNetwork:
@@ -22,7 +27,6 @@ class IxNetwork:
         chassis_ip,
         chassis_slot_number,
         session_name,
-        clear_config=True,
         verbosity=None,
         log_file=None,
     ):
@@ -49,21 +53,6 @@ class IxNetwork:
             self._log_file = (
                 f"{self._session_name}_{time.strftime('%Y%m%d-%H%M%S')}.log"
             )
-
-        self._ix_session = SessionAssistant(
-            IpAddress=self._api_server_ip,
-            RestPort=None,
-            UserName=self._username,
-            Password=self._password,
-            SessionName=self._session_name,
-            SessionId=None,
-            ApiKey=None,
-            ClearConfig=clear_config,
-            LogLevel=self._verbosity,
-            LogFilename=self._log_file,
-        )
-
-        self._ix_network = self._ix_session.Ixnetwork
 
     def _create_packet_header(
         self, trafficItemObj, packetHeaderToAdd=None, appendToStack=None
@@ -124,10 +113,12 @@ class IxNetwork:
         # Check endpoint name and device_group
         endpoints = self._endpoints["endpoints"]
         if not endpoints.get(keys[0], False):
-            raise RuntimeError(f"{keys[0]} not a valid endpoint in toplogy")
+            raise IxNetworkError(f"{keys[0]} not a valid endpoint in toplogy")
 
         if not endpoints[keys[0]].get("device_groups", False):
-            raise RuntimeError(f"{keys[0]} does not contain a device_groups in toplogy")
+            raise IxNetworkError(
+                f"{keys[0]} does not contain a device_groups in toplogy"
+            )
 
         # Check if we are using the whole endpoint and not jus one interface
         if len(keys) == 1:
@@ -165,9 +156,29 @@ class IxNetwork:
                 self._validate_traffic_endpoint(traffic_endpoint)
 
     def create_session(
-        self, topology_file, traffic_file, dry_run=False, force_port_ownership=True
+        self,
+        topology_file,
+        traffic_file,
+        dry_run=False,
+        force_port_ownership=True,
+        clean=False,
     ):
         """Creates a session with ixnetwork_restpy"""
+
+        self._ix_session = SessionAssistant(
+            IpAddress=self._api_server_ip,
+            RestPort=None,
+            UserName=self._username,
+            Password=self._password,
+            SessionName=self._session_name,
+            SessionId=None,
+            ApiKey=None,
+            ClearConfig=clean,
+            LogLevel=self._verbosity,
+            LogFilename=self._log_file,
+        )
+
+        self._ix_network = self._ix_session.Ixnetwork
 
         # Load endpoints and traffic items
         with open(topology_file, "r") as f_topology:
@@ -300,6 +311,20 @@ class IxNetwork:
             trafficItem[i].Generate()
 
     def run_session(self, run_time_sec, dry_run=False):
+        # Try to find an existing session with this same name
+        platform = TestPlatform(self._api_server_ip)
+        platform.Authenticate(self._username, self._password)
+
+        self._ix_session = platform.Sessions.find(Name=self._session_name, Id=None)
+
+        if self._ix_session.index == -1:
+            raise IxNetworkError(
+                f"Unable to find session with name {self._session_name}"
+            )
+
+        print(f"Found session {self._session_name}")
+        self._ix_network = self._ix_session.Ixnetwork
+
         if dry_run is False:
             print("Starting traffic...")
             self._ix_network.Globals.Testworkflow.Start(arg2=True)

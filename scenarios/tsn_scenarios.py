@@ -14,6 +14,7 @@ from ixnetwork.IxNetwork import IxNetwork
 from dotenv import load_dotenv
 
 import argparse
+import requests
 import sys
 
 
@@ -69,14 +70,6 @@ def parse_opts():
     )
 
     parser_base.add_argument(
-        "--clean",
-        action="store_true",
-        default=False,
-        required=False,
-        help="""If set then clear any current session with the same name""",
-    )
-
-    parser_base.add_argument(
         "-l",
         "--log",
         type=str,
@@ -127,6 +120,14 @@ def parse_opts():
         if necessary""",
     )
 
+    parser_create.add_argument(
+        "--clean",
+        action="store_true",
+        default=False,
+        required=False,
+        help="""If set then clear any current session with the same name""",
+    )
+
     parser_create.set_defaults(func=create_session)
 
     # Parser for run sub-command
@@ -164,7 +165,7 @@ def create_session(args):
     )
 
     ix_session.create_session(
-        args.topology, args.traffic, args.dry_run, args.force_port_ownership
+        args.topology, args.traffic, args.dry_run, args.force_port_ownership, args.clean
     )
 
 
@@ -175,7 +176,6 @@ def run_session(args):
         args.chassis_ip,
         args.chassis_slot_number,
         args.session_name,
-        args.clean,
         args.verbosity,
         args.log,
     )
@@ -192,6 +192,9 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+    except requests.exceptions.ConnectionError as e:
+        print("Error: " + str(e))
+        sys.exit(1)
     except Exception as e:
         print("Error: " + str(e))
         if e.__cause__ is not None:
