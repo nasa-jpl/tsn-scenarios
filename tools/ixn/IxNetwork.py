@@ -30,8 +30,8 @@ class IxNetwork:
         verbosity=None,
         log_file=None,
     ):
-        self._username = os.getenv("IX_USER")
-        self._password = os.getenv("IX_PASS")
+        self._username = os.getenv("IXN_USER")
+        self._password = os.getenv("IXN_PASS")
 
         # Our API server and chassis are same device
         self._api_server_ip = api_server_ip
