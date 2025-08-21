@@ -250,7 +250,7 @@ class IxNetwork:
                     if protocol_stack.startswith("eth"):
                         eth_stack = device_groups[protocol_stack]
                         ix_eth = ix_group.Ethernet.add(Name=f"{name}.{protocol_stack}")
-                        ix_eth.Mac.Single(value="00:11:01:00:00:01")
+                        ix_eth.Mac.Single(value=eth_stack["mac"])
 
                         if "vlan" in eth_stack:
                             ix_eth.EnableVlans.Single(True)
