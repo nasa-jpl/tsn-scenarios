@@ -214,9 +214,8 @@ class IxNetwork:
         portMap = self._ix_session.PortMapAssistant()
         # Each port consists of the IP address of the chassis, the card #, and the port #
         vport = dict()
-        for i, key in enumerate(self._endpoints["endpoints"]):
-            endpoint = self._endpoints["endpoints"][key]
-            portName = f"Port_EP{i + 1}"
+        for key, endpoint in self._endpoints["endpoints"].items():
+            portName = f"Port_{key}"
             vport[key] = portMap.Map(
                 IpAddress=self._chassis_ip,
                 CardId=self._chassis_slot_number,
