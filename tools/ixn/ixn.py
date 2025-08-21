@@ -10,7 +10,7 @@
 # ///
 #
 
-from ixnetwork.IxNetwork import IxNetwork
+from IxNetwork import IxNetwork
 from dotenv import load_dotenv
 
 import argparse
@@ -159,7 +159,6 @@ def create_session(args):
         args.chassis_ip,
         args.chassis_slot_number,
         args.session_name,
-        args.clean,
         args.verbosity,
         args.log,
     )

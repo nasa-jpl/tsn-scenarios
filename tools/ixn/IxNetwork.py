@@ -165,6 +165,7 @@ class IxNetwork:
     ):
         """Creates a session with ixnetwork_restpy"""
 
+        print("Starting session...")
         self._ix_session = SessionAssistant(
             IpAddress=self._api_server_ip,
             RestPort=None,
