@@ -163,7 +163,11 @@ class IxNetwork:
         session = platform.Sessions.find(Name=self._session_name, Id=None)
 
         if session.index == -1:
-            return None
+            raise IxNetworkError(
+                f"Unable to find session with name {self._session_name}"
+            )
+
+        print(f"Found session {self._session_name}")
 
         return session
 
@@ -327,13 +331,6 @@ class IxNetwork:
         """Run an existing session"""
 
         self._ix_session = self._get_session_by_name()
-
-        if self._ix_session is None:
-            raise IxNetworkError(
-                f"Unable to find session with name {self._session_name}"
-            )
-
-        print(f"Found session {self._session_name}")
         self._ix_network = self._ix_session.Ixnetwork
 
         if dry_run is False:
@@ -472,13 +469,6 @@ class IxNetwork:
         """Stop an existing session"""
 
         self._ix_session = self._get_session_by_name()
-
-        if self._ix_session is None:
-            raise IxNetworkError(
-                f"Unable to find session with name {self._session_name}"
-            )
-
-        print(f"Found session {self._session_name}")
         self._ix_network = self._ix_session.Ixnetwork
 
         if dry_run is False:
