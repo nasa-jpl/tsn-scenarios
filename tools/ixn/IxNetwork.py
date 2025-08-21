@@ -155,6 +155,18 @@ class IxNetwork:
             for traffic_endpoint in traffic_item["dst"]:
                 self._validate_traffic_endpoint(traffic_endpoint)
 
+    def _get_session_by_name(self):
+        """Checks to see if the session name exists on the server"""
+        platform = TestPlatform(self._api_server_ip)
+        platform.Authenticate(self._username, self._password)
+
+        session = platform.Sessions.find(Name=self._session_name, Id=None)
+
+        if session.index == -1:
+            return None
+
+        return session
+
     def create_session(
         self,
         topology_file,
@@ -312,13 +324,11 @@ class IxNetwork:
             trafficItem[i].Generate()
 
     def run_session(self, run_time_sec, dry_run=False):
-        # Try to find an existing session with this same name
-        platform = TestPlatform(self._api_server_ip)
-        platform.Authenticate(self._username, self._password)
+        """Run an existing session"""
 
-        self._ix_session = platform.Sessions.find(Name=self._session_name, Id=None)
+        self._ix_session = self._get_session_by_name()
 
-        if self._ix_session.index == -1:
+        if self._ix_session is None:
             raise IxNetworkError(
                 f"Unable to find session with name {self._session_name}"
             )
