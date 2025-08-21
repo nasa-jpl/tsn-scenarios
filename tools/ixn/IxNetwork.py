@@ -358,8 +358,8 @@ class IxNetwork:
             # the rate of change of every stats item of interest and wait until
             # some convergence across the majority of them.
 
-            print("Waiting for statistics to settle...")
             if run_time_sec != 0:
+                print("Waiting for statistics to settle...")
                 # wait for a specified amount of time before getting statistics
                 time.sleep(run_time_sec)
 
