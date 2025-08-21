@@ -465,8 +465,8 @@ class IxNetwork:
                     vport.ReleasePort()
 
                 # For linux and connection_manager only
-                if self._ix_session.TestPlatform.Platform != "windows":
-                    self._ix_session.Session.remove()
+                # if self._ix_session.TestPlatform.Platform != "windows":
+                #     self._ix_session.Session.remove()
 
     def stop_session(self, dry_run):
         """Stop an existing session"""
