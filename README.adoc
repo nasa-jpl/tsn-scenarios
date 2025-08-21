@@ -77,18 +77,26 @@ traffic_items:
 
 === Create a session
 
-`uv run tools/ixn/ixn.py create --topology scenarios/ixnetwork/<scenario>/<topology_yaml>  --traffic scenarios/ixnetwork/<scenario>/<traffic_yaml> --session-name <session_name> --dry-run`
-
+[source, bash]
+----
+uv run tools/ixn/ixn.py create --topology scenarios/ixnetwork/<scenario>/<topology_yaml>  --traffic scenarios/ixnetwork/<scenario>/<traffic_yaml> --session-name <session_name> --dry-run
+----
 The option `--clean` can be used to wipe any existing session with the same name before creating a new one
 
 === Run a session
 
-`uv run tools/ixn/ixn.py run --session-name <session_name> --run-time-sec <time_in_sec>`
+[source, bash]
+----
+uv run tools/ixn/ixn.py run --session-name <session_name> --run-time-sec <time_in_sec>
+----
 
 If the session cannot be found, it will return an error. The default run time is 10s, but if you set it to 0, then it will leave the session running. It would then need to be stopped with the `stop` command
 
 === Stopping a session
 
-`uv run tools/ixn/ixn.py stop --session_name <session_name>`
+[source, bash]
+----
+uv run tools/ixn/ixn.py stop --session_name <session_name>
+----
 
 If the session cannot be found, it will return an error.
