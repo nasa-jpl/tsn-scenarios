@@ -467,3 +467,23 @@ class IxNetwork:
                 # For linux and connection_manager only
                 if self._ix_session.TestPlatform.Platform != "windows":
                     self._ix_session.Session.remove()
+
+    def stop_session(self, dry_run):
+        """Stop an existing session"""
+
+        self._ix_session = self._get_session_by_name()
+
+        if self._ix_session is None:
+            raise IxNetworkError(
+                f"Unable to find session with name {self._session_name}"
+            )
+
+        print(f"Found session {self._session_name}")
+        self._ix_network = self._ix_session.Ixnetwork
+
+        if dry_run is False:
+            print("Stopping traffic...")
+            self._ix_network.Globals.Testworkflow.Stop()
+
+            for vport in self._ix_network.Vport.find():
+                vport.ReleasePort()

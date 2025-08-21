@@ -149,6 +149,16 @@ def parse_opts():
 
     parser_run.set_defaults(func=run_session)
 
+    # Parser for stop sub-command
+    parser_stop = commands.add_parser(
+        "stop",
+        parents=[parser_base],
+        help="""Stops a previously started session""",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    parser_stop.set_defaults(func=stop_session)
+
     return parser.parse_args()
 
 
@@ -180,6 +190,20 @@ def run_session(args):
     )
 
     ix_session.run_session(args.run_time_sec, args.dry_run)
+
+
+def stop_session(args):
+    """Entry function to create a session"""
+    ix_session = IxNetwork(
+        args.api_server_ip,
+        args.chassis_ip,
+        args.chassis_slot_number,
+        args.session_name,
+        args.verbosity,
+        args.log,
+    )
+
+    ix_session.stop_session(args.dry_run)
 
 
 def main():
