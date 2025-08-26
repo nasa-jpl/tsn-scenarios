@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 import argparse
 import requests
 import sys
+import traceback
 
 
 def parse_opts():
@@ -159,42 +160,53 @@ def parse_opts():
 
     parser_stop.set_defaults(func=stop_session)
 
+    # Parser for validate sub-command
+    parser_validate = commands.add_parser(
+        "validate",
+        parents=[parser_base],
+        help="""Validates a session that is currently running""",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    parser_validate.add_argument(
+        "--test-func",
+        required=True,
+        help="""The function in the IxValidate class to use for validation""",
+    )
+
+    parser_validate.set_defaults(func=validate_session)
+
     return parser.parse_args()
 
 
 def create_session(args):
     """Entry function to create a session"""
-    ix_session = IxNetwork(
-        args.api_server_ip,
-        args.chassis_ip,
-        args.chassis_slot_number,
-        args.session_name,
-        args.verbosity,
-        args.log,
-    )
-
-    ix_session.create_session(
+    ix_network = _create_ix_network(args)
+    ix_network.create_session(
         args.topology, args.traffic, args.dry_run, args.force_port_ownership, args.clean
     )
 
 
 def run_session(args):
     """Entry function to create a session"""
-    ix_session = IxNetwork(
-        args.api_server_ip,
-        args.chassis_ip,
-        args.chassis_slot_number,
-        args.session_name,
-        args.verbosity,
-        args.log,
-    )
-
-    ix_session.run_session(args.run_time_sec, args.dry_run)
+    ix_network = _create_ix_network(args)
+    ix_network.run_session(args.run_time_sec, args.dry_run)
 
 
 def stop_session(args):
     """Entry function to create a session"""
-    ix_session = IxNetwork(
+    ix_network = _create_ix_network(args)
+    ix_network.stop_session(args.dry_run)
+
+
+def validate_session(args):
+    """Entry function to create a session"""
+    ix_network = _create_ix_network(args)
+    ix_network.validate_session(validation_func=args.test_func)
+
+
+def _create_ix_network(args):
+    return IxNetwork(
         args.api_server_ip,
         args.chassis_ip,
         args.chassis_slot_number,
@@ -202,8 +214,6 @@ def stop_session(args):
         args.verbosity,
         args.log,
     )
-
-    ix_session.stop_session(args.dry_run)
 
 
 def main():
@@ -218,8 +228,6 @@ if __name__ == "__main__":
     except requests.exceptions.ConnectionError as e:
         print("Error: " + str(e))
         sys.exit(1)
-    except Exception as e:
-        print("Error: " + str(e))
-        if e.__cause__ is not None:
-            print(f"cause: {e.__cause__}")
+    except Exception:
+        traceback.print_exc()
         sys.exit(1)

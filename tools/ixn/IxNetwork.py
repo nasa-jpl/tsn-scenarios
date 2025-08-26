@@ -1,8 +1,8 @@
 import os
 import time
 import yaml
-
-from ixnetwork_restpy import SessionAssistant, TestPlatform
+import IxValidate
+from ixnetwork_restpy import PortMapAssistant, SessionAssistant, TestPlatform
 
 
 class IxNetworkError(Exception):
@@ -53,6 +53,9 @@ class IxNetwork:
             self._log_file = (
                 f"{self._session_name}_{time.strftime('%Y%m%d-%H%M%S')}.log"
             )
+
+        self._ix_session = None
+        self._ix_network = None
 
     def _create_packet_header(
         self, trafficItemObj, packetHeaderToAdd=None, appendToStack=None
@@ -326,7 +329,7 @@ class IxNetwork:
             # This generates the frames based on the previous configuration.
             trafficItem[i].Generate()
 
-    def run_session(self, run_time_sec, dry_run=False):
+    def run_session(self, run_time_sec, dry_run=False, validation_func=None):
         """Run an existing session"""
 
         self._ix_session = self._get_session_by_name()
@@ -363,106 +366,35 @@ class IxNetwork:
                 # wait for a specified amount of time before getting statistics
                 time.sleep(run_time_sec)
 
-                for i in range(10):
-                    statsView = self._ix_network.Statistics.View.find(
-                        Caption="Flow Statistics"
-                    )
-                    RxRates = statsView.GetColumnValues(Arg2="Rx Rate (Kbps)")
-                    print(RxRates)
-                    time.sleep(1)
-
-                # TODO: Invoke script to test the scenario
-                statsView = self._ix_network.Statistics.View.find(
-                    Caption="Flow Statistics"
-                )
-                # print(statsView)
-
-                # For this scenario, success/failure is based on the receive bit rate of each traffic
-                # item to see that the proper flow meters are applied by the switch.
-                RxRates = statsView.GetColumnValues(Arg2="Rx Rate (Kbps)")
-                # print("RxRates: ", RxRates)
-
-                streamName = ["1", "2", "3", "4", "5", "6", "N/A (unmetered)"]
-                streamTrafficMembers = [
-                    [5],
-                    [0, 1, 2, 3],
-                    [],
-                    [6, 7],
-                    [4],
-                    [8, 9],
-                    [10],
-                ]
-                streamExpectedRxRate = [
-                    1000.0,
-                    2000.0,
-                    3000.0,
-                    4000.0,
-                    5000.0,
-                    0.0,
-                    20000.0,
-                ]
-                streamRateUnits = [
-                    "Kbps",
-                    "Kbps",
-                    "Kbps",
-                    "Kbps",
-                    "Kbps",
-                    "Kbps",
-                    "Kbps",
-                ]
-
-                # A tolerance needs to be applied as the values won't be exact based on how the flow meter is applied.
-                # Currently, there seems to be some source of error we have not figured out, so the tolerance
-                # needs to be a bit higher than ideal.  For example, a flow restricted to 5000 Kbps we might see 5020 Kbps.
-                # The error seems to be more a constant than a ratio of the traffic, so a flow restricted to 100 Kbps might see 120 Kbps.
-                # For now, using a constant tolerance of 1% but that might not work for scenarios using lower flow meter rates.
-
-                longestName = len(max(streamName, key=len))
-
-                for i in range(len(streamName)):
-                    rate = 0.0
-                    expectedRxRate = float(streamExpectedRxRate[i])
-                    tolerance = expectedRxRate * 0.01
-
-                    # Pad with spaces so all names are same length to make output look nice
-                    name = streamName[i].ljust(longestName)
-                    if len(streamTrafficMembers[i]) == 0:
-                        emptyStream = True
-                    else:
-                        emptyStream = False
-                        for j in range(len(streamTrafficMembers[i])):
-                            rate += float(RxRates[streamTrafficMembers[i][j]])
-                    testResult = abs(rate - expectedRxRate) <= tolerance
-                    if emptyStream:
-                        print(
-                            "N/A : Stream",
-                            name,
-                            "- scenario does not match any traffic items to this stream",
-                        )
-                    else:
-                        if testResult:
-                            print("PASS: ", end="")
-                        else:
-                            print("FAIL: ", end="")
-                        print(
-                            "Stream",
-                            name,
-                            "- expected rate:",
-                            expectedRxRate,
-                            streamRateUnits[i],
-                            "actual rate:",
-                            rate,
-                            streamRateUnits[i],
-                        )
+                self.validate_session(validation_func)
 
                 self._ix_network.Globals.Testworkflow.Stop()
 
                 for vport in self._ix_network.Vport.find():
                     vport.ReleasePort()
 
-                # For linux and connection_manager only
-                # if self._ix_session.TestPlatform.Platform != "windows":
-                #     self._ix_session.Session.remove()
+    def validate_session(self, validation_func):
+        if validation_func is None:
+            raise IxNetworkError("Must define a validation function")
+
+        if self._ix_network is None:
+            self._ix_session = self._get_session_by_name()
+            self._ix_network = self._ix_session.Ixnetwork
+
+        ix_validate = IxValidate.IxValidate(self._ix_network)
+
+        if hasattr(ix_validate, validation_func):
+            callable_validation_func = getattr(ix_validate, validation_func)
+            if callable(callable_validation_func):
+                callable_validation_func()
+            else:
+                raise IxNetworkError(
+                    f"Validation function IxValidate.{validation_func} must be callable"
+                )
+        else:
+            raise IxNetworkError(
+                f"Validation function IxValidate.{validation_func} does not exist"
+            )
 
     def stop_session(self, dry_run):
         """Stop an existing session"""
