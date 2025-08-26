@@ -175,12 +175,7 @@ class IxNetwork:
         return session
 
     def create_session(
-        self,
-        topology_file,
-        traffic_file,
-        dry_run=False,
-        force_port_ownership=True,
-        clean=False,
+        self, topology_file, traffic_file, dry_run=False, force_port_ownership=True
     ):
         """Creates a session with ixnetwork_restpy"""
 
@@ -193,7 +188,7 @@ class IxNetwork:
             SessionName=self._session_name,
             SessionId=None,
             ApiKey=None,
-            ClearConfig=clean,
+            ClearConfig=True,
             LogLevel=self._verbosity,
             LogFilename=self._log_file,
         )

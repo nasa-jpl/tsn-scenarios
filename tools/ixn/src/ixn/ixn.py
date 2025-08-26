@@ -109,14 +109,6 @@ def parse_opts():
         if necessary""",
     )
 
-    parser_create.add_argument(
-        "--clean",
-        action="store_true",
-        default=False,
-        required=False,
-        help="""If set then clear any current session with the same name""",
-    )
-
     parser_create.set_defaults(func=create_session)
 
     # Parser for run sub-command
@@ -171,7 +163,7 @@ def create_session(args):
     """Entry function to create a session"""
     ix_network = _create_ix_network(args)
     ix_network.create_session(
-        args.topology, args.traffic, args.dry_run, args.force_port_ownership, args.clean
+        args.topology, args.traffic, args.dry_run, args.force_port_ownership
     )
 
 
