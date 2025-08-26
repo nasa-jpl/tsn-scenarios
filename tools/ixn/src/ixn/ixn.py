@@ -5,6 +5,7 @@ import argparse
 import requests
 import sys
 import traceback
+from ixnetwork_restpy import ConnectionError
 
 
 def parse_opts():
@@ -197,15 +198,11 @@ def _create_ix_network(args):
 
 
 def main():
-    load_dotenv()
-    opts = parse_opts()
-    opts.func(opts)
-
-
-if __name__ == "__main__":
     try:
-        main()
-    except requests.exceptions.ConnectionError as e:
+        load_dotenv()
+        opts = parse_opts()
+        opts.func(opts)
+    except ConnectionError as e:
         print("Error: " + str(e))
         sys.exit(1)
     except Exception:
