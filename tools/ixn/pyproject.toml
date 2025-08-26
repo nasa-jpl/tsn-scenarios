@@ -1,0 +1,19 @@
+[project]
+name = "ixn"
+version = "0.1.0"
+description = "A tool to create, run, and validate Keysight sessions for TSN scenarios"
+requires-python = ">=3.12"
+dependencies = [
+    "ixnetwork-restpy>=1.7.0",
+    "python-dotenv>=1.1.1",
+    "pyyaml>=6.0.2",
+    "requests[socks]>=2.32.4",
+]
+
+[project.scripts]
+ixn = "ixn.ixn:main"
+
+[build-system]
+requires = ["uv_build>=0.8.13,<0.9.0"]
+build-backend = "uv_build"
+

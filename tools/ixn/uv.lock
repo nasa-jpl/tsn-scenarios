@@ -2,11 +2,6 @@ version = 1
 revision = 3
 requires-python = ">=3.12"
 
-[manifest]
-members = [
-    "ixn",
-]
-
 [[package]]
 name = "certifi"
 version = "2025.8.3"
@@ -70,7 +65,7 @@ wheels = [
 [[package]]
 name = "ixn"
 version = "0.1.0"
-source = { editable = "tools/ixn" }
+source = { editable = "." }
 dependencies = [
     { name = "ixnetwork-restpy" },
     { name = "python-dotenv" },

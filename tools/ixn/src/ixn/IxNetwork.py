@@ -1,7 +1,7 @@
 import os
 import time
 import yaml
-import IxValidate
+from .IxValidate import IxValidate
 from ixnetwork_restpy import PortMapAssistant, SessionAssistant, TestPlatform
 
 

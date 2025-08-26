@@ -1,16 +1,4 @@
-#!/usr/bin/env -S uv run --script --quiet
-# /// script
-# requires-python = ">=3.11"
-# dependencies = [
-#   "requests[socks]>=2.32.4",
-#   "ixnetwork-restpy >= 1.7.0",
-#   "python-dotenv >= 1.1.1",
-#   "pyyaml",
-# ]
-# ///
-#
-
-from IxNetwork import IxNetwork
+from .IxNetwork import IxNetwork
 from dotenv import load_dotenv
 
 import argparse
