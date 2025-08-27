@@ -9,7 +9,8 @@ from ixnetwork_restpy import ConnectionError
 
 def parse_opts():
     parser = argparse.ArgumentParser(
-        description="Tool to configure and run TSN scenarios. It takes a topology and traffic configuration as input",
+        description="""Tool to configure and run TSN scenarios. It takes a
+        topology and traffic configuration as input""",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     commands = parser.add_subparsers(
