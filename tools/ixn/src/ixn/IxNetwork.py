@@ -58,55 +58,56 @@ class IxNetwork:
         self._ix_network = None
 
     def _create_packet_header(
-        self, trafficItemObj, packetHeaderToAdd=None, appendToStack=None
+        self, config_element, packet_header_to_add=None, append_to_stack=None
     ):
         """This function is used to create packet headers that can then be manipulated by the caller"""
-
-        configElement = trafficItemObj.ConfigElement.find()
 
         # Do the followings to add packet headers on the new traffic item
 
         # Get a list of all the available protocol templates to create (packet headers)
-        availableProtocolTemplates = []
-        for protocolHeader in self._ix_network.Traffic.ProtocolTemplate.find():
-            availableProtocolTemplates.append(protocolHeader.DisplayName)
+        available_protocol_templates = []
+        for protocol_header in self._ix_network.Traffic.ProtocolTemplate.find():
+            available_protocol_templates.append(protocol_header.DisplayName)
 
-        packetHeaderProtocolTemplate = self._ix_network.Traffic.ProtocolTemplate.find(
-            DisplayName="^{}".format(packetHeaderToAdd)
+        packet_header_protocol_template = (
+            self._ix_network.Traffic.ProtocolTemplate.find(
+                DisplayName="^{}".format(packet_header_to_add)
+            )
         )
-        if len(packetHeaderProtocolTemplate) == 0:
+        if len(packet_header_protocol_template) == 0:
             self._ix_network.info(
                 "{} protocol template not supported, skipping. Supported procotol templates: {}".format(
-                    packetHeaderToAdd, "|".join(availableProtocolTemplates)
+                    packet_header_to_add, "|".join(available_protocol_templates)
                 )
             )
             return None
 
         # 2> Append the <new packet header> object after the specified packet header stack.
-        appendToStackObj = configElement.Stack.find(
-            DisplayName="^{}".format(appendToStack)
+        append_to_stack_obj = config_element.Stack.find(
+            DisplayName="^{}".format(append_to_stack)
         )
         self._ix_network.info(
             "Adding protocolTemplate: {} on top of stack: {}".format(
-                packetHeaderProtocolTemplate.DisplayName, appendToStackObj.DisplayName
+                packet_header_protocol_template.DisplayName,
+                append_to_stack_obj.DisplayName,
             )
         )
 
         # if self._debug_mode is True:
-        #     self._ix_network.info(format(packetHeaderProtocolTemplate))
-        #     self._ix_network.info(format(appendToStackObj))
-        appendToStackObj.Append(Arg2=packetHeaderProtocolTemplate)
+        #     self._ix_network.info(format(packet_header_protocol_template))
+        #     self._ix_network.info(format(append_to_stack_obj))
+        append_to_stack_obj.Append(Arg2=packet_header_protocol_template)
 
         # 3> Get the new packet header stack to use it for appending an IPv4 stack after it.
         # Look for the packet header object and stack ID.
-        packetHeaderStackObj = configElement.Stack.find(
-            DisplayName="^{}".format(packetHeaderToAdd)
+        packet_header_stack_obj = config_element.Stack.find(
+            DisplayName="^{}".format(packet_header_to_add)
         )
 
         # 4> In order to modify the fields, get the field object
-        packetHeaderFieldObj = packetHeaderStackObj.Field.find()
+        packet_header_field_obj = packet_header_stack_obj.Field.find()
 
-        return packetHeaderFieldObj
+        return packet_header_field_obj
 
     def _validate_traffic_endpoint(self, traffic_endpoint):
         """Takes in an endpoint of the form <EP>.<DG>.<protocol_stack>
@@ -137,26 +138,22 @@ class IxNetwork:
     def _validate_configs(self):
         """Takes in the endpoints and traffic_items read from the yaml files and validates them"""
 
-        # Make sure each src and dst lists match in size, and have a corresponding endpoint
         for traffic_item in self._traffic_items["traffic_items"]:
-            if not isinstance(traffic_item["src"], list):
-                raise RuntimeError(
-                    f"Traffic source {traffic_item['src']} must be a list"
-                )
+            # Make sure each endpoint set has a src and dst
+            for endpoint_set in traffic_item["endpoint_sets"]:
+                if "src" not in endpoint_set:
+                    raise RuntimeError(
+                        f"Endpoint set src missing from {traffic_item['name']}"
+                    )
+                if "dst" not in endpoint_set:
+                    raise RuntimeError(
+                        f"Endpoint set dst missing from {traffic_item['name']}"
+                    )
 
-            if not isinstance(traffic_item["dst"], list):
-                raise RuntimeError(
-                    f"Traffic source {traffic_item['dst']} must be a list"
-                )
-
-            if len(traffic_item["src"]) != len(traffic_item["dst"]):
-                raise RuntimeError("Traffic src and dst list sizes must match")
-
-            for traffic_endpoint in traffic_item["src"]:
-                self._validate_traffic_endpoint(traffic_endpoint)
-
-            for traffic_endpoint in traffic_item["dst"]:
-                self._validate_traffic_endpoint(traffic_endpoint)
+                # Make sure each src and dst has a corresponding value in
+                # the topology
+                self._validate_traffic_endpoint(endpoint_set["src"])
+                self._validate_traffic_endpoint(endpoint_set["dst"])
 
     def _get_session_by_name(self):
         """Checks to see if the session name exists on the server"""
@@ -268,18 +265,18 @@ class IxNetwork:
                         ix_endpoints[f"{name}.{protocol_stack}"] = ix_eth
 
         self._ix_network.info("Create Traffic Items")
-        trafficItem = []
-        for i, traffic_item in enumerate(self._traffic_items["traffic_items"]):
+        traffic_item = []
+        for i, traffic_item_config in enumerate(self._traffic_items["traffic_items"]):
             print(
                 f"Creating Traffic Item {i + 1} of {len(self._traffic_items['traffic_items'])}..."
             )
             # Create a traffic item.  This scenario, all traffic is uni-directional.
             # Need to specify the type so that the appropriate packet headers are applied.
-            trafficItem.append(
+            traffic_item.append(
                 self._ix_network.Traffic.TrafficItem.add(
-                    Name=f"Traffic Item {i + 1}",
+                    Name=f"{traffic_item_config['name']}",
                     BiDirectional=False,
-                    TrafficType=traffic_item["type"],
+                    TrafficType=traffic_item_config["type"],
                 )
             )
 
@@ -291,38 +288,49 @@ class IxNetwork:
 
             # So for example if a topology ep3_topology has 2 IPv4 stacks, you need to provide
             # the specific IPv4 stack you want to use.
-            for src, dst in zip(traffic_item["src"], traffic_item["dst"]):
-                trafficItem[i].EndpointSet.add(
-                    Sources=ix_endpoints[src], Destinations=ix_endpoints[dst]
+            for endpoint_set in traffic_item_config["endpoint_sets"]:
+                traffic_item[i].EndpointSet.add(
+                    Sources=ix_endpoints[endpoint_set["src"]],
+                    Destinations=ix_endpoints[endpoint_set["dst"]],
                 )
-                configElement = trafficItem[i].ConfigElement.find()[0]
+                # NOTE: There doesn't seem to be a way to find a specific
+                # endpoint set that was added above. i.e. ideally there would
+                # be a name of an ID that we could specify and then get that
+                # particular config_element. So instead we rely on the
+                # assumption that the last item in the list is the most
+                # recently added one.
+                config_element = traffic_item[i].ConfigElement.find()[-1]
 
-            # If this traffic item is UDP, add the UDP packet header with appropriate destination port.
-            # Our scenario doesn't care about the source port.
-            if traffic_item["udp"]:
-                udpFieldObj = self._create_packet_header(
-                    trafficItem[i], packetHeaderToAdd="UDP", appendToStack="IPv4"
-                )
-                udpDstField = udpFieldObj.find(DisplayName="UDP-Dest-Port")
-                udpDstField.Auto = False
-                udpDstField.SingleValue = traffic_item["dst_port"]
+                # If this traffic item is UDP, add the UDP packet header with appropriate destination port.
+                # Our scenario doesn't care about the source port.
+                if endpoint_set["udp"]:
+                    udp_field_obj = self._create_packet_header(
+                        config_element,
+                        packet_header_to_add="UDP",
+                        append_to_stack="IPv4",
+                    )
+                    if "dst_port" in endpoint_set:
+                        udp_dst_field = udp_field_obj.find(DisplayName="UDP-Dest-Port")
+                        udp_dst_field.Auto = False
+                        udp_dst_field.SingleValue = endpoint_set["dst_port"]
 
-            # Configure for a particular bit rate.  By fixing frame size at 128 bytes, Keysight will determine
-            # the correct frame rate to use to achieve the specified bit rate.
-            configElement.FrameRate.update(
-                Type="bitsPerSecond",
-                BitRateUnitsType="kbitsPerSec",
-                Rate=traffic_item["tx_rate"],
-            )
-            configElement.FrameSize.FixedSize = 128
+                # Configure for a particular bit rate.  By fixing frame size at 128 bytes, Keysight will determine
+                # the correct frame rate to use to achieve the specified bit rate.
+                if "frame_rate_kbps" in endpoint_set:
+                    config_element.FrameRate.update(
+                        Type="bitsPerSecond",
+                        BitRateUnitsType="kbitsPerSec",
+                        Rate=endpoint_set["frame_rate_kbps"],
+                    )
+                if "frame_size" in endpoint_set:
+                    config_element.FrameSize.FixedSize = endpoint_set["frame_size"]
 
             # This adds Traffic Item to the Statistics Tracking field.
             # Without this, keysight will not track frame drops, latencies, etc.
-            for j in range(0, len(traffic_item["src"])):
-                trafficItem[i].Tracking.find()[j].TrackBy = [f"trackingenabled{j}"]
+            traffic_item[i].Tracking.find()[0].TrackBy = [f"trackingenabled0"]
 
             # This generates the frames based on the previous configuration.
-            trafficItem[i].Generate()
+            traffic_item[i].Generate()
 
     def run_session(self, run_time_sec, dry_run=False, validation_func=None):
         """Run an existing session"""
