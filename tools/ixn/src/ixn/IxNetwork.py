@@ -384,7 +384,7 @@ class IxNetwork:
             self._ix_session = self._get_session_by_name()
             self._ix_network = self._ix_session.Ixnetwork
 
-        ix_validate = IxValidate.IxValidate(self._ix_network)
+        ix_validate = IxValidate(self._ix_network)
 
         if hasattr(ix_validate, validation_func):
             callable_validation_func = getattr(ix_validate, validation_func)

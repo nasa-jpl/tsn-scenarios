@@ -1,100 +1,100 @@
 traffic_items:
   - name: "Traffic1"
     type: "ipv4"
-    src:
-      - "ep1"
-    dst:
-      - "ep3.eth1.ip"
-    udp: True
-    dst_port: 1000
-    tx_rate: 10000
+    endpoint_sets:
+      - src: "ep1"
+        dst: "ep3.eth1.ip"
+        udp: True
+        dst_port: 1000
+        frame_rate_kbps: 10000
+        frame_size: 128
   - name: "Traffic2"
     type: "ipv4"
-    src:
-      - "ep1.eth1.ip"
-    dst:
-      - "ep3.eth1.ip"
-    udp: True
-    dst_port: 1100
-    tx_rate: 11000
+    endpoint_sets:
+      - src:  "ep1.eth1.ip"
+        dst: "ep3.eth1.ip"
+        udp: True
+        dst_port: 1100
+        frame_rate_kbps: 11000
+        frame_size: 128
   - name: "Traffic3"
     type: "ipv4"
-    src:
-      - "ep1.eth1.ip"
-    dst:
-      - "ep3.eth2.ip"
-    udp: True
-    dst_port: 2000
-    tx_rate: 12000
+    endpoint_sets:
+      - src:  "ep1.eth1.ip"
+        dst: "ep3.eth2.ip"
+        udp: True
+        dst_port: 2000
+        frame_rate_kbps: 12000
+        frame_size: 128
   - name: "Traffic4"
     type: "ipv4"
-    src:
-      - "ep1.eth1.ip"
-    dst:
-      - "ep3.eth2.ip"
-    udp: True
-    dst_port: 2200
-    tx_rate: 13000
+    endpoint_sets:
+      - src:  "ep1.eth1.ip"
+        dst: "ep3.eth2.ip"
+        udp: True
+        dst_port: 2200
+        frame_rate_kbps: 13000
+        frame_size: 128
   - name: "Traffic5"
     type: "ipv4"
-    src:
-      - "ep2.eth1.ip"
-    dst:
-      - "ep3.eth1.ip"
-    udp: True
-    dst_port: 3000
-    tx_rate: 14000
+    endpoint_sets:
+      - src:  "ep2.eth1.ip"
+        dst: "ep3.eth1.ip"
+        udp: True
+        dst_port: 3000
+        frame_rate_kbps: 14000
+        frame_size: 128
   - name: "Traffic6"
     type: "ipv4"
-    src:
-      - "ep2.eth1.ip"
-    dst:
-      - "ep3.eth1.ip"
-    udp: True
-    dst_port: 3300
-    tx_rate: 15000
+    endpoint_sets:
+      - src:  "ep2.eth1.ip"
+        dst: "ep3.eth1.ip"
+        udp: True
+        dst_port: 3300
+        frame_rate_kbps: 15000
+        frame_size: 128
   - name: "Traffic7"
     type: "ipv4"
-    src:
-      - "ep2.eth1.ip"
-    dst:
-      - "ep3.eth2.ip"
-    udp: True
-    dst_port: 4000
-    tx_rate: 16000
+    endpoint_sets:
+      - src:  "ep2.eth1.ip"
+        dst: "ep3.eth2.ip"
+        udp: True
+        dst_port: 4000
+        frame_rate_kbps: 16000
+        frame_size: 128
   - name: "Traffic8"
     type: "ipv4"
-    src:
-      - "ep2.eth1.ip"
-    dst:
-      - "ep3.eth2.ip"
-    udp: True
-    dst_port: 4400
-    tx_rate: 17000
+    endpoint_sets:
+      - src:  "ep2.eth1.ip"
+        dst: "ep3.eth2.ip"
+        udp: True
+        dst_port: 4400
+        frame_rate_kbps: 17000
+        frame_size: 128
   - name: "Traffic9"
     type: "ipv4"
-    src:
-      - "ep2.eth1.ip"
-    dst:
-      - "ep3.eth2.ip"
-    udp: True
-    dst_port: 5000
-    tx_rate: 18000
+    endpoint_sets:
+      - src:  "ep2.eth1.ip"
+        dst: "ep3.eth2.ip"
+        udp: True
+        dst_port: 5000
+        frame_rate_kbps: 18000
+        frame_size: 128
   - name: "Traffic10"
     type: "ipv4"
-    src:
-      - "ep2.eth1.ip"
-    dst:
-      - "ep3.eth1.ip"
-    udp: True
-    dst_port: 5000
-    tx_rate: 19000
+    endpoint_sets:
+      - src:  "ep2.eth1.ip"
+        dst: "ep3.eth1.ip"
+        udp: True
+        dst_port: 5000
+        frame_rate_kbps: 19000
+        frame_size: 128
   - name: "Traffic11"
     type: "ethernetVlan"
-    src:
-      - "ep1.eth1"
-    dst:
-      - "ep3.eth1"
-    udp: False
-    dst_port: 0
-    tx_rate: 20000
+    endpoint_sets:
+      - src:  "ep1.eth1"
+        dst: "ep3.eth1"
+        udp: False
+        dst_port: 0
+        frame_rate_kbps: 20000
+        frame_size: 128
