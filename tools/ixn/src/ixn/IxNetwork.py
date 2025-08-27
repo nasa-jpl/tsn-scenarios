@@ -23,9 +23,6 @@ class IxNetwork:
 
     def __init__(
         self,
-        api_server_ip,
-        chassis_ip,
-        chassis_slot_number,
         session_name,
         verbosity=None,
         log_file=None,
@@ -34,13 +31,11 @@ class IxNetwork:
         self._password = os.getenv("IXN_PASS")
 
         # Our API server and chassis are same device
-        self._api_server_ip = api_server_ip
-        self._chassis_ip = chassis_ip
+        self._api_server_ip = os.getenv("IXN_API_SERVER")
+        self._chassis_ip = os.getenv("IXN_CHASSIS_SERVER")
+        self._chassis_slot_number = os.getenv("IXN_CHASSIS_SLOT")
 
         self._session_name = session_name
-
-        # Some Keysight products have multiple slots within a single chassis, we just have 1 slot
-        self._chassis_slot_number = chassis_slot_number
 
         # How verbose do we want the output
         if verbosity is None:

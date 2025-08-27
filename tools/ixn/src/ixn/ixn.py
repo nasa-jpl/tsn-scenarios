@@ -19,29 +19,6 @@ def parse_opts():
 
     # Parent parser for use by multiple subcommands
     parser_base = argparse.ArgumentParser(add_help=False)
-    parser_base.add_argument(
-        "--api-server-ip",
-        default="192.168.1.21",
-        type=str,
-        required=False,
-        help="""Specify the IP address of the RestAPI server""",
-    )
-
-    parser_base.add_argument(
-        "--chassis-ip",
-        default="192.168.1.21",
-        type=str,
-        required=False,
-        help="""Specify the IP address of the Ixia chassis""",
-    )
-
-    parser_base.add_argument(
-        "--chassis-slot-number",
-        default=1,
-        type=int,
-        required=False,
-        help="""Specify the Ixia chassis slot number""",
-    )
 
     parser_base.add_argument(
         "--session-name",
@@ -188,9 +165,6 @@ def validate_session(args):
 
 def _create_ix_network(args):
     return IxNetwork(
-        args.api_server_ip,
-        args.chassis_ip,
-        args.chassis_slot_number,
         args.session_name,
         args.verbosity,
         args.log,
