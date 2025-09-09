@@ -104,7 +104,7 @@ To see a more drastic effect, reduce the inter burst gap to <5 seconds.
 Configure two streams with Stream ID 1 and Stream ID 2. Within the configuration window for each stream, set the following settings:
 
 * Set SMAC type to `MAC/Mask`.
-* Input the MAC to be the source MAC of the ethernet transmitter on the keysight. The SMAC can be found by clicking on the "Ethernet" protocol box within the Topology in the Keysight, then referencing the "MAC" box in the bottom window.
+* Input the MAC to be the source MAC of the ethernet transmitter on the keysight. The SMAC can be found by clicking on the VLAN enabled "Ethernet" protocol box within the Topology in the Keysight, then referencing the "MAC" box in the bottom window.
 * DMAC type should remain as `Any`
 * For Stream ID 1, select port 1 (assuming that port 1 of the Keysight is connected to port 1 of the switch).
 * For Stream ID 2, select port 2 (assuming that port 2 of the Keysight is connected to port 2 of the switch).
@@ -134,7 +134,7 @@ Configure two stream filters with Stream Filter ID 1 and Stream Filter ID 2. Wit
 
 ==== Detailed Novus Configuration
 
-Create two standard traffic items using gPTP (one timing master, one slave) with Ethernet stack, no VLAN tags for the sources, with both traffic items routed to the same receiver (gPTP slave, Ethernet).
+Create two standard traffic items using gPTP (one timing master, one slave) with Ethernet stack (no VLAN tags) for gPTP and add a second EThernet stack (VLAN enabled) as the traffic sources, with both traffic items routed to the same receiver (gPTP slave, Ethernet).  
 
 For the traffic items, enable the following settings:
 
@@ -143,6 +143,7 @@ For the traffic items, enable the following settings:
 ** Set the start time to 1us for both traffic items.
 ** Leave other entriws in the default setting.
 * The frame size is Fixed: 64 (Bytes)
+* Under Traffic Global Settings, enable "Use scheduled start transmit"
 
 This set up enables 1,000 fps traffic for both Stream 1 and Stream 2.
 
