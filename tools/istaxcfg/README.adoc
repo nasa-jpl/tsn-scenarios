@@ -21,8 +21,6 @@ Changing a single layer will change all scenarios that use it.
 
 === Templating
 
-IMPORTANT: Not yet implemented.
-
 Configurations can be templated to allow the same configuration to be used across more contexts.
 
 There are two types on configuration:
@@ -170,5 +168,3 @@ just format
 ----
 just check
 ----
-
-
