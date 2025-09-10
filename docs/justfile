@@ -1,3 +1,5 @@
+project := "tsn-scenarios"
+
 init:
     apptainer exec docker://antora/antora npm i @antora/lunr-extension
 
@@ -24,6 +26,7 @@ deploy:
 
 archive:
     just build
-    mkdir tsn-scenarios
-    mv build tsn-scenarios
-    tar czf tsn-scenarios-$(git log -1 --format=format:%h-%cs).tar.gz tsn-scenarios
+    mkdir {{project}}
+    mv build {{project}}
+    tar czf {{project}}-$(git log -1 --format=format:%h-%cs).tar.gz {{project}}
+    rm -rf {{project}}
