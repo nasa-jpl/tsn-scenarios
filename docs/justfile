@@ -21,3 +21,9 @@ deploy:
     rm -rf jfve-pages
     git clone git@github.jpl.nasa.gov:jfve/pages.git jfve-pages
     jfve-pages/exe/pages publish build/site .
+
+archive:
+    just build
+    mkdir tsn-scenarios
+    mv build tsn-scenarios
+    tar czf tsn-scenarios-$(git log -1 --format=format:%h-%cs).tar.gz tsn-scenarios
