@@ -5,7 +5,8 @@ build:
     apptainer run docker://antora/antora antora-playbook-local.yml
 
 serve:
-    (cd build/site/; echo "Serving on http://localhost:8080"; python3 -m http.server 8080)
+    echo "Serving on http://localhost:8080"
+    python3 -m http.server 8080 -d build/site
 
 dev:
     #!/bin/sh
