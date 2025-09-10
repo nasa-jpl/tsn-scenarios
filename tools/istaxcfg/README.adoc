@@ -30,35 +30,58 @@ There are two types on configuration:
 
 == Usage
 
+=== Download Configuration
+
 [source,sh]
-.Download configuration
+.Usage
 ----
 istaxcfg download <host>
 ----
 
 [source,console]
-.Download example
+.Example
 ----
 > istaxcfg download hpsctsnsw0 | grep hostname
 hostname hpsctsnsw0
 ----
 
+=== Upload Preview
+
+The final configuration can be previewed without actually uploading it via the `--dry-run` option.
+
 [source,sh]
-.Upload configuration
+.Usage
 ----
 istaxcfg upload <host> <config-file>
 ----
 
-[source,sh]
-.Upload concatenation of multiple configuration partials
+==== Upload Preview Example
+
+[listing]
+.`example.cfg` file
 ----
-istaxcfg upload <host> <partial-config-file> <partial-config-file> ...
+hostname {{ hostname }}
 ----
 
 [source,console]
-.Example configuration layering
+.Example
 ----
-istaxcfg upload hpsctsnsw0 base.cfg vlans.cfg nolldp.cfg
+> istaxcfg upload --dry-run my-istax-host example.cfg
+hostname my-istax-host
+----
+
+=== Concatenate Multiple Config Partials
+
+[source,sh]
+.Usage
+----
+istaxcfg upload <host> <partial-config-file> [<partial-config-file>...]
+----
+
+[source,console]
+.Example
+----
+istaxcfg upload hpsctsnsw0 scenario.cfg mirroring.cfg
 ----
 
 == Advanced Usage
@@ -79,11 +102,9 @@ The `istax upload` performs the following steps:
 . Sets the `hostname` template variable to:
 .. If host argument is IP address, transform IP address into valid hostname by replacing `.` with `_`
 .. Else, host argument
-. Adds switch metadata to template variables
-.. If `--metadata <file.yml>` option provided, loads switch metadata from provided YAML file
-.. Else,
-... If `--part <part-id>` option provided, loads switch metadata from internal metadata for given part ID
-... Else, queries switch for information to infer the part ID then loads switch metadata from internal metadata for inferred part ID
+. Sets the `ports` template variable to:
+.. If `--dry-run` option present, use dummy port map for preview purposes
+.. Else, port map provided by switch
 . Renders the template
 
 === Configuration Templating Example
@@ -95,14 +116,14 @@ Given the following configuration template:
 ----
 hostname {{ hostname }}
 
-{% for port in ports %}
+{% for port in ports[:-1] %}
 interface {{ port.name }}
  switchport access vlan 2
 !
 {% endfor %}
 ----
 
-And given the following switch description:
+And given the following port map:
 
 [source,yaml]
 .Example switch description
@@ -110,12 +131,11 @@ And given the following switch description:
 ports:
 - name: 10GigabitEthernet 1/1
 - name: 10GigabitEthernet 1/2
-- name: GigabitEthernet 1/1
 ----
 
 [NOTE]
 ====
-Ports is a list of all ports including the management port.
+`ports` is a list of all ports including the management port.
 
 The management port can be referenced in templates with `port[-1]`.
 All ports except the management port can be referenced in templates with `ports[:-1]`.
@@ -144,6 +164,70 @@ interface 10GigabitEthernet 1/2
 !
 interface GigabitEthernet 1/1
  switchport access vlan 2
+!
+----
+
+=== Templating Conventions
+
+==== Layering
+
+Scenario configurations should include lower layer configuration such that only the scenario configuration needs to be provided.
+
+For example, an 802.1Qbv scenario configuration should include the 802.1AS configuration and the base configuration.
+
+[listing]
+.Example `802.1Qbv.conf`
+----
+{% include "base.conf" %}
+{% include "802.1AS.conf" %}
+
+...
+----
+
+==== Mixins
+
+Configuration mixins are configuration files that can be optionally added for things like debug.
+
+For example, a mixin could be created to optionally enable port mirroring.
+
+[source,sh]
+.Example
+----
+istaxcfg upload myistaxhost scenario.cfg mirroring.cfg
+----
+
+==== Ports
+
+An array of ports is provided to the configuration template via the `ports` template variable.
+This array contains all ports front and back.
+By convention, the management port is always the last port.
+Python array slice syntax can be used to target a subset of ports.
+
+[source,python]
+.Loop through all ports
+----
+{% for port in ports %}
+interface {{ port.name }}
+ ...
+!
+{% endfor %}
+----
+
+[source,python]
+.Loop through front ports only
+----
+{% for port in ports[:-1] %}
+interface {{ port.name }}
+ ...
+!
+{% endfor %}
+----
+
+[source,python]
+.Management port only
+----
+interface {{ port[-1].name }}
+ ...
 !
 ----
 
