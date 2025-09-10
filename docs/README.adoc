@@ -19,7 +19,7 @@ just build
 [listing]
 .Preview site
 ----
-just dev
+just --tempdir ~/tmp dev
 ----
 
 == Publish
