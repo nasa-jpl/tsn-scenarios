@@ -21,6 +21,8 @@ class IxNetwork:
         "all": SessionAssistant.LOGLEVEL_ALL,
     }
 
+    FRAME_RATE_TYPES = ["bitsPerSecond", "framesPerSecond", "percentLineRate"]
+
     def __init__(
         self,
         session_name,
@@ -150,6 +152,12 @@ class IxNetwork:
                 self._validate_traffic_endpoint(endpoint_set["src"])
                 self._validate_traffic_endpoint(endpoint_set["dst"])
 
+                if endpoint_set["frame_rate_type"]:
+                    if endpoint_set["frame_rate_type"] not in self.FRAME_RATE_TYPES:
+                        raise RuntimeError(
+                            f"Frame rate type must be one of {self.FRAME_RATE_TYPES}"
+                        )
+
     def _get_session_by_name(self):
         """Checks to see if the session name exists on the server"""
         platform = TestPlatform(self._api_server_ip)
@@ -243,9 +251,14 @@ class IxNetwork:
 
                         if "vlan" in eth_stack:
                             ix_eth.EnableVlans.Single(True)
-                            ix_eth_vlan = ix_eth.Vlan.find()[0].VlanId.SingleValue(
-                                eth_stack["vlan"]
-                            )
+                            # TODO: Ask Mike if this should work. His traffic
+                            # example uses what looks like the incorrect
+                            # endpoint when assigning the vlan Id. When I use
+                            # what I think is the correct endpoint, the
+                            # EndpointSet.add call below fails
+                            # ix_eth_vlan = ix_eth.Vlan.find()[0].VlanId.Single(
+                            #     eth_stack["vlan"]
+                            # )
 
                         if eth_stack["ipv4"] is True:
                             self._ix_network.info(f"Configuring {name} IP{j}")
@@ -259,6 +272,7 @@ class IxNetwork:
 
                         ix_endpoints[f"{name}.{protocol_stack}"] = ix_eth
 
+        print(ix_endpoints)
         self._ix_network.info("Create Traffic Items")
         traffic_item = []
         for i, traffic_item_config in enumerate(self._traffic_items["traffic_items"]):
@@ -284,6 +298,9 @@ class IxNetwork:
             # So for example if a topology ep3_topology has 2 IPv4 stacks, you need to provide
             # the specific IPv4 stack you want to use.
             for endpoint_set in traffic_item_config["endpoint_sets"]:
+                print(f"Src: {ix_endpoints[endpoint_set['src']]}")
+                print(f"Dst: {ix_endpoints[endpoint_set['dst']]}")
+
                 traffic_item[i].EndpointSet.add(
                     Sources=ix_endpoints[endpoint_set["src"]],
                     Destinations=ix_endpoints[endpoint_set["dst"]],
@@ -309,16 +326,48 @@ class IxNetwork:
                         udp_dst_field.Auto = False
                         udp_dst_field.SingleValue = endpoint_set["dst_port"]
 
-                # Configure for a particular bit rate.  By fixing frame size at 128 bytes, Keysight will determine
-                # the correct frame rate to use to achieve the specified bit rate.
-                if "frame_rate_kbps" in endpoint_set:
+                # FrameRate
+                if "frame_rate" in endpoint_set:
+                    config_element.FrameRate.update(Rate=endpoint_set["frame_rate"])
+                if "frame_rate_type" in endpoint_set:
                     config_element.FrameRate.update(
-                        Type="bitsPerSecond",
-                        BitRateUnitsType="kbitsPerSec",
-                        Rate=endpoint_set["frame_rate_kbps"],
+                        Type=endpoint_set["frame_rate_type"]
                     )
+                config_element.FrameRate.update(BitRateUnitsType="kbitsPerSec")
                 if "frame_size" in endpoint_set:
                     config_element.FrameSize.FixedSize = endpoint_set["frame_size"]
+
+                # TransmissionControl
+                if "control_type" in endpoint_set:
+                    config_element.TransmissionControl.update(
+                        Type=endpoint_set["control_type"],
+                    )
+
+                if "control_burst_count" in endpoint_set:
+                    config_element.TransmissionControl.update(
+                        BurstPacketCount=endpoint_set["control_burst_count"],
+                    )
+                if "control_burst_gap" in endpoint_set:
+                    config_element.TransmissionControl.update(
+                        EnableInterBurstGap=True,
+                        InterBurstGap=endpoint_set["control_burst_gap"],
+                    )
+                if "control_burst_gap_units" in endpoint_set:
+                    config_element.TransmissionControl.update(
+                        InterBurstGapUnits=endpoint_set["control_burst_gap_units"]
+                    )
+
+                # VLAN priority
+                if "vlan_priority" in endpoint_set:
+                    # Set priority level
+                    for stack in config_element.Stack.find():
+                        if stack.StackTypeId == "vlan":
+                            for field in stack.Field.find():
+                                if (
+                                    field.FieldTypeId
+                                    == "vlan.header.vlanTag.vlanUserPriority"
+                                ):
+                                    field.SingleValue = endpoint_set["vlan_priority"]
 
             # This adds Traffic Item to the Statistics Tracking field.
             # Without this, keysight will not track frame drops, latencies, etc.

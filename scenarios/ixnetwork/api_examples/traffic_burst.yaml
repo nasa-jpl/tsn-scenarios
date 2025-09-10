@@ -1,0 +1,16 @@
+traffic_items:
+  - name: "Traffic1"
+    type: "ipv4"
+    endpoint_sets:
+      - src: "ep1.eth1.ip"
+        dst: "ep3.eth1.ip"
+        udp: True
+        dst_port: 1000
+        frame_rate: 100
+        frame_rate_type: "percentLineRate"
+        frame_size: 1000
+        control_type: 'custom'
+        control_burst_count: 1000
+        control_burst_gap: 13
+        control_burst_gap_units: 'seconds'
+

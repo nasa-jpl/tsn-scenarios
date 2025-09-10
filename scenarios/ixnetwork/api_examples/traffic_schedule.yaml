@@ -1,0 +1,14 @@
+traffic_items:
+  - name: "Traffic1"
+    type: "ethernetVlan"
+    endpoint_sets:
+      - src: "ep1.eth1.ip"
+        dst: "ep3.eth1.ip"
+        udp: True
+        dst_port: 1000
+        frame_rate: 1000
+        frame_rate_type: "framesPerSecond"
+        frame_size: 128
+        start_delay: 250
+        start_delay_units: 'microseconds'
+        vlan_priority: 3
