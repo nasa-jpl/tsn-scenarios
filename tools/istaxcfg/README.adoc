@@ -96,16 +96,20 @@ istaxcfg --proxy localhost:9999 download <host>
 
 == Configuration Templating
 
-The `istax upload` performs the following steps:
+The `istaxcfg upload` commands concatenates all configuration template input files then renders the concatenated template using the Jinja templating library.
 
-. Concatenates all configuration input files
-. Sets the `hostname` template variable to:
-.. If host argument is IP address, transform IP address into valid hostname by replacing `.` with `_`
-.. Else, host argument
-. Sets the `ports` template variable to:
-.. If `--dry-run` option present, use dummy port map for preview purposes
-.. Else, port map provided by switch
-. Renders the template
+=== Templating Syntax
+
+See the Jinja https://jinja.palletsprojects.com/en/stable/templates/[Template Designer Documentation] for syntax documentation.
+
+=== Templating Variables
+
+The following template variables are provided:
+
+* `hostname` -- the hostname of the IStaX host obtained from the `hostname` argument of the `istaxcfg upload` command.
+* `ports` -- an array of port objects.
+Each port object has the following members:
+** `name` -- the internal name of the port.
 
 === Configuration Templating Example
 
