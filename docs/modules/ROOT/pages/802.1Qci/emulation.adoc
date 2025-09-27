@@ -126,7 +126,7 @@ Configure two stream filters with Stream Filter ID 1 and Stream Filter ID 2. Wit
 
 * For Stream Filter 1, set Stream ID to 1
 * For Stream Filter 2, set Stream ID to 2
-* Check Stream Gate Enable box
+* Check the Stream Gate Enable box for each filter
 * For Stream Filter 1, set Stream Gate ID to 1
 * For Stream Filter 2, set Stream Gate ID to 2
 * Set Maximum SDU Size to 1536
@@ -140,8 +140,8 @@ For the traffic items, enable the following settings:
 
 * Under Frame Rate, set to 1000 fps.
 * Under Flow Transmission, for both streams, keep the continuous mode.
-** Set the start time to 1us for both traffic items.
-** Leave other entriws in the default setting.
+** Set the start time to 5us for both traffic items.
+** Leave other entries in the default setting.
 * The frame size is Fixed: 64 (Bytes)
 * Under Traffic Global Settings, enable "Use scheduled start transmit"
 
@@ -153,23 +153,25 @@ This set up enables 1,000 fps traffic for both Stream 1 and Stream 2.
 
 Generate, Apply, and Run the Novus configuration.  Either in the switch Port Statistics Overview, or in the Keysight flow statistics, view the Tx and Rx byte counts.
 
-Expected to see all packets being passed for both streams but with delays of 249us for stream 1 and 499us for stream2. No packets were passed for either traffic stream. It was found that a stream gate passes packets in the respective stream only when the packets arrive during the open interval of the gate.
+Expected to see all packets being passed for both streams but with delays of 245us for stream 1 and 495us for stream2. No packets were passed for either traffic stream. It was found that a stream gate passes packets in the respective stream only when the packets arrive during the open interval of the gate.
 
-Changed the traffic timing so Stream 1 packets are delayed by 255us and Stream 2 packets by 505us. Now all packets are passed but with nominally 2us latency. Additionally defined TAS for the receive port (port 4 for the Keysight and switch) to generate 245us and 505us latencies for stream 1 and 2 respectively.
+===== Test 2
+
+Changed the traffic timing so Stream 1 packets are delayed by 255us and Stream 2 packets by 505us. Now all packets are passed but with nominally 2us latency. TAS is needed at the switch exit port (port 4 for the Keysight and switch) to generate 245us and 505us latencies for stream 1 and 2 respectively.
 
 
 === Scenario 2 - Invalid Rx
 
 ==== Detailed Switch Configuration
 
-Disable the TAS configuration for port 4. Turn on the RxInvalid flag and activate the updated configuration for both stream gates as per the following steps:
+Disable TAS configuration for port 4 (if activated). Turn on the Invalid Rx flag and activate the updated configuration for both stream gates as per the following steps:
 
-* Check the RxInvalid box and click the Save button
+* Check the Invalid Rx box and click the Save button
 * Check the "Config Change" box and click the Save button
 
 ===== Test 1
 
-Clear the switch Port Statistics Overview and run the Novus without any modifications. Either in the switch Port Statistics Overview, or in the Keysight flow statistics, view the Tx and Rx byte counts to confirm that both traffics streams are passed by their stream gates.
+Clear the switch Port Statistics Overview and run the Novus without any modifications. Either in the switch Port Statistics Overview, or in the Keysight flow statistics, view the Tx and Rx byte counts to confirm that both traffics streams are passed by their respective stream gates.
 
 ==== Detailed Novus Configuration
 
@@ -202,9 +204,9 @@ Note: It was found that the RxInvalid flag does not clear reliably if packets ar
 
 ==== Detailed Switch Configuration
 
-For Stream Gate 2, turn off the RxInvalid flag, set the Octet Max value to 511 and activate the updated configuration for the stream gate as per the following steps:
+For Stream Gate 2, turn off the Invalid Rx flag, set the Octet Max value to 511 and activate the updated configuration for the stream gate as per the following steps:
 
-* Uncheck the RxInvalid box
+* Uncheck the Invalid Rx box
 * Enter 511 in the Octet Max box for each GCL index
 * Click the Save button
 * Check the "Config Change" box and click the Save button
@@ -242,7 +244,7 @@ Clear the Octets Exceeded flag for Stream Gate 2.
 
 ===== Test 4
 
-Clear the switch PSFP Stream FIlter Statistics and run the Novus. Either in the switch PSFP Stream FIlter Statistics, or in the Keysight flow statistics, view the Tx and Rx byte counts to confirm that all packets for Stream 2 traffic are being passed.
+Clear the switch PSFP Stream FIlter Statistics and run the Novus. Either in the switch PSFP Stream Filter Statistics, or in the Keysight flow statistics, view the Tx and Rx byte counts to confirm that all packets for Stream 2 traffic are being passed.
 
 
 === Scenario 4 - Re-prioritization
@@ -251,7 +253,7 @@ Clear the switch PSFP Stream FIlter Statistics and run the Novus. Either in the 
 
 Apply the following changes:
 
-* Change the SMAC filter Any for the Stream 1 definition
+* Change the SMAC filter to Any for the Stream 1 definition
 * Change the Stream Gate 1 GCL to 4
 * Set all four gate states to Open
 * Set the IPV entries to 4,5,6,7 for successive GCL indices
@@ -265,7 +267,7 @@ Add additional traffic items as follows:
 
 * Add three Endpoint sets to traffic item 1 (i.e. Stream 1)
 * Stagger the delay in the original traffic item and the newly added endpoints with delays of 5us, 255us, 505us, and 755us
-* Do not include a VLAN priority for these four traffic items
+* Do not include a VLAN priority (i.e. set to 0) for these four traffic items
 * Delete traffic item 2 (i.e. Stream 2)
 
 ===== Test 1
@@ -294,6 +296,7 @@ Apply the following changes in the Mirroring screen to mirror traffic from port 
 * Documentation is at Teledyne LeCroy SierraNet M328 :: HPSC Lab
 * In the desktop of the analyzer:
 ** Open the Teledyne LeCroy Net Protocl Suite icon
+** Select Setup>Device Management in the UI and click the Connect button in the pop up at right; close the pop up
 ** Run it in a manual record mode to capture incoming packets (switch port 6 as per the switch configuration above)
 
 ===== Test 2

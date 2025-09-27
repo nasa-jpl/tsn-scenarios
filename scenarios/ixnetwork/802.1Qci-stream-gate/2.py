@@ -49,7 +49,7 @@ username = os.getenv("IXN_USERNAME")
 password = os.getenv("IXN_PASSWORD")
 
 # Provide a name for the keysight session
-scenarioName = 'stream_gate-1-gating'
+scenarioName = 'stream_gate-2-gating'
 
 
 try:
@@ -65,7 +65,7 @@ try:
     sourceList = [ep1_eth2, ep2_eth2] # The actual sources used are the virtual ports for EP1 and EP2
     udpList = [False, False]
     frameRate = [1000, 1000]
-    frameDelay = [5, 5]
+    frameDelay = [256, 506]
 
     ixNetwork.info('Create Traffic Items')
     trafficItem = []
@@ -101,7 +101,7 @@ try:
         # This scenario doesn't use VLANs but adding this here so somebody starting with this, 
         # making a scenario that does use VLANs, knows where to look in the API
         configElement = trafficItem[i].ConfigElement.find()[0]
-
+        
         # Rest_py template # 71 is VLAN protocol which matches traffic item with web UI
         VlanTagTemplate = ixNetwork.Traffic.ProtocolTemplate.find(DisplayName='^VLAN$')
         
@@ -112,7 +112,7 @@ try:
         # Append the Vlan template to the traffic item Ethernet stack
         ethernetStack.Append(Arg2=VlanTagTemplate)
         print("ethernetStack = ", ethernetStack)
-
+        
         # Find the newly created Vlan stack object in the traffic item
         VlanTagStack = configElement.Stack.find(DisplayName='^VLAN$')[0]
 
@@ -127,11 +127,11 @@ try:
         )
         print("vlan_id_field = ", vlan_id_field)
         #print("dir(ethernetStack.Field) = ",dir(ethernetStack.Field)) ## Use this diagnostic to see the available attributes of an object
-        
+
         # Attach the ethernet stacks to the corresponding MAC addresses for the endpoints
         # This one is for the destination (EP3)
         ethernetStack.Field.find(DisplayName='^Destination MAC Address$').SingleValue = '00:12:01:00:00:01'
-
+        
         # This is an alternate way to find/set an Ethernet stack field (eg destination MAC for this example)
         #destination_mac = configElement.Stack.find(StackTypeId='ethernet').Field.find(FieldTypeId='ethernet.header.destinationAddress')
         #destination_mac.update(ValueType='valueList', ValueList=['00:12:01:00:00:01'])
@@ -167,9 +167,11 @@ try:
         print("Generated traffic...")
 
         ##sys.exit() # Halts the script
-    
-    # This is the loop used to run the test cases for this stream gat escenario; two pases are needed
-    for seq in range(2):    
+
+    # This is the loop used to run the test cases for this stream gat escenario; four pases are needed
+    for seq in range(4):  # Use 4 passes for scenario 2
+        if (seq == 0):
+            frameDelayCurr = [frameDelay[0], frameDelay[1], 0, 0, 0, 0, 0, 0, 0, 0] # Populate first two values used to define traffic items, update the rest as per test cases
         # Sync to gptp time base
         # 1. Get the global Traffic object.
         GlbTraffic = ixNetwork.Traffic
@@ -179,7 +181,7 @@ try:
         # The `useScheduledStartTransmit` setting is located under this object.
         GlbTraffic.UseScheduledStartTransmit = True
         
-        # Not clear why the following steps don't work, but not all the traffic starts (Mike's comments).
+        # Not clear why the following steps don't work, but not all the traffic starts.
         # ixNetwork.Traffic.Apply()
         # ixNetwork.StartAllProtocols(Arg1='sync')
         # ixNetwork.Traffic.Start()
@@ -203,7 +205,7 @@ try:
         # opportunity to do the flow metering, and it can take a little while for the keysight stats 
         # "moving average" to not reflect the startup transient
         
-        
+
         # Wait for the flow statistics to come up allowing for up to 60 seconds before timing out
         statsView = StatViewAssistant(ixNetwork, "Flow Statistics", Timeout=60)
         print("Waiting for statistics to settle...")
@@ -242,7 +244,13 @@ try:
         
         for i in range(len(streamName)):
             rate = 0.0
-            expectedRxRate = float(streamExpectedRxRate[i])
+            if (i== 0):
+                expectedRxRate = float(streamExpectedRxRate[i])
+            else:
+                if (seq == 0 or seq == 3):
+                    expectedRxRate = streamExpectedRxRate[1]
+                else:
+                    expectedRxRate = 0.0
             tolerance = expectedRxRate * 0.01
             
             # Pad with spaces so all names are same length to make output look nice
@@ -253,16 +261,15 @@ try:
                 emptyStream = False
                 for j in range(len(streamTrafficMembers[i])):
                     rate += float(RxRates[streamTrafficMembers[i][j]])
-            # Should get 0 for frame rate for test 1 and at least 99.9% of the frame rate for  test 2
-            if (seq == 1):
-                testResult = abs(rate-expectedRxRate)<=tolerance # Should get 99.9% or more of the frames
-            else:
-                testResult = abs(rate)==0.0 # Should be blocked
-                expectedRxRate = 0.0
+            testResult = abs(rate-expectedRxRate)<=tolerance
             if(emptyStream):
                 print("N/A : Stream",name,"- scenario does not match any traffic items to this stream")
             else:
-                if(testResult):
+                if((seq == 1 or seq == 2) and testResult):
+                    print("PASS: ",end="")
+                elif((seq == 1 or seq == 2) and not testResult and i == 1):
+                    print("FAIL: ",end="")
+                elif(testResult):
                     print("PASS: ",end="")
                 else:
                     print("FAIL: ",end="")
@@ -270,7 +277,6 @@ try:
         
         #print("Before stopping, scheduled_traffic_item = ", scheduled_traffic_item)
         
-        # Stop the traffic items after the last test case is complete
         ixNetwork.Globals.Testworkflow.Stop()
         
         time.sleep(3.0)
@@ -278,40 +284,48 @@ try:
         RxFrames = statsView.GetColumnValues(Arg2='Rx Frames')
         MaxLatency = statsView.GetColumnValues(Arg2='Store-Forward Max Latency (ns)')
         ##print('TxFrames = ',TxFrames,'RxFrames = ',RxFrames)
-        print('frameDelay = ', frameDelay)
+        print('Current frameDelay = ', frameDelayCurr[2*seq],', ',frameDelayCurr[2*seq+1])
             
         for i in range(len(TxFrames)):
-            if (seq == 1):
+            if (seq == 0 or seq == 3):
                 if(TxFrames[i]==RxFrames[i]):
                     print('Stream Row[',i,']: ', 'TxFrames = ',TxFrames[i],', RxFrames = ',RxFrames[i], 'Max Latency = ', MaxLatency[i], "(ns), PASS: ")
                 elif(float(RxFrames[i]) >  float(TxFrames[i])*0.99):
                     print('Stream Row[',i,']: ', 'TxFrames = ',TxFrames[i],', RxFrames = ',RxFrames[i], 'Max Latency = ', MaxLatency[i], "(ns), PASS: ")
                 else:
                     print('Stream Row[',i,']: ', 'TxFrames = ',TxFrames[i],', RxFrames = ',RxFrames[i], 'Max Latency = ', MaxLatency[i], "NA, FAIL: ")
-            else:
-                if(float(RxFrames[i]) > 0.0):
-                    print('Stream Row[',i,']: ', 'TxFrames = ',TxFrames[i],', RxFrames = ',RxFrames[i], 'Max Latency = ', MaxLatency[i], "(ns), FAIL: ")
-                else:
+            elif(seq == 1 or seq == 2):
+                if(float(RxFrames[1]) == 0.0 and i == 0):
+                    print('Stream Row[',i,']: ', 'TxFrames = ',TxFrames[i],', RxFrames = ',RxFrames[i], 'Max Latency = ', MaxLatency[i], "(ns), PASS: ")
+                elif(float(RxFrames[1]) == 0.0):
                     print('Stream Row[',i,']: ', 'TxFrames = ',TxFrames[i],', RxFrames = ',RxFrames[i], 'Max Latency = ', MaxLatency[i], "NA, PASS: ")
-        
+                else:
+                    print('Stream Row[',i,']: ', 'TxFrames = ',TxFrames[i],', RxFrames = ',RxFrames[i], 'Max Latency = ', MaxLatency[i], "NA, FAIL: ")
+            else:
+                if(float(RxFrames[i]) > float(TxFrames[i])*0.99 and i == 0):
+                    print('Stream Row[',i,']: ', 'TxFrames = ',TxFrames[i],', RxFrames = ',RxFrames[i], 'Max Latency = ', MaxLatency[i], "(ns), PASS: ")
+                elif(float(RxFrames[i]) > float(TxFrames[i])*0.99):
+                    print('Stream Row[',i,']: ', 'TxFrames = ',TxFrames[i],', RxFrames = ',RxFrames[i], 'Max Latency = ', MaxLatency[i], "NA, PASS: ")
+                else:
+                    print('Stream Row[',i,']: ', 'TxFrames = ',TxFrames[i],', RxFrames = ',RxFrames[i], 'Max Latency = ', MaxLatency[i], "NA, FAIL: ")
+
         
         ## Modify traffic item start times and rerun
-        frameDelay = [255, 505]
-        
-        ##SW_status = input("Pause here to check traffic delays ")
-        
+        frameDelay = [256, 5, 256, 506, 256, 506, 256, 506]
         print("Change traffic start delay times; Streams")        
         for m in range(len(sourceList)):
-            print(f"\rUpdating start time Traffic Item",m+1,"of",len(sourceList)," to frameDelay = ", frameDelay[m]," ",end="")
+            #print("2*seq+m = ", 2*seq+m)
+            frameDelayCurr[2*(seq+1)+m] = frameDelay[2*seq+m]
+            print(f"\rUpdating start time Traffic Item",m+1,"of",len(sourceList)," to frameDelay = ", frameDelay[2*seq+m]," ",end="")
             configElement = trafficItem[m].ConfigElement.find()[0]
-            configElement.TransmissionControl.update(StartDelayUnits = "microseconds", StartDelay = frameDelay[m])
+            configElement.TransmissionControl.update(StartDelayUnits = "microseconds", StartDelay = frameDelay[2*seq+m])
             # This adds Traffic Item to the Statistics Tracking field.  
             # Without this, keysight will not track frame drops, latencies, etc.
             trafficItem[m].Tracking.find()[0].TrackBy = ["ethernetIiSourceaddress0", 'trackingenabled0']
             # This generates the frames based on the previous configuration.
             trafficItem[m].Generate()
             print("Generated updated traffic...")
-
+        
         # Pause the script to change the switch configuration as needed        
         SW_status = input("If needed, update the TSN switch now ")
         print(f"Switch status, {SW_status}!")
