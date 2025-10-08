@@ -2,7 +2,6 @@ from .IxNetwork import IxNetwork
 from dotenv import load_dotenv
 
 import argparse
-import requests
 import sys
 import traceback
 import yaml

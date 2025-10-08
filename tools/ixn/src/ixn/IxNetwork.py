@@ -1,7 +1,7 @@
 import os
 import time
 from .IxValidate import IxValidate
-from ixnetwork_restpy import PortMapAssistant, SessionAssistant, TestPlatform
+from ixnetwork_restpy import SessionAssistant, TestPlatform
 
 
 class IxNetworkError(Exception):
@@ -246,7 +246,7 @@ class IxNetwork:
 
                         if "vlan" in eth_stack:
                             ix_eth.EnableVlans.Single(True)
-                            ix_eth_vlan = ix_eth.Vlan.find()[0].VlanId.SingleValue(
+                            ix_eth.Vlan.find()[0].VlanId.SingleValue(
                                 eth_stack["vlan"]
                             )
 
