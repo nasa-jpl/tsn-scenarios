@@ -1,6 +1,5 @@
 import os
 import time
-import yaml
 from .IxValidate import IxValidate
 from ixnetwork_restpy import PortMapAssistant, SessionAssistant, TestPlatform
 
@@ -175,7 +174,7 @@ class IxNetwork:
         return session
 
     def create_session(
-        self, topology_file, traffic_file, dry_run=False, force_port_ownership=True
+        self, endpoints, traffic_items, dry_run=False, force_port_ownership=True
     ):
         """Creates a session with ixnetwork_restpy"""
 
@@ -195,12 +194,8 @@ class IxNetwork:
 
         self._ix_network = self._ix_session.Ixnetwork
 
-        # Load endpoints and traffic items
-        with open(topology_file, "r") as f_topology:
-            self._endpoints = yaml.safe_load(f_topology)
-
-        with open(traffic_file, "r") as f_traffic:
-            self._traffic_items = yaml.safe_load(f_traffic)
+        self._endpoints = endpoints
+        self._traffic_items = traffic_items
 
         self._validate_configs()
 
