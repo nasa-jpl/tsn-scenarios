@@ -250,7 +250,7 @@ class IxNetwork:
                                 eth_stack["vlan"]
                             )
 
-                        if eth_stack["ipv4"] is True:
+                        if eth_stack.get("ipv4"):
                             self._ix_network.info(f"Configuring {name} IP{j}")
                             ipv4 = ix_eth.Ipv4.add(Name=f"{name}.{protocol_stack}.ip")
                             ipv4.Address.Single(value=eth_stack["ip"])
