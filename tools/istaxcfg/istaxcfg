@@ -6,8 +6,12 @@
 #   "argcomplete>=3.5.3",
 #   "python-dotenv>=1.1.1",
 #   "requests[socks]>=2.32.4",
-#   "jinja2>=3.1.6"
+#   "jinja2>=3.1.6",
+#   "yaspin>=3.2.0",
 # ]
+#
+# [tool.uv.sources]
+# yaspin = { git = "https://github.com/pavdmyt/yaspin.git" }
 # ///
 
 import argparse
@@ -23,6 +27,7 @@ import argcomplete
 import dotenv
 import jinja2
 import requests
+from yaspin import yaspin, Spinner
 
 VERSION = "0.2.0"
 
@@ -150,7 +155,6 @@ def create_session(opts) -> requests.Session:
 
 
 def istax_login(session: requests.Session, host: str, username: str, password: str):
-    eprint("logging in...")
     data = {
         "user": username,
         "password": password,
@@ -181,8 +185,6 @@ def istax_config_download(session: requests.Session, host: str, filename: str):
 
 
 def istax_config_activate_status(session: requests.Session, host: str):
-    eprint("activating configuration...", end="", flush=True)
-
     timeout = time.time() + 90
     while True:
         try:
@@ -193,18 +195,14 @@ def istax_config_activate_status(session: requests.Session, host: str):
             if time.time() > timeout:
                 raise ApplicationError("timed out waiting for response")
             time.sleep(3)
-            eprint(".", end="", flush=True)
             continue
         firstline = response.text.partition("\n")[0]
         if firstline == "<html>":
             if time.time() > timeout:
                 raise ApplicationError("timed out waiting for response")
-            eprint(".", end="", flush=True)
             time.sleep(3)
             continue
         elif response.text.partition("\n")[0] == "DONE":
-            eprint()
-            eprint("activation complete")
             break
         else:
             raise ApplicationError(f"activation failed with:\n{response.text.strip()}")
@@ -221,15 +219,10 @@ def istax_config_upload(
     files = {
         "source_file": config,
     }
-    eprint("uploading configuration...")
     session.post(f"http://{host}/config/icfg_conf_upload", data=data, files=files)
-
-    if filename == "running-config":
-        istax_config_activate_status(session, host)
 
 
 def istax_get_port_map(session: requests.Session, host: str) -> PortMap:
-    eprint("fetching port map...")
     data = {
         "method": "port.namemap.get",
         "id": "jsonrpc",
@@ -267,14 +260,18 @@ def transform_port_name(name: str) -> dict[str, str]:
 
 def command_activate(opts):
     session = create_session(opts)
-    istax_login(session, opts.host, opts.username, opts.password)
-    istax_config_activate(session, opts.host, opts.filename)
+    with Progress("logging in"):
+        istax_login(session, opts.host, opts.username, opts.password)
+    with Progress("activating config"):
+        istax_config_activate(session, opts.host, opts.filename)
 
 
 def command_download(opts):
     session = create_session(opts)
-    istax_login(session, opts.host, opts.username, opts.password)
-    istax_config_download(session, opts.host, opts.filename)
+    with Progress("logging in"):
+        istax_login(session, opts.host, opts.username, opts.password)
+    with Progress("downloading config"):
+        istax_config_download(session, opts.host, opts.filename)
 
 
 def render_config(opts, ports: PortMap, config) -> StringIO:
@@ -287,6 +284,26 @@ def render_config(opts, ports: PortMap, config) -> StringIO:
     data = {"hostname": opts.host, "ports": ports}
     rendered_template = template.render(data)
     return StringIO(rendered_template)
+
+
+class Progress(object):
+    def __init__(self, text):
+        self.spinner = yaspin(text=text, color="blue", stream=sys.stderr)
+
+    def __enter__(self) -> Spinner:
+        self.spinner.start()
+        return self.spinner
+
+    def __exit__(self, type, value, traceback) -> bool:
+        if type is ApplicationError:
+            self.spinner.red.fail()
+            return False
+        elif type:
+            self.spinner.red.fail()
+            return False
+        else:
+            self.spinner.green.ok()
+            return True
 
 
 def command_upload(opts):
@@ -302,15 +319,21 @@ def command_upload(opts):
         ports = dummy_port_map()
     else:
         session = create_session(opts)
-        istax_login(session, opts.host, opts.username, opts.password)
-        ports = istax_get_port_map(session, opts.host)
+        with Progress("logging in"):
+            istax_login(session, opts.host, opts.username, opts.password)
+        with Progress("fetching port map"):
+            ports = istax_get_port_map(session, opts.host)
 
     config = render_config(opts, ports, config)
 
     if opts.dry_run:
         print(config.read())
     else:
-        istax_config_upload(session, opts.host, opts.filename, opts.merge, config)
+        with Progress("uploading config"):
+            istax_config_upload(session, opts.host, opts.filename, opts.merge, config)
+        if opts.filename == "running-config":
+            with Progress("activating config"):
+                istax_config_activate_status(session, opts.host)
 
 
 def main():
