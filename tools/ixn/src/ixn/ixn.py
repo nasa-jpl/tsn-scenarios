@@ -2,9 +2,9 @@ from .IxNetwork import IxNetwork
 from dotenv import load_dotenv
 
 import argparse
-import requests
 import sys
 import traceback
+import yaml
 from ixnetwork_restpy import ConnectionError
 
 
@@ -163,8 +163,12 @@ def parse_opts():
 def create_session(args):
     """Entry function to create a session"""
     ix_network = _create_ix_network(args)
+    with open(args.topology, "r") as text:
+        endpoints = yaml.safe_load(text)
+    with open(args.traffic, "r") as text:
+        traffic_items = yaml.safe_load(text)
     ix_network.create_session(
-        args.topology, args.traffic, args.dry_run, args.force_port_ownership
+        endpoints, traffic_items, args.dry_run, args.force_port_ownership
     )
 
 

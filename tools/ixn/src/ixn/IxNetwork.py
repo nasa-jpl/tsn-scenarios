@@ -1,8 +1,7 @@
 import os
 import time
-import yaml
 from .IxValidate import IxValidate
-from ixnetwork_restpy import PortMapAssistant, SessionAssistant, TestPlatform
+from ixnetwork_restpy import SessionAssistant, TestPlatform
 
 
 class IxNetworkError(Exception):
@@ -175,7 +174,7 @@ class IxNetwork:
         return session
 
     def create_session(
-        self, topology_file, traffic_file, dry_run=False, force_port_ownership=True
+        self, endpoints, traffic_items, dry_run=False, force_port_ownership=True
     ):
         """Creates a session with ixnetwork_restpy"""
 
@@ -195,12 +194,8 @@ class IxNetwork:
 
         self._ix_network = self._ix_session.Ixnetwork
 
-        # Load endpoints and traffic items
-        with open(topology_file, "r") as f_topology:
-            self._endpoints = yaml.safe_load(f_topology)
-
-        with open(traffic_file, "r") as f_traffic:
-            self._traffic_items = yaml.safe_load(f_traffic)
+        self._endpoints = endpoints
+        self._traffic_items = traffic_items
 
         self._validate_configs()
 
@@ -251,11 +246,11 @@ class IxNetwork:
 
                         if "vlan" in eth_stack:
                             ix_eth.EnableVlans.Single(True)
-                            ix_eth_vlan = ix_eth.Vlan.find()[0].VlanId.SingleValue(
+                            ix_eth.Vlan.find()[0].VlanId.SingleValue(
                                 eth_stack["vlan"]
                             )
 
-                        if eth_stack["ipv4"] is True:
+                        if eth_stack.get("ipv4"):
                             self._ix_network.info(f"Configuring {name} IP{j}")
                             ipv4 = ix_eth.Ipv4.add(Name=f"{name}.{protocol_stack}.ip")
                             ipv4.Address.Single(value=eth_stack["ip"])
