@@ -160,7 +160,7 @@ def main():
     macs = create_macs()
     session_name = "802.1CB-frer-1"
 
-    session = create_session(chassis_address, session_name, reuse=True)
+    session = create_session(chassis_address, session_name, reuse=False)
     ixn = session.Ixnetwork
 
     create_frer_topology(ixn, chassis_address, ports)
