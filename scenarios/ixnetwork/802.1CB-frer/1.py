@@ -2,60 +2,36 @@
 # /// script
 # requires-python = ">=3.12"
 # dependencies = [
-#     "ixn",
 #     "python-dotenv",
+#     "ixnetwork_restpy",
 # ]
 #
 # [tool.uv.sources]
 # ixn = { path = "../../../tools/ixn", editable = true }
 # ///
 
-from dotenv import load_dotenv
+import os
 
-from ixn.IxNetwork import IxNetwork
+from dotenv import load_dotenv
+from ixnetwork_restpy import SessionAssistant, BatchAdd, TestPlatform, StatViewAssistant
 
 RTAG_ETHER_TYPE = "f1c1"
 NOVLAN_ETHER_TYPE_BYTE_OFFSET = 12
 VLAN_ETHER_TYPE_BYTE_OFFSET = 16
 
+FRAME_COUNT = 10
+FRAME_SIZE = 64
+CTAG_SIZE = 4
+RTAG_SIZE = 6
+REPLICATED_FRAME_SIZE = FRAME_SIZE + CTAG_SIZE + RTAG_SIZE
+NON_REPLICATED_FRAME_SIZE = FRAME_SIZE
 
 def create_macs():
     return {
-            "nonfrer_talker": "02:00:00:00:00:01",
-            "frer_listener": "02:00:00:00:00:02",
-            "nonfrer_listener": "02:00:00:00:00:03",
-            }
-
-
-def create_topology(ports: list[int], macs: list[str]):
-    assert len(ports) == 3
-
-    endpoints = {
-        "endpoints": {},
+        "nonfrer_talker": "02:00:00:00:00:01",
+        "frer_listener": "02:00:00:00:00:02",
+        "nonfrer_listener": "02:00:00:00:00:03",
     }
-
-    for index, (port, mac) in enumerate(zip(ports, macs)):
-        name = f"ep{index}"
-        ep = {
-            "port_num": port,
-            "device_groups": {
-                "eth1": {
-                    "mac": mac,
-                },
-            },
-        }
-        endpoints["endpoints"][name] = ep
-
-    return endpoints
-
-
-def create_traffic_items():
-    traffic_items = {
-        "traffic_items": {},
-    }
-
-    return traffic_items
-
 
 def set_ethernet_stack(stream, src_addr, dst_addr):
     # custom_protocol_template = ixn.Traffic.ProtocolTemplate.find(StackTypeId="^custom$")
@@ -89,11 +65,6 @@ def set_ethernet_stack(stream, src_addr, dst_addr):
 
 # Add quick flow group that generates r-tagged traffic
 def add_traffic_items(ixn, macs):
-    # FIXME: remove when dev done
-    print(ixn.Traffic.TrafficItem.find())
-    ixn.Traffic.TrafficItem.find().remove()
-    print(ixn.Traffic.TrafficItem.find())
-
     traffic_item = ixn.Traffic.TrafficItem.add(
         Name="Non-FRER Talker", TrafficType="raw", TrafficItemType="quick"
     )
@@ -103,26 +74,35 @@ def add_traffic_items(ixn, macs):
     stream.DuplicateQuickFlowGroups(1)
 
     streams = traffic_item.HighLevelStream.find()
-    set_stream(streams[0], "Replicated", src_addr=macs["nonfrer_talker"], dst_addr=macs["frer_listener"])
-    set_stream(streams[1], "Not replicated", src_addr=macs["nonfrer_talker"], dst_addr=macs["nonfrer_listener"])
-
+    set_stream(
+        streams[0],
+        "Replicated",
+        src_addr=macs["nonfrer_talker"],
+        dst_addr=macs["frer_listener"],
+    )
+    set_stream(
+        streams[1],
+        "Not replicated",
+        src_addr=macs["nonfrer_talker"],
+        dst_addr=macs["nonfrer_listener"],
+    )
     ixn.Traffic.Apply()
-
 
 def set_stream(stream, name, src_addr, dst_addr):
     stream.Name = name
+    stream.FrameSize.update(
+            Type="fixed",
+            FixedSize=FRAME_SIZE,
+            )
     stream.TransmissionControl.update(
         Type="fixedFrameCount",
-        FrameCount=10,
+        FrameCount=FRAME_COUNT,
     )
     set_ethernet_stack(stream, src_addr, dst_addr)
 
 
 def add_egress_only_tracking(ixn):
     ixn.Traffic.EnableEgressOnlyTracking = True
-
-    # FIXME: remove when dev done
-    ixn.Traffic.EgressOnlyTracking.find().remove()
 
     vports = ixn.Vport.find()[-2:]
 
@@ -148,8 +128,26 @@ def add_egress_only_tracking(ixn):
             SignatureValue=RTAG_ETHER_TYPE + "0000",
         )
 
-    print(ixn.Traffic.EgressOnlyTracking.find())
+    ixn.Traffic.Apply()
 
+
+def create_frer_topology(ixn, chassis_address, ports):
+    with BatchAdd(ixn):
+        for i, port in enumerate(ports):
+            vport = i + 1
+            vp = ixn.Vport.add(Name=vport, Location=f"{chassis_address};1;{port}")
+            t = ixn.Topology.add(Vports=vp[-1])
+            dg = t.DeviceGroup.add(Multiplier=1)
+
+def create_session(chassis_address, session_name, reuse: bool):
+    return SessionAssistant(
+        IpAddress=chassis_address,
+        UserName=os.getenv("IXN_USER"),
+        Password=os.getenv("IXN_PASS"),
+        LogLevel=SessionAssistant.LOGLEVEL_INFO,
+        ClearConfig=not reuse,
+        SessionName=session_name,
+    )
 
 def main():
     load_dotenv()
@@ -160,17 +158,46 @@ def main():
 
     ports = [5, 6, 7]
     macs = create_macs()
-    endpoints = create_topology(ports, macs.values())
-    traffic_items = create_traffic_items()
     session_name = "802.1CB-frer-1"
 
-    jixn = IxNetwork(chassis_address, chassis_address, 1, session_name, verbosity, log)
-    jixn.create_session(endpoints, traffic_items, dry_run=False, force_port_ownership=True)
-    # jixn._ix_session = jixn._get_session_by_name()
-    ixn = jixn._ix_session.Ixnetwork
+    session = create_session(chassis_address, session_name, reuse=True)
+    ixn = session.Ixnetwork
+
+    create_frer_topology(ixn, chassis_address, ports)
 
     add_traffic_items(ixn, macs)
     add_egress_only_tracking(ixn)
+
+    ixn.Traffic.Stop()
+    stats = session.StatViewAssistant("Port Statistics")
+
+    stream = ixn.Traffic.TrafficItem.find().HighLevelStream.find(Name="^Replicated$")
+    stream.StartStatelessTrafficBlocking()
+    stats.AddRowFilter(ColumnName="Port Name", Comparator=StatViewAssistant.EQUAL, FilterValue=1)
+    stats.CheckCondition(ColumnName="Frames Tx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT)
+    stats.CheckCondition(ColumnName="Bytes Tx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT * FRAME_SIZE)
+    stats.ClearRowFilters()
+    stats.AddRowFilter(ColumnName="Port Name", Comparator=StatViewAssistant.REGEX, FilterValue="2|3")
+    stats.CheckCondition(ColumnName="Valid Frames Rx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT)
+    stats.CheckCondition(ColumnName="Bytes Rx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT * REPLICATED_FRAME_SIZE)
+    stats.ClearRowFilters()
+    stream.StopStatelessTrafficBlocking()
+
+    stream = ixn.Traffic.TrafficItem.find().HighLevelStream.find(Name="^Not replicated$")
+    stream.StartStatelessTrafficBlocking()
+    stats.AddRowFilter(ColumnName="Port Name", Comparator=StatViewAssistant.EQUAL, FilterValue=1)
+    stats.CheckCondition(ColumnName="Frames Tx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT)
+    stats.CheckCondition(ColumnName="Bytes Tx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT * FRAME_SIZE)
+    stats.ClearRowFilters()
+    stats.AddRowFilter(ColumnName="Port Name", Comparator=StatViewAssistant.EQUAL, FilterValue=2)
+    stats.CheckCondition(ColumnName="Valid Frames Rx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT)
+    stats.CheckCondition(ColumnName="Bytes Rx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT * NON_REPLICATED_FRAME_SIZE)
+    stats.ClearRowFilters()
+    stats.AddRowFilter(ColumnName="Port Name", Comparator=StatViewAssistant.EQUAL, FilterValue=3)
+    stats.CheckCondition(ColumnName="Valid Frames Rx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=0)
+    stats.CheckCondition(ColumnName="Bytes Rx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=0)
+    stats.ClearRowFilters()
+    stream.StopStatelessTrafficBlocking()
 
 
 main()
