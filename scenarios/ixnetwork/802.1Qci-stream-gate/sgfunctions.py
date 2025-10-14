@@ -16,8 +16,8 @@ rx_port3 = "global_value"
 def basecfg(scenarioName, time, SessionAssistant, username, password, traceback):
     global ep1_eth2, ep2_eth2
     # Our API server and chassis are same device
-    apiServerIp = '192.168.1.21'
-    chassisIp = '192.168.1.21'
+    apiServerIp = os.getenv("IXN_ADDRESS")
+    chassisIp = os.getenv("IXN_ADDRESS")
     
     # Some Keysight products have multiple slots within a single chassis, we just have 1 slot
     chassisSlotNumber = 1

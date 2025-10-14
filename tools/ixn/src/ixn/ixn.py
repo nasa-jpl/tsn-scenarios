@@ -20,19 +20,19 @@ def parse_opts():
     # Parent parser for use by multiple subcommands
     parser_base = argparse.ArgumentParser(add_help=False)
     parser_base.add_argument(
-        "--api-server-ip",
-        default="192.168.1.21",
+        "--api-address",
+        default=os.getenv("IXN_ADDRESS"),
         type=str,
         required=False,
-        help="""Specify the IP address of the RestAPI server""",
+        help="""Specify the address of the RestAPI server""",
     )
 
     parser_base.add_argument(
-        "--chassis-ip",
-        default="192.168.1.21",
+        "--chassis-address",
+        default=os.getenv("IXN_ADDRESS"),
         type=str,
         required=False,
-        help="""Specify the IP address of the Ixia chassis""",
+        help="""Specify the address of the Ixia chassis""",
     )
 
     parser_base.add_argument(
@@ -192,8 +192,8 @@ def validate_session(args):
 
 def _create_ix_network(args):
     return IxNetwork(
-        args.api_server_ip,
-        args.chassis_ip,
+        args.api_address,
+        args.chassis_address,
         args.chassis_slot_number,
         args.session_name,
         args.verbosity,
@@ -204,6 +204,8 @@ def _create_ix_network(args):
 def main():
     try:
         load_dotenv()
+        if proxy := os.getenv("IXN_PROXY"):
+            os.environ["ALL_PROXY"] = proxy
         opts = parse_opts()
         opts.func(opts)
     except ConnectionError as e:

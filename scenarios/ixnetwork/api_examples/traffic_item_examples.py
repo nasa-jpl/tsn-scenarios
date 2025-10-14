@@ -39,8 +39,10 @@ from ixnetwork_restpy import *
 # Provide username and password to login to Keysight
 load_dotenv()
 
-username = os.getenv('username')
-password = os.getenv('password')
+if proxy := os.getenv("IXN_PROXY"):
+    os.environ["ALL_PROXY"] = proxy
+username = os.getenv("IXN_USER")
+password = os.getenv("IXN_PASS")
 
 # TODO: Figure out a better / external way to provide deployment-specific information about the Keysight and the port mapping so the demo can be run with different TSN switches wired to different ports
 
@@ -48,8 +50,8 @@ password = os.getenv('password')
 scenarioName = 'traffic_item_examples'
 
 # Our API server and chassis are same device
-apiServerIp = '192.168.1.21'
-chassisIp = '192.168.1.21'
+apiServerIp = os.getenv("IXN_ADDRESS")
+chassisIp = os.getenv("IXN_ADDRESS")
 
 # Some Keysight products have multiple slots within a single chassis, we just have 1 slot
 chassisSlotNumber = 1
