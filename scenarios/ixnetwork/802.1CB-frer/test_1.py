@@ -5,15 +5,12 @@
 #     "python-dotenv",
 #     "ixnetwork_restpy",
 # ]
-#
-# [tool.uv.sources]
-# ixn = { path = "../../../tools/ixn", editable = true }
 # ///
 
-import os
+import time
 
-from dotenv import load_dotenv
-from ixnetwork_restpy import SessionAssistant, BatchAdd, TestPlatform, StatViewAssistant
+from ixnetwork_restpy import BatchAdd
+import pytest
 
 RTAG_ETHER_TYPE = "f1c1"
 NOVLAN_ETHER_TYPE_BYTE_OFFSET = 12
@@ -26,12 +23,14 @@ RTAG_SIZE = 6
 REPLICATED_FRAME_SIZE = FRAME_SIZE + CTAG_SIZE + RTAG_SIZE
 NON_REPLICATED_FRAME_SIZE = FRAME_SIZE
 
+
 def create_macs():
     return {
         "nonfrer_talker": "02:00:00:00:00:01",
         "frer_listener": "02:00:00:00:00:02",
         "nonfrer_listener": "02:00:00:00:00:03",
     }
+
 
 def set_ethernet_stack(stream, src_addr, dst_addr):
     # custom_protocol_template = ixn.Traffic.ProtocolTemplate.find(StackTypeId="^custom$")
@@ -88,12 +87,13 @@ def add_traffic_items(ixn, macs):
     )
     ixn.Traffic.Apply()
 
+
 def set_stream(stream, name, src_addr, dst_addr):
     stream.Name = name
     stream.FrameSize.update(
-            Type="fixed",
-            FixedSize=FRAME_SIZE,
-            )
+        Type="fixed",
+        FixedSize=FRAME_SIZE,
+    )
     stream.TransmissionControl.update(
         Type="fixedFrameCount",
         FrameCount=FRAME_COUNT,
@@ -131,73 +131,85 @@ def add_egress_only_tracking(ixn):
     ixn.Traffic.Apply()
 
 
-def create_frer_topology(ixn, chassis_address, ports):
+class StatsView:
+    def __init__(self, ixn, view_caption):
+        self._view = ixn.Statistics.View.find(Caption=f"^{view_caption}$")
+        self._snapshot = self._snapshot()
+
+    def _snapshot(self):
+        cols = self._view.Data.ColumnCaptions
+        rows = self._view.Data.RowValues.values()
+        rows = [row[0] for row in rows]
+
+        return self._list_of_lists_to_list_of_dicts(rows, cols)
+
+    def _list_of_lists_to_list_of_dicts(
+        self, list_of_lists: list[list[str]], column_captions: list[str]
+    ) -> list[dict[str, str]]:
+        list_of_dicts = []
+        for row in list_of_lists:
+            row_dict = {}
+            for i, cell in enumerate(row):
+                key = column_captions[i]
+                try:
+                    row_dict[key] = int(cell)
+                except:
+                    row_dict[key] = cell
+            list_of_dicts.append(row_dict)
+        return list_of_dicts
+
+    def __getitem__(self, i):
+        return self._snapshot[i]
+
+
+@pytest.fixture(scope="module")
+def topology(config, ixn):
+    chassis = config["chassis"]
+    ports = config["ports"]
+
     with BatchAdd(ixn):
         for i, port in enumerate(ports):
             vport = i + 1
-            vp = ixn.Vport.add(Name=vport, Location=f"{chassis_address};1;{port}")
+            vp = ixn.Vport.add(Name=vport, Location=f"{chassis};1;{port}")
             t = ixn.Topology.add(Vports=vp[-1])
-            dg = t.DeviceGroup.add(Multiplier=1)
+            t.DeviceGroup.add(Multiplier=1)
 
-def create_session(chassis_address, session_name, reuse: bool):
-    return SessionAssistant(
-        IpAddress=chassis_address,
-        UserName=os.getenv("IXN_USER"),
-        Password=os.getenv("IXN_PASS"),
-        LogLevel=SessionAssistant.LOGLEVEL_INFO,
-        ClearConfig=not reuse,
-        SessionName=session_name,
-    )
 
-def main():
-    load_dotenv()
-
-    chassis_address = "hpscnovus"
-    verbosity = "info"
-    log = None
-
-    ports = [5, 6, 7]
+@pytest.fixture
+def traffic(ixn):
     macs = create_macs()
-    session_name = "802.1CB-frer-1"
-
-    session = create_session(chassis_address, session_name, reuse=False)
-    ixn = session.Ixnetwork
-
-    create_frer_topology(ixn, chassis_address, ports)
-
     add_traffic_items(ixn, macs)
-    add_egress_only_tracking(ixn)
+    yield
+    ixn.Traffic.TrafficItem.find().remove()
+    ixn.ClearStats()
 
-    ixn.Traffic.Stop()
-    stats = session.StatViewAssistant("Port Statistics")
 
+def test_replication(ixn, topology, traffic):
     stream = ixn.Traffic.TrafficItem.find().HighLevelStream.find(Name="^Replicated$")
     stream.StartStatelessTrafficBlocking()
-    stats.AddRowFilter(ColumnName="Port Name", Comparator=StatViewAssistant.EQUAL, FilterValue=1)
-    stats.CheckCondition(ColumnName="Frames Tx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT)
-    stats.CheckCondition(ColumnName="Bytes Tx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT * FRAME_SIZE)
-    stats.ClearRowFilters()
-    stats.AddRowFilter(ColumnName="Port Name", Comparator=StatViewAssistant.REGEX, FilterValue="2|3")
-    stats.CheckCondition(ColumnName="Valid Frames Rx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT)
-    stats.CheckCondition(ColumnName="Bytes Rx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT * REPLICATED_FRAME_SIZE)
-    stats.ClearRowFilters()
+    time.sleep(1)
     stream.StopStatelessTrafficBlocking()
 
-    stream = ixn.Traffic.TrafficItem.find().HighLevelStream.find(Name="^Not replicated$")
+    ports = StatsView(ixn, "Port Statistics")
+    assert ports[0]["Frames Tx."] == FRAME_COUNT
+    assert ports[0]["Bytes Tx."] == FRAME_COUNT * FRAME_SIZE
+    assert ports[1]["Valid Frames Rx."] == FRAME_COUNT
+    assert ports[1]["Bytes Rx."] == FRAME_COUNT * REPLICATED_FRAME_SIZE
+    assert ports[1]["Valid Frames Rx."] == FRAME_COUNT
+    assert ports[1]["Bytes Rx."] == FRAME_COUNT * REPLICATED_FRAME_SIZE
+
+
+def test_nonreplication(ixn, topology, traffic):
+    stream = ixn.Traffic.TrafficItem.find().HighLevelStream.find(
+        Name="^Not replicated$"
+    )
     stream.StartStatelessTrafficBlocking()
-    stats.AddRowFilter(ColumnName="Port Name", Comparator=StatViewAssistant.EQUAL, FilterValue=1)
-    stats.CheckCondition(ColumnName="Frames Tx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT)
-    stats.CheckCondition(ColumnName="Bytes Tx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT * FRAME_SIZE)
-    stats.ClearRowFilters()
-    stats.AddRowFilter(ColumnName="Port Name", Comparator=StatViewAssistant.EQUAL, FilterValue=2)
-    stats.CheckCondition(ColumnName="Valid Frames Rx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT)
-    stats.CheckCondition(ColumnName="Bytes Rx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=FRAME_COUNT * NON_REPLICATED_FRAME_SIZE)
-    stats.ClearRowFilters()
-    stats.AddRowFilter(ColumnName="Port Name", Comparator=StatViewAssistant.EQUAL, FilterValue=3)
-    stats.CheckCondition(ColumnName="Valid Frames Rx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=0)
-    stats.CheckCondition(ColumnName="Bytes Rx.", Comparator=StatViewAssistant.EQUAL, ConditionValue=0)
-    stats.ClearRowFilters()
+    time.sleep(1)
     stream.StopStatelessTrafficBlocking()
-
-
-main()
+    ports = StatsView(ixn, "Port Statistics")
+    assert ports[0]["Frames Tx."] == FRAME_COUNT
+    assert ports[0]["Bytes Tx."] == FRAME_COUNT * FRAME_SIZE
+    assert ports[1]["Valid Frames Rx."] == FRAME_COUNT
+    assert ports[1]["Bytes Rx."] == FRAME_COUNT * NON_REPLICATED_FRAME_SIZE
+    assert ports[2]["Valid Frames Rx."] == 0
+    assert ports[2]["Bytes Rx."] == 0
