@@ -18,4 +18,6 @@ dev = [
 filterwarnings = [
     "ignore::pytest.PytestCollectionWarning",
     "ignore::urllib3.exceptions.InsecureRequestWarning",
+    # Invalid escape sequence in doc comment
+    "ignore::SyntaxWarning:ixnetwork",
 ]
