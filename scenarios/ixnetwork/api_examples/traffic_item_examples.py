@@ -39,8 +39,8 @@ from ixnetwork_restpy import *
 # Provide username and password to login to Keysight
 load_dotenv()
 
-username = os.getenv('username')
-password = os.getenv('password')
+username = os.getenv("IXN_USER")
+password = os.getenv("IXN_PASS")
 
 # TODO: Figure out a better / external way to provide deployment-specific information about the Keysight and the port mapping so the demo can be run with different TSN switches wired to different ports
 

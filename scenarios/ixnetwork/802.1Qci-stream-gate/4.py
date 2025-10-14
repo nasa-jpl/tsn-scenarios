@@ -44,9 +44,8 @@ from sgfunctions import basecfg
 # Provide username and password to login to Keysight
 load_dotenv()
 
-# Use this snytax for linux 
-username = os.getenv("IXN_USERNAME")
-password = os.getenv("IXN_PASSWORD")
+username = os.getenv("IXN_USER")
+password = os.getenv("IXN_PASS")
 
 # Provide a name for the keysight session
 scenarioName = 'stream_gate-4-gating'
