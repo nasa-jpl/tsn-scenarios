@@ -7,6 +7,8 @@ import pytest
 
 @pytest.fixture(scope="session")
 def config():
+    load_dotenv()
+
     return {
         "chassis": "hpscnovus",
         "user": os.getenv("IXN_USER"),
@@ -21,8 +23,6 @@ def session(config, request):
     remainder, dirname = os.path.split(remainder)
     scenario = filename.replace("test_", "").replace(".py", "")
     session_name = f"{dirname}-{scenario}"
-
-    load_dotenv()
 
     session = SessionAssistant(
         IpAddress=config["chassis"],
