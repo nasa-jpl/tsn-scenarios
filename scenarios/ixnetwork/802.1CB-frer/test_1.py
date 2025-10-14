@@ -101,36 +101,6 @@ def set_stream(stream, name, src_addr, dst_addr):
     set_ethernet_stack(stream, src_addr, dst_addr)
 
 
-def add_egress_only_tracking(ixn):
-    ixn.Traffic.EnableEgressOnlyTracking = True
-
-    vports = ixn.Vport.find()[-2:]
-
-    for vport in vports:
-        vport.AddEgressOnlyTracking()
-
-    for eot in ixn.Traffic.EgressOnlyTracking.find():
-        egress = [
-            # NOTE: This allows bins to be created based on packet contents
-            # (e.g., one bin per priority).  Arg1 is a byte offset into the
-            # packet and arg2 is a bit mask where a zero value includes the
-            # bit and a one value excludes the bit. We aren't insterested
-            # in multiple bins but IxNetwork requires at least two so at
-            # least one bit needs to be unmasked (zero).  So we unmask the
-            # first bit.
-            {"arg1": 0, "arg2": "7fffffff"},
-            {"arg1": 0, "arg2": "ffffffff"},
-            {"arg1": 0, "arg2": "ffffffff"},
-        ]
-        eot.update(
-            Egress=egress,
-            SignatureOffset=NOVLAN_ETHER_TYPE_BYTE_OFFSET,
-            SignatureValue=RTAG_ETHER_TYPE + "0000",
-        )
-
-    ixn.Traffic.Apply()
-
-
 class StatsView:
     def __init__(self, ixn, view_caption):
         self._view = ixn.Statistics.View.find(Caption=f"^{view_caption}$")
