@@ -10,7 +10,7 @@ def config():
     load_dotenv()
 
     return {
-        "chassis": "hpscnovus",
+        "chassis": os.getenv("IXN_ADDRESS"),
         "user": os.getenv("IXN_USER"),
         "pass": os.getenv("IXN_PASS"),
         "ports": [5, 6, 7],
