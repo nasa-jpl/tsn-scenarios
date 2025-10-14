@@ -204,6 +204,8 @@ def _create_ix_network(args):
 def main():
     try:
         load_dotenv()
+        if proxy := os.getenv("IXN_PROXY"):
+            os.environ["ALL_PROXY"] = proxy
         opts = parse_opts()
         opts.func(opts)
     except ConnectionError as e:

@@ -44,6 +44,8 @@ from sgfunctions import basecfg
 # Provide username and password to login to Keysight
 load_dotenv()
 
+if proxy := os.getenv("IXN_PROXY"):
+    os.environ["ALL_PROXY"] = proxy
 username = os.getenv("IXN_USER")
 password = os.getenv("IXN_PASS")
 
