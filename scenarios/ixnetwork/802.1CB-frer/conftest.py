@@ -1,19 +1,64 @@
 import os
+from typing import Literal
 
 from dotenv import load_dotenv
 from ixnetwork_restpy import SessionAssistant
 import pytest
 
 
-@pytest.fixture(scope="session")
-def config():
+def parse_ports(ports: str) -> [int]:
+    tokens = ports.split(",")
+    return [int(token.strip()) for token in tokens]
+
+
+def read_env(
+    variables: dict[str, Literal["optional", "required"]],
+) -> dict[str, str | None]:
     load_dotenv()
 
+    env = {}
+
+    for variable, optionality in variables.items():
+        env[variable] = os.getenv(variable)
+        match optionality:
+            case "optional":
+                pass
+            case "required":
+                assert variable in os.environ
+
+    return env
+
+
+@pytest.fixture(scope="session")
+def config():
+    """
+    Load configuration from .env file and the environment.
+    """
+
+    load_dotenv()
+
+    env = read_env(
+        {
+            "IXN_PROXY": "optional",
+            "IXN_ADDRESS": "required",
+            "IXN_USER": "required",
+            "IXN_PASS": "required",
+            "IXN_PORTS": "required",
+        }
+    )
+
+    print_env = env.copy()
+    print_env["IXN_PASS"] = "********"
+    print(f"config={print_env}")
+
+    if env["IXN_PROXY"]:
+        os.environ["ALL_PROXY"] = env["IXN_PROXY"]
+
     return {
-        "chassis": os.getenv("IXN_ADDRESS"),
-        "user": os.getenv("IXN_USER"),
-        "pass": os.getenv("IXN_PASS"),
-        "ports": [5, 6, 7],
+        "chassis": env["IXN_ADDRESS"],
+        "user": env["IXN_USER"],
+        "pass": env["IXN_PASS"],
+        "ports": parse_ports(env["IXN_PORTS"]),
     }
 
 
@@ -33,6 +78,7 @@ def session(config, request):
         SessionName=session_name,
     )
     yield session
+
     session.Session.remove()
 
 

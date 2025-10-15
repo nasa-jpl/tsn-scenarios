@@ -21,3 +21,6 @@ filterwarnings = [
     # Invalid escape sequence in doc comment
     "ignore::SyntaxWarning:ixnetwork",
 ]
+addopts = [
+    "--exitfirst",
+]

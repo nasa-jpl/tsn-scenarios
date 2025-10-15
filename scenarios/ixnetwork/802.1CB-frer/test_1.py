@@ -15,90 +15,17 @@ import pytest
 RTAG_ETHER_TYPE = "f1c1"
 NOVLAN_ETHER_TYPE_BYTE_OFFSET = 12
 VLAN_ETHER_TYPE_BYTE_OFFSET = 16
+CTAG_SIZE = 4
+RTAG_SIZE = 6
 
 FRAME_COUNT = 10
 FRAME_SIZE = 64
-CTAG_SIZE = 4
-RTAG_SIZE = 6
-REPLICATED_FRAME_SIZE = FRAME_SIZE + CTAG_SIZE + RTAG_SIZE
-NON_REPLICATED_FRAME_SIZE = FRAME_SIZE
+FRAME_SIZE_REPLICATED = FRAME_SIZE + CTAG_SIZE + RTAG_SIZE
+FRAME_SIZE_NONREPLICATED = FRAME_SIZE
 
-
-def create_macs():
-    return {
-        "nonfrer_talker": "02:00:00:00:00:01",
-        "frer_listener": "02:00:00:00:00:02",
-        "nonfrer_listener": "02:00:00:00:00:03",
-    }
-
-
-def set_ethernet_stack(stream, src_addr, dst_addr):
-    # custom_protocol_template = ixn.Traffic.ProtocolTemplate.find(StackTypeId="^custom$")
-
-    ethernet_stack = stream.Stack.find(StackTypeId="^ethernet$")
-    # rtag_rsvd_stack = stream.Stack.read(
-    #     ethernet_stack.AppendProtocol(custom_protocol_template)
-    # )
-    # rtag_seqid_stack = stream.Stack.read(
-    #     rtag_rsvd_stack.AppendProtocol(custom_protocol_template)
-    # )
-
-    # Set src and dst addresses
-    ethernet_stack.Field.find(Name="sourceAddress").SingleValue = src_addr
-    ethernet_stack.Field.find(Name="destinationAddress").SingleValue = dst_addr
-
-    # # Add R-Tag
-    # ethernet_stack.Field.find(Name="ether_type").update(
-    #     Auto=False,
-    #     SingleValue=RTAG_ETHER_TYPE,
-    # )
-    # rtag_rsvd_stack.Field.find(Name="Length").SingleValue = 16
-    # rtag_seqid_stack.Field.find(Name="Length").SingleValue = 16
-    # rtag_seqid_stack.Field.find(Name="Data").update(
-    #     ValueType="increment",
-    #     StartValue=1,
-    #     StepValue=1,
-    #     CountValue=65535,
-    # )
-
-
-# Add quick flow group that generates r-tagged traffic
-def add_traffic_items(ixn, macs):
-    traffic_item = ixn.Traffic.TrafficItem.add(
-        Name="Non-FRER Talker", TrafficType="raw", TrafficItemType="quick"
-    )
-    vport = ixn.Vport.find()[:1]
-    traffic_item.EndpointSet.add(Sources=vport.Protocols.find())
-    stream = traffic_item.HighLevelStream.find()
-    stream.DuplicateQuickFlowGroups(1)
-
-    streams = traffic_item.HighLevelStream.find()
-    set_stream(
-        streams[0],
-        "Replicated",
-        src_addr=macs["nonfrer_talker"],
-        dst_addr=macs["frer_listener"],
-    )
-    set_stream(
-        streams[1],
-        "Not replicated",
-        src_addr=macs["nonfrer_talker"],
-        dst_addr=macs["nonfrer_listener"],
-    )
-    ixn.Traffic.Apply()
-
-
-def set_stream(stream, name, src_addr, dst_addr):
-    stream.Name = name
-    stream.FrameSize.update(
-        Type="fixed",
-        FixedSize=FRAME_SIZE,
-    )
-    stream.TransmissionControl.update(
-        Type="fixedFrameCount",
-        FrameCount=FRAME_COUNT,
-    )
-    set_ethernet_stack(stream, src_addr, dst_addr)
+ADDR_NONFRER_TALKER = "02:00:00:00:00:01"
+ADDR_FRER_LISTENER = "02:00:00:00:00:02"
+ADDR_NONFRER_LISTENER = "02:00:00:00:00:03"
 
 
 class StatsView:
@@ -123,7 +50,7 @@ class StatsView:
                 key = column_captions[i]
                 try:
                     row_dict[key] = int(cell)
-                except:
+                except Exception:
                     row_dict[key] = cell
             list_of_dicts.append(row_dict)
         return list_of_dicts
@@ -146,40 +73,73 @@ def topology(config, ixn):
 
 
 @pytest.fixture
-def traffic(ixn):
-    macs = create_macs()
-    add_traffic_items(ixn, macs)
-    yield
+def add_traffic(ixn):
+    def _add_traffic(name, src_addr, dst_addr):
+        traffic_item = ixn.Traffic.TrafficItem.add(
+            Name=name,
+            TrafficType="raw",
+            TrafficItemType="quick",
+        )
+        vport = ixn.Vport.find()[0]
+        traffic_item.EndpointSet.add(Sources=vport.Protocols.find())
+
+        stream = traffic_item.HighLevelStream.find()
+        stream.FrameSize.update(
+            Type="fixed",
+            FixedSize=FRAME_SIZE,
+        )
+        stream.TransmissionControl.update(
+            Type="fixedFrameCount",
+            FrameCount=FRAME_COUNT,
+        )
+
+        ethernet_stack = stream.Stack.find(StackTypeId="^ethernet$")
+        ethernet_stack.Field.find(Name="sourceAddress").SingleValue = src_addr
+        ethernet_stack.Field.find(Name="destinationAddress").SingleValue = dst_addr
+
+        ixn.Traffic.Apply()
+
+        return traffic_item
+
+    yield _add_traffic
+
     ixn.Traffic.TrafficItem.find().remove()
     ixn.ClearStats()
 
 
-def test_replication(ixn, topology, traffic):
-    stream = ixn.Traffic.TrafficItem.find().HighLevelStream.find(Name="^Replicated$")
-    stream.StartStatelessTrafficBlocking()
-    time.sleep(1)
-    stream.StopStatelessTrafficBlocking()
-
-    ports = StatsView(ixn, "Port Statistics")
-    assert ports[0]["Frames Tx."] == FRAME_COUNT
-    assert ports[0]["Bytes Tx."] == FRAME_COUNT * FRAME_SIZE
-    assert ports[1]["Valid Frames Rx."] == FRAME_COUNT
-    assert ports[1]["Bytes Rx."] == FRAME_COUNT * REPLICATED_FRAME_SIZE
-    assert ports[1]["Valid Frames Rx."] == FRAME_COUNT
-    assert ports[1]["Bytes Rx."] == FRAME_COUNT * REPLICATED_FRAME_SIZE
-
-
-def test_nonreplication(ixn, topology, traffic):
-    stream = ixn.Traffic.TrafficItem.find().HighLevelStream.find(
-        Name="^Not replicated$"
+def test_replication(ixn, topology, add_traffic):
+    traffic = add_traffic(
+        name="Replicated", src_addr=ADDR_NONFRER_TALKER, dst_addr=ADDR_FRER_LISTENER
     )
-    stream.StartStatelessTrafficBlocking()
-    time.sleep(1)
-    stream.StopStatelessTrafficBlocking()
+
+    traffic.StartStatelessTrafficBlocking()
+    time.sleep(5)
+    traffic.StopStatelessTrafficBlocking()
+
     ports = StatsView(ixn, "Port Statistics")
     assert ports[0]["Frames Tx."] == FRAME_COUNT
     assert ports[0]["Bytes Tx."] == FRAME_COUNT * FRAME_SIZE
     assert ports[1]["Valid Frames Rx."] == FRAME_COUNT
-    assert ports[1]["Bytes Rx."] == FRAME_COUNT * NON_REPLICATED_FRAME_SIZE
+    assert ports[1]["Bytes Rx."] == FRAME_COUNT * FRAME_SIZE_REPLICATED
+    assert ports[1]["Valid Frames Rx."] == FRAME_COUNT
+    assert ports[1]["Bytes Rx."] == FRAME_COUNT * FRAME_SIZE_REPLICATED
+
+
+def test_nonreplication(ixn, topology, add_traffic):
+    traffic = add_traffic(
+        name="Not replicated",
+        src_addr=ADDR_NONFRER_TALKER,
+        dst_addr=ADDR_NONFRER_LISTENER,
+    )
+
+    traffic.StartStatelessTrafficBlocking()
+    time.sleep(5)
+    traffic.StopStatelessTrafficBlocking()
+
+    ports = StatsView(ixn, "Port Statistics")
+    assert ports[0]["Frames Tx."] == FRAME_COUNT
+    assert ports[0]["Bytes Tx."] == FRAME_COUNT * FRAME_SIZE
+    assert ports[1]["Valid Frames Rx."] == FRAME_COUNT
+    assert ports[1]["Bytes Rx."] == FRAME_COUNT * FRAME_SIZE_NONREPLICATED
     assert ports[2]["Valid Frames Rx."] == 0
     assert ports[2]["Bytes Rx."] == 0
