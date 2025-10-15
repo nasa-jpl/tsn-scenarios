@@ -57,13 +57,9 @@ chassisIp = os.getenv("IXN_ADDRESS")
 # Some Keysight products have multiple slots within a single chassis, we just have 1 slot
 chassisSlotNumber = 1
 
-# Probably should have some end-point structure so each can specify a different chassisIp, slot number, and port number, making script more useful for other deployments
-portNumberEP1 = 5
-portNumberEP2 = 6
-portNumberEP3 = 7
-
 # Each port consists of the IP address of the chassis, the card #, and the port #
-portList = [[chassisIp, chassisSlotNumber, portNumberEP1], [chassisIp, chassisSlotNumber, portNumberEP2], [chassisIp, chassisSlotNumber, portNumberEP3]]
+ports = [int(port) for port in os.getenv("IXN_PORTS").split(",")]
+portList = [[chassisIp, chassisSlotNumber, port] for port in ports]
 
 
 outLogFile : str = scenarioName + '_' + time.strftime("%Y%m%d-%H%M%S") + '.log'

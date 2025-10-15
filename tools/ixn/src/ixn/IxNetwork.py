@@ -31,6 +31,7 @@ class IxNetwork:
     ):
         self._username = os.getenv("IXN_USER")
         self._password = os.getenv("IXN_PASS")
+        self._ports = [int(port) for port in os.getenv("IXN_PORTS").split(",")]
 
         # Our API server and chassis are same device
         self._api_server_ip = api_server_ip
@@ -207,12 +208,14 @@ class IxNetwork:
         portMap = self._ix_session.PortMapAssistant()
         # Each port consists of the IP address of the chassis, the card #, and the port #
         vport = dict()
-        for key, endpoint in self._endpoints["endpoints"].items():
+        if len(self._ports) < len(self._endpoints["endpoints"]):
+            raise RuntimeError("Fewer ports provided than endpoints")
+        for port, (key, endpoint) in zip(self._ports, self._endpoints["endpoints"].items()):
             portName = f"Port_{key}"
             vport[key] = portMap.Map(
                 IpAddress=self._chassis_ip,
                 CardId=self._chassis_slot_number,
-                PortId=endpoint["port_num"],
+                PortId=port,
                 Name=portName,
             )
 
