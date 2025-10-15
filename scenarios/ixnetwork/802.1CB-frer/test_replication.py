@@ -78,6 +78,7 @@ def test_replication(ixn, topology, add_traffic):
     )
 
     traffic.StartStatelessTrafficBlocking()
+    # FIXME: Poll "Frames Tx." stat instead?
     time.sleep(5)
     traffic.StopStatelessTrafficBlocking()
 
@@ -90,7 +91,7 @@ def test_replication(ixn, topology, add_traffic):
     assert ports[2]["Bytes Rx."] == FRAME_COUNT * FRAME_SIZE_REPLICATED
 
 
-def test_noreplication(ixn, topology, add_traffic):
+def test_no_replication(ixn, topology, add_traffic):
     """
     Send traffic on port 0.
 
@@ -103,6 +104,7 @@ def test_noreplication(ixn, topology, add_traffic):
     )
 
     traffic.StartStatelessTrafficBlocking()
+    # FIXME: Poll "Frames Tx." stat instead?
     time.sleep(5)
     traffic.StopStatelessTrafficBlocking()
 

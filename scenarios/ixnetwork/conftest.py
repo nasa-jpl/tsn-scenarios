@@ -26,6 +26,20 @@ def pytest_runtest_makereport(item, call):
 
 
 def parse_ports(ports: str) -> [int]:
+    """
+    Parse a list of ports.
+
+    >>> parse_ports("1,2,3")
+    [1, 2, 3]
+
+    >>> parse_ports("1, 2, 3")
+    [1, 2, 3]
+
+    >>> parse_ports("one, two")
+        ...
+    ValueError: invalid literal for int() with base 10: 'one'
+    """
+
     tokens = ports.split(",")
     return [int(token.strip()) for token in tokens]
 
@@ -33,6 +47,10 @@ def parse_ports(ports: str) -> [int]:
 def read_env(
     variables: dict[str, Literal["optional", "required"]],
 ) -> dict[str, str | None]:
+    """
+    Read and validate the environment.
+    """
+
     load_dotenv()
 
     env = {}
