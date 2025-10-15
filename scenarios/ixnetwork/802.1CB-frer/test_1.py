@@ -12,6 +12,8 @@ import time
 from ixnetwork_restpy import BatchAdd
 import pytest
 
+from ixnetwork_restpy_helpers import StatsViewSnapshot
+
 RTAG_ETHER_TYPE = "f1c1"
 NOVLAN_ETHER_TYPE_BYTE_OFFSET = 12
 VLAN_ETHER_TYPE_BYTE_OFFSET = 16
@@ -26,37 +28,6 @@ FRAME_SIZE_NONREPLICATED = FRAME_SIZE
 ADDR_NONFRER_TALKER = "02:00:00:00:00:01"
 ADDR_FRER_LISTENER = "02:00:00:00:00:02"
 ADDR_NONFRER_LISTENER = "02:00:00:00:00:03"
-
-
-class StatsView:
-    def __init__(self, ixn, view_caption):
-        self._view = ixn.Statistics.View.find(Caption=f"^{view_caption}$")
-        self._snapshot = self._snapshot()
-
-    def _snapshot(self):
-        cols = self._view.Data.ColumnCaptions
-        rows = self._view.Data.RowValues.values()
-        rows = [row[0] for row in rows]
-
-        return self._list_of_lists_to_list_of_dicts(rows, cols)
-
-    def _list_of_lists_to_list_of_dicts(
-        self, list_of_lists: list[list[str]], column_captions: list[str]
-    ) -> list[dict[str, str]]:
-        list_of_dicts = []
-        for row in list_of_lists:
-            row_dict = {}
-            for i, cell in enumerate(row):
-                key = column_captions[i]
-                try:
-                    row_dict[key] = int(cell)
-                except Exception:
-                    row_dict[key] = cell
-            list_of_dicts.append(row_dict)
-        return list_of_dicts
-
-    def __getitem__(self, i):
-        return self._snapshot[i]
 
 
 @pytest.fixture(scope="module")
@@ -74,6 +45,14 @@ def topology(config, ixn):
 
 @pytest.fixture
 def add_traffic(ixn):
+    """
+    Generate a simple L2 quick flow traffic item.
+
+    Uses the "factory as fixture" pattern [1] to allow the test to pass
+    arguments (e.g., src_addr) to the fixture.
+
+    [1]: https://docs.pytest.org/en/stable/how-to/fixtures.html#factories-as-fixtures
+    """
     def _add_traffic(name, src_addr, dst_addr):
         traffic_item = ixn.Traffic.TrafficItem.add(
             Name=name,
@@ -108,6 +87,12 @@ def add_traffic(ixn):
 
 
 def test_replication(ixn, topology, add_traffic):
+    """
+    Send N frames on port 0.
+
+    Verify that they are replicated to both ports 1 and 2 and that both VLAN
+    tag and R-Tag have been added.
+    """
     traffic = add_traffic(
         name="Replicated", src_addr=ADDR_NONFRER_TALKER, dst_addr=ADDR_FRER_LISTENER
     )
@@ -116,16 +101,21 @@ def test_replication(ixn, topology, add_traffic):
     time.sleep(5)
     traffic.StopStatelessTrafficBlocking()
 
-    ports = StatsView(ixn, "Port Statistics")
+    ports = StatsViewSnapshot(ixn, "Port Statistics")
     assert ports[0]["Frames Tx."] == FRAME_COUNT
     assert ports[0]["Bytes Tx."] == FRAME_COUNT * FRAME_SIZE
     assert ports[1]["Valid Frames Rx."] == FRAME_COUNT
     assert ports[1]["Bytes Rx."] == FRAME_COUNT * FRAME_SIZE_REPLICATED
-    assert ports[1]["Valid Frames Rx."] == FRAME_COUNT
-    assert ports[1]["Bytes Rx."] == FRAME_COUNT * FRAME_SIZE_REPLICATED
+    assert ports[2]["Valid Frames Rx."] == FRAME_COUNT
+    assert ports[2]["Bytes Rx."] == FRAME_COUNT * FRAME_SIZE_REPLICATED
 
 
 def test_nonreplication(ixn, topology, add_traffic):
+    """
+    Send traffic on port 0.
+
+    Verify that it is only forwarded to port 1 w/o modification.
+    """
     traffic = add_traffic(
         name="Not replicated",
         src_addr=ADDR_NONFRER_TALKER,
@@ -136,7 +126,7 @@ def test_nonreplication(ixn, topology, add_traffic):
     time.sleep(5)
     traffic.StopStatelessTrafficBlocking()
 
-    ports = StatsView(ixn, "Port Statistics")
+    ports = StatsViewSnapshot(ixn, "Port Statistics")
     assert ports[0]["Frames Tx."] == FRAME_COUNT
     assert ports[0]["Bytes Tx."] == FRAME_COUNT * FRAME_SIZE
     assert ports[1]["Valid Frames Rx."] == FRAME_COUNT
