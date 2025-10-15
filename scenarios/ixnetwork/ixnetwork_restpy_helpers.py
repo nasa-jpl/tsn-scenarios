@@ -8,6 +8,7 @@ class StatsViewSnapshot:
     >>> ports = StatsViewSnapshot(ixn, "Port Statistics")
     >>> assert ports[0]["Frames Tx."] == 10
     """
+
     def __init__(self, ixn, view_caption: str):
         self._view = ixn.Statistics.View.find(Caption=f"^{view_caption}$")
         self._snapshot = self._snapshot()

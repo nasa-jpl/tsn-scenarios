@@ -1,6 +1,7 @@
 from ixnetwork_restpy import BatchAdd
 import pytest
 
+
 @pytest.fixture(scope="module")
 def topology(config, ixn):
     chassis = config["chassis"]

@@ -1,12 +1,3 @@
-#!/usr/bin/env -S uv run --script --quiet
-# /// script
-# requires-python = ">=3.12"
-# dependencies = [
-#     "python-dotenv",
-#     "ixnetwork_restpy",
-# ]
-# ///
-
 import time
 
 import pytest
@@ -39,6 +30,7 @@ def add_traffic(ixn):
 
     [1]: https://docs.pytest.org/en/stable/how-to/fixtures.html#factories-as-fixtures
     """
+
     def _add_traffic(name, src_addr, dst_addr):
         traffic_item = ixn.Traffic.TrafficItem.add(
             Name=name,
