@@ -79,7 +79,7 @@ def test_replication(ixn, topology, add_traffic):
 
     traffic.StartStatelessTrafficBlocking()
     # FIXME: Poll "Frames Tx." stat instead?
-    time.sleep(5)
+    time.sleep(10)
     traffic.StopStatelessTrafficBlocking()
 
     ports = StatsViewSnapshot(ixn, "Port Statistics")
@@ -105,7 +105,7 @@ def test_no_replication(ixn, topology, add_traffic):
 
     traffic.StartStatelessTrafficBlocking()
     # FIXME: Poll "Frames Tx." stat instead?
-    time.sleep(5)
+    time.sleep(10)
     traffic.StopStatelessTrafficBlocking()
 
     ports = StatsViewSnapshot(ixn, "Port Statistics")
