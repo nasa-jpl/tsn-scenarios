@@ -9,7 +9,6 @@
 
 import time
 
-from ixnetwork_restpy import BatchAdd
 import pytest
 
 from ixnetwork_restpy_helpers import StatsViewSnapshot
@@ -28,19 +27,6 @@ FRAME_SIZE_NONREPLICATED = FRAME_SIZE
 ADDR_NONFRER_TALKER = "02:00:00:00:00:01"
 ADDR_FRER_LISTENER = "02:00:00:00:00:02"
 ADDR_NONFRER_LISTENER = "02:00:00:00:00:03"
-
-
-@pytest.fixture(scope="module")
-def topology(config, ixn):
-    chassis = config["chassis"]
-    ports = config["ports"]
-
-    with BatchAdd(ixn):
-        for i, port in enumerate(ports):
-            vport = i + 1
-            vp = ixn.Vport.add(Name=vport, Location=f"{chassis};1;{port}")
-            t = ixn.Topology.add(Vports=vp[-1])
-            t.DeviceGroup.add(Multiplier=1)
 
 
 @pytest.fixture
