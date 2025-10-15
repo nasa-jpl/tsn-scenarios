@@ -1,6 +1,5 @@
 endpoints:
   ep1:
-    port_num: 5
     device_groups:
       eth1:
         mac: '00:11:01:00:00:01'
@@ -10,7 +9,6 @@ endpoints:
         gateway: '10.1.0.10'
         resolve_gateway: False
   ep3:
-    port_num: 7
     device_groups:
       eth1:
         mac: '00:11:01:00:00:03'
@@ -27,7 +25,6 @@ endpoints:
         gateway: '10.1.0.10'
         resolve_gateway: False
   ep2:
-    port_num: 6
     device_groups:
       eth1:
         mac: '00:11:01:00:00:02'
