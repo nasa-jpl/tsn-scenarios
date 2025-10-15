@@ -82,7 +82,7 @@ uv run ixn create --topology scenarios/ixnetwork/<scenario>/<topology_yaml>  --t
 
 [source, bash]
 ----
-uv run ixn run --session-name <session_name> --run-time-sec <time_in_sec>
+uv run ixn run --session-name <session_name> --run-time-sec <time_in_sec> --test-func <Function defined in IxValidate.py>
 ----
 
 If the session cannot be found, it will return an error. The default run time is 10s, but if you set it to 0, then it will leave the session running. It would then need to be stopped with the `stop` command

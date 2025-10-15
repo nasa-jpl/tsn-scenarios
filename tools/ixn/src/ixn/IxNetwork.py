@@ -319,7 +319,7 @@ class IxNetwork:
             # This generates the frames based on the previous configuration.
             trafficItem[i].Generate()
 
-    def run_session(self, run_time_sec, dry_run=False, validation_func=None):
+    def run_session(self, run_time_sec, dry_run, validation_func):
         """Run an existing session"""
 
         self._ix_session = self._get_session_by_name()
