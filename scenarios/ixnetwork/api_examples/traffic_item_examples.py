@@ -30,7 +30,9 @@ Usage:
 
 """
 
-import sys, os, time, traceback
+import os
+import time
+import traceback
 
 from dotenv import load_dotenv
 
@@ -170,7 +172,7 @@ try:
     ip1.ResolveGateway.Single(False)
 
     # Setup EP3
-    print(f"\rCreating Topology 2 of 3...", end="")
+    print("\rCreating Topology 2 of 3...", end="")
 
     ixNetwork.info("Creating Topology Group 3")
     ep3_topology = ixNetwork.Topology.add(Name="EP3", Ports=vport["Port_EP3"])
@@ -196,7 +198,7 @@ try:
     ip4.ResolveGateway.Single(False)
 
     # Setup EP2
-    print(f"\rCreating Topology 3 of 3...")
+    print("\rCreating Topology 3 of 3...")
 
     ixNetwork.info("Creating Topology Group 2")
     ep2_topology = ixNetwork.Topology.add(Name="EP2", Ports=vport["Port_EP2"])

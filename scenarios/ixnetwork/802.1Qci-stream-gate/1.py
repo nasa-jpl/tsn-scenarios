@@ -32,7 +32,9 @@ Usage:
 """
 # from ixnetwork_restpy import SessionAssistant
 
-import sys, os, time, traceback
+import os
+import time
+import traceback
 
 from dotenv import load_dotenv
 
@@ -83,7 +85,7 @@ try:
     vlan_outer = []
     print("Creating Traffic Item 1 of", len(sourceList), "...", end="")
     for i in range(len(sourceList)):
-        print(f"\rCreating Traffic Item", i + 1, "of", len(sourceList), "...", end="")
+        print("\rCreating Traffic Item", i + 1, "of", len(sourceList), "...", end="")
         # Create a traffic item.  This scenario, all traffic is uni-directional.
         # Need to specify the type so that the appropriate packet headers are applied.
 
@@ -398,7 +400,7 @@ try:
         print("Change traffic start delay times; Streams")
         for m in range(len(sourceList)):
             print(
-                f"\rUpdating start time Traffic Item",
+                "\rUpdating start time Traffic Item",
                 m + 1,
                 "of",
                 len(sourceList),

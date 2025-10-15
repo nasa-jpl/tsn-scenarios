@@ -31,7 +31,9 @@ Usage:
 
 """
 
-import sys, os, time, traceback
+import os
+import time
+import traceback
 
 from dotenv import load_dotenv
 
@@ -189,7 +191,7 @@ try:
 
     # Setup EP3
     # For this scenario there are 2 separate stacks with separate IP addresses
-    print(f"\rCreating Topology 2 of 3...", end="")
+    print("\rCreating Topology 2 of 3...", end="")
 
     ixNetwork.info("Creating Topology Group 3")
     ep3_topology = ixNetwork.Topology.add(Name="EP3", Ports=vport["Port_EP3"])
@@ -215,7 +217,7 @@ try:
     ip4.ResolveGateway.Single(False)
 
     # Setup EP2
-    print(f"\rCreating Topology 3 of 3...")
+    print("\rCreating Topology 3 of 3...")
 
     ixNetwork.info("Creating Topology Group 2")
     ep2_topology = ixNetwork.Topology.add(Name="EP2", Ports=vport["Port_EP2"])
@@ -270,7 +272,7 @@ try:
     trafficItem = []
     print("Creating Traffic Item 1 of", len(sourceList), "...", end="")
     for i in range(len(sourceList)):
-        print(f"\rCreating Traffic Item", i + 1, "of", len(sourceList), "...", end="")
+        print("\rCreating Traffic Item", i + 1, "of", len(sourceList), "...", end="")
         # Create a traffic item.  This scenario, all traffic is uni-directional.
         # Need to specify the type so that the appropriate packet headers are applied.
         trafficItem.append(

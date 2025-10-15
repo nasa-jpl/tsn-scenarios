@@ -176,7 +176,7 @@ def basecfg(scenarioName, time, SessionAssistant, username, password, traceback)
 
         # Setup EP3
         # For this scenario there are 2 separate stacks with separate MAC addresses for sources and one for the destination
-        print(f"\rCreating Topology 2 of 3...", end="")
+        print("\rCreating Topology 2 of 3...", end="")
         ixNetwork.info("Creating Topology Group 3")
         ep3_topology = ixNetwork.Topology.add(Name="EP3", Ports=vport["Port_EP3"])
         ep3_dg1 = ep3_topology.DeviceGroup.add(Name="EP3.DG1", Multiplier="1")
@@ -197,7 +197,7 @@ def basecfg(scenarioName, time, SessionAssistant, username, password, traceback)
         )  # Set PTP1 to proper ptp protocol:SM 8/13/25
 
         # Setup EP2
-        print(f"\rCreating Topology 3 of 3...")
+        print("\rCreating Topology 3 of 3...")
         ixNetwork.info("Creating Topology Group 2")
         ep2_topology = ixNetwork.Topology.add(Name="EP2", Ports=vport["Port_EP2"])
         ep2_dg1 = ep2_topology.DeviceGroup.add(Name="EP2.DG1", Multiplier="1")
