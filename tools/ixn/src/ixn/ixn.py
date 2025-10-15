@@ -2,6 +2,7 @@ from .IxNetwork import IxNetwork
 from dotenv import load_dotenv
 
 import argparse
+import os
 import sys
 import traceback
 import yaml
@@ -129,6 +130,12 @@ def parse_opts():
         help="""The run time for this scenario in seconds""",
     )
 
+    parser_run.add_argument(
+        "--test-func",
+        required=True,
+        help="""The function in the IxValidate class to use for validation""",
+    )
+
     parser_run.set_defaults(func=run_session)
 
     # Parser for stop sub-command
@@ -175,7 +182,7 @@ def create_session(args):
 def run_session(args):
     """Entry function to create a session"""
     ix_network = _create_ix_network(args)
-    ix_network.run_session(args.run_time_sec, args.dry_run)
+    ix_network.run_session(args.run_time_sec, args.dry_run, args.test_func)
 
 
 def stop_session(args):
