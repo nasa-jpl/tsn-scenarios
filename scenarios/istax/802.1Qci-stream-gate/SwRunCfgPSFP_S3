@@ -1,0 +1,240 @@
+hostname hpsctsnsw0
+username admin privilege 15 password encrypted f81d6d9a43f1e374e36ae09883fcd152e29874f76259ccb5f89ad754cdd64bb02a53cb67a44e4d3c20c8dcc6e028b50989a4f2d093bca8e7035269de339b812e
+web timeout 0 0
+!
+vlan 1,2,200
+!
+!
+!
+!
+mac address-table static 00:a9:00:00:05:05 vlan 2 interface 10GigabitEthernet 1/2
+spanning-tree mst name 00-04-a3-01-00-00 revision 0
+!
+stream 1
+ smac 00-13-01-00-00-01
+!
+stream 2
+ smac 00-15-01-00-00-01
+!
+!
+voice vlan oui 00-01-E3 description Siemens AG phones
+voice vlan oui 00-03-6B description Cisco phones
+voice vlan oui 00-0F-E2 description H3C phones
+voice vlan oui 00-60-B9 description Philips and NEC AG phones
+voice vlan oui 00-D0-1E description Pingtel phones
+voice vlan oui 00-E0-75 description Polycom phones
+voice vlan oui 00-E0-BB description 3Com phones
+ptp 0 mode boundary twostep ethernet twoway id 00:04:a3:ff:fe:01:00:00 vid 2 0 profile 802.1as mep 1
+ ptp 0 filter-type basic
+!
+interface GigabitEthernet 1/1
+!
+interface 10GigabitEthernet 1/1
+ switchport access vlan 2
+ stream-id 1
+ no lldp receive
+ no lldp transmit
+ qos trust tag
+ qos map tag-cos pcp 0 dei 0 cos 0 dpl 0
+ qos map tag-cos pcp 0 dei 1 cos 0 dpl 1
+ qos map tag-cos pcp 1 dei 0 cos 1 dpl 0
+ qos map tag-cos pcp 1 dei 1 cos 1 dpl 1
+ no spanning-tree
+ ptp 0 
+ ptp 0 announce interval 0 timeout 3
+ ptp 0 sync-interval -3
+ ptp 0 delay-mechanism p2p
+ ptp 0 delay-req interval 0
+ ptp 0 delay-asymmetry 0
+ ptp 0 ingress-latency 0
+ ptp 0 egress-latency 0
+ ptp 0 mcast-dest link-local
+ ptp 0 gptp-interval 0
+!
+interface 10GigabitEthernet 1/2
+ switchport access vlan 2
+ stream-id 2
+ no lldp receive
+ no lldp transmit
+ qos trust tag
+ qos map tag-cos pcp 0 dei 0 cos 0 dpl 0
+ qos map tag-cos pcp 0 dei 1 cos 0 dpl 1
+ qos map tag-cos pcp 1 dei 0 cos 1 dpl 0
+ qos map tag-cos pcp 1 dei 1 cos 1 dpl 1
+ no spanning-tree
+ ptp 0 
+ ptp 0 announce interval 0 timeout 3
+ ptp 0 sync-interval -3
+ ptp 0 delay-mechanism p2p
+ ptp 0 delay-req interval 0
+ ptp 0 delay-asymmetry 0
+ ptp 0 ingress-latency 0
+ ptp 0 egress-latency 0
+ ptp 0 mcast-dest link-local
+ ptp 0 gptp-interval 0
+!
+interface 10GigabitEthernet 1/3
+ switchport access vlan 2
+ no lldp receive
+ no lldp transmit
+ qos trust tag
+ qos map tag-cos pcp 0 dei 0 cos 0 dpl 0
+ qos map tag-cos pcp 0 dei 1 cos 0 dpl 1
+ qos map tag-cos pcp 1 dei 0 cos 1 dpl 0
+ qos map tag-cos pcp 1 dei 1 cos 1 dpl 1
+ no spanning-tree
+ ptp 0 
+ ptp 0 announce interval 0 timeout 3
+ ptp 0 sync-interval -3
+ ptp 0 delay-mechanism p2p
+ ptp 0 delay-req interval 0
+ ptp 0 delay-asymmetry 0
+ ptp 0 ingress-latency 0
+ ptp 0 egress-latency 0
+ ptp 0 mcast-dest link-local
+ ptp 0 gptp-interval 0
+!
+interface 10GigabitEthernet 1/4
+ switchport access vlan 2
+ no lldp receive
+ no lldp transmit
+ qos trust tag
+ qos map tag-cos pcp 0 dei 0 cos 0 dpl 0
+ qos map tag-cos pcp 0 dei 1 cos 0 dpl 1
+ qos map tag-cos pcp 1 dei 0 cos 1 dpl 0
+ qos map tag-cos pcp 1 dei 1 cos 1 dpl 1
+ no spanning-tree
+ ptp 0 
+ ptp 0 announce interval 0 timeout 3
+ ptp 0 sync-interval -3
+ ptp 0 delay-mechanism p2p
+ ptp 0 delay-req interval 0
+ ptp 0 delay-asymmetry 0
+ ptp 0 ingress-latency 0
+ ptp 0 egress-latency 0
+ ptp 0 mcast-dest link-local
+ ptp 0 gptp-interval 0
+ tsn tas cycle-time 1 ms 
+ tsn tas control-list-length 8
+ tsn tas control-list index 0 gate-state queue 1 open time-interval 25000
+ tsn tas control-list index 1 gate-state queue 0,5-7 open time-interval 225000
+ tsn tas control-list index 2 gate-state queue 2 open time-interval 25000
+ tsn tas control-list index 3 gate-state queue 0,5-7 open time-interval 225000
+ tsn tas control-list index 4 gate-state queue 3 open time-interval 25000
+ tsn tas control-list index 5 gate-state queue 0,5-7 open time-interval 225000
+ tsn tas control-list index 6 gate-state queue 4 open time-interval 25000
+ tsn tas control-list index 7 gate-state queue 0,5-7 open time-interval 225000
+!
+interface 10GigabitEthernet 1/5
+!
+interface 10GigabitEthernet 1/6
+ switchport access vlan 200
+ no mac address-table learning
+!
+interface 10GigabitEthernet 1/7
+!
+interface 10GigabitEthernet 1/8
+ switchport access vlan 200
+ no mac address-table learning
+!
+interface 10GigabitEthernet 1/9
+!
+interface 10GigabitEthernet 1/10
+!
+interface 10GigabitEthernet 1/11
+!
+interface 10GigabitEthernet 1/12
+ switchport access vlan 2
+!
+interface 10GigabitEthernet 1/13
+!
+interface 10GigabitEthernet 1/14
+!
+interface 10GigabitEthernet 1/15
+!
+interface 10GigabitEthernet 1/16
+!
+interface 10GigabitEthernet 1/17
+!
+interface 10GigabitEthernet 1/18
+!
+interface 10GigabitEthernet 1/19
+!
+interface 10GigabitEthernet 1/20
+!
+interface vlan 1
+ ip address dhcp fallback 192.0.2.1 255.255.255.0 timeout 60
+!
+spanning-tree aggregation
+ spanning-tree link-type point-to-point
+!
+!
+!
+tsn stream gate 1
+ ipv 1
+ cycle-time 1 ms
+ control-list-length 4
+ control-list index 0 gate-state closed time-interval 250 us ipv 1
+ control-list index 1 gate-state open time-interval 25 us ipv 2
+ control-list index 2 gate-state closed time-interval 724 us ipv 1
+ control-list index 3 gate-state closed time-interval 1 us ipv 1
+ enable
+ config-change
+!
+tsn stream gate 2
+ ipv 2
+ cycle-time 1 ms
+ control-list-length 4
+ control-list index 0 gate-state closed time-interval 500 us ipv 2 octet-max 511
+ control-list index 1 gate-state open time-interval 25 us ipv 3 octet-max 511
+ control-list index 2 gate-state closed time-interval 474 us ipv 2 octet-max 511
+ control-list index 3 gate-state closed time-interval 1 us ipv 2 octet-max 511
+ enable
+ config-change
+!
+tsn stream filter 1
+ stream-id 1
+ gate id 1
+ max-sdu 1536
+!
+tsn stream filter 2
+ stream-id 2
+ gate id 2
+ max-sdu 1536
+!
+line console 0
+!
+line vty 0
+!
+line vty 1
+!
+line vty 2
+!
+line vty 3
+!
+line vty 4
+!
+line vty 5
+!
+line vty 6
+!
+line vty 7
+!
+line vty 8
+!
+line vty 9
+!
+line vty 10
+!
+line vty 11
+!
+line vty 12
+!
+line vty 13
+!
+line vty 14
+!
+line vty 15
+!
+!
+end
