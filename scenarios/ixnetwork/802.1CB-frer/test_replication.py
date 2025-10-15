@@ -80,7 +80,7 @@ def test_replication(ixn, topology, add_traffic):
     tag and R-Tag have been added.
     """
     traffic = add_traffic(
-        name="Replicated", src_addr=ADDR_NONFRER_TALKER, dst_addr=ADDR_FRER_LISTENER
+        name="Replication", src_addr=ADDR_NONFRER_TALKER, dst_addr=ADDR_FRER_LISTENER
     )
 
     traffic.StartStatelessTrafficBlocking()
@@ -96,14 +96,14 @@ def test_replication(ixn, topology, add_traffic):
     assert ports[2]["Bytes Rx."] == FRAME_COUNT * FRAME_SIZE_REPLICATED
 
 
-def test_nonreplication(ixn, topology, add_traffic):
+def test_noreplication(ixn, topology, add_traffic):
     """
     Send traffic on port 0.
 
     Verify that it is only forwarded to port 1 w/o modification.
     """
     traffic = add_traffic(
-        name="Not replicated",
+        name="No replication",
         src_addr=ADDR_NONFRER_TALKER,
         dst_addr=ADDR_NONFRER_LISTENER,
     )
