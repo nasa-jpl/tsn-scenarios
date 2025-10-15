@@ -60,8 +60,10 @@ def add_traffic(ixn):
 
     yield _add_traffic
 
-    ixn.Traffic.TrafficItem.find().remove()
-    ixn.ClearStats()
+    # Prevent cleanup on failure so that we can inspect the state of the system
+    if not pytest.any_test_failed:
+        ixn.Traffic.TrafficItem.find().remove()
+        ixn.ClearStats()
 
 
 def test_replication(ixn, topology, add_traffic):

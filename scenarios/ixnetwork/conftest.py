@@ -6,6 +6,25 @@ from ixnetwork_restpy import SessionAssistant
 import pytest
 
 
+def pytest_configure():
+    pytest.any_test_failed = False
+
+
+@pytest.hookimpl(wrapper=True, tryfirst=True)
+def pytest_runtest_makereport(item, call):
+    """
+    Set a global on failure so that fixtures can use it to disable cleanup so
+    that we can inspect the state of the system.
+    """
+
+    report = yield
+
+    if report.when == "call" and report.failed:
+        pytest.any_test_failed = True
+
+    return report
+
+
 def parse_ports(ports: str) -> [int]:
     tokens = ports.split(",")
     return [int(token.strip()) for token in tokens]
@@ -77,9 +96,12 @@ def session(config, request):
         ClearConfig=True,
         SessionName=session_name,
     )
+
     yield session
 
-    session.Session.remove()
+    # Prevent cleanup on failure so that we can inspect the state of the system
+    if not pytest.any_test_failed:
+        session.Session.remove()
 
 
 @pytest.fixture(scope="module")
