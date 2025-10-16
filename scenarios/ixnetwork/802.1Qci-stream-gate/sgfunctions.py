@@ -1,12 +1,13 @@
 # This Function handles the template generation, API session, virtual ports and EPs
 # for stream gate scenarios 1-4
 
-from ixnetwork_restpy import *
+import os
+
+from ixnetwork_restpy import SessionAssistant
 
 ep1_eth2 = "global_value"
 ep2_eth2 = "global_value"
 debugMode = "global_value"
-SessionAssistant = "global_value"
 session = "global_value"
 Ixnetwork = "global_value"
 ixNetwork = "global_value"
@@ -14,7 +15,7 @@ tx_port = "global_value"
 rx_port3 = "global_value"
 
 
-def basecfg(scenarioName, time, SessionAssistant, username, password, traceback):
+def basecfg(scenarioName, time, username, password, traceback):
     global ep1_eth2, ep2_eth2
     # Our API server and chassis are same device
     apiServerIp = os.getenv("IXN_ADDRESS")
@@ -232,9 +233,6 @@ def basecfg(scenarioName, time, SessionAssistant, username, password, traceback)
 
     except Exception as errMsg:
         print("\n%s" % traceback.format_exc(None, errMsg))
-        if debugMode == False and "session" in locals():
-            if session.TestPlatform.Platform != "windows":
-                session.Session.remove()
 
     return (
         debugMode,

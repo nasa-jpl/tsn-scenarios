@@ -30,7 +30,6 @@ Usage:
    - ./<script.py>
 
 """
-# from ixnetwork_restpy import SessionAssistant
 
 import os
 import time
@@ -38,8 +37,7 @@ import traceback
 
 from dotenv import load_dotenv
 
-from ixnetwork_restpy import *
-# from ixnetwork_restpy import SessionAssistant
+from ixnetwork_restpy import StatViewAssistant
 
 from sgfunctions import basecfg
 
@@ -65,7 +63,7 @@ try:
         ep2_eth2,
         tx_port,
         rx_port3,
-    ] = basecfg(scenarioName, time, SessionAssistant, username, password, traceback)
+    ] = basecfg(scenarioName, time, username, password, traceback)
 
     # Configure raw Traffic items.  Comments further down explain some of this.
     trafficTypeList = ["raw", "raw", "raw", "raw"]
@@ -79,7 +77,6 @@ try:
         ep1_eth2,
         ep1_eth2,
     ]  # The actual sources used are the virtual ports for EP1 and EP2
-    udpList = [False, False, False, False]
     frameRate = [1000, 1000, 1000, 1000]
     frameDelay = [5, 255, 505, 755]
 
@@ -197,16 +194,6 @@ try:
         configElement.TransmissionControl.update(
             StartDelayUnits="microseconds", StartDelay=frameDelay[i]
         )
-
-        # If this traffic item is UDP, add the UDP packet header with appropriate destination port.
-        # Our scenario doesn't care about the source port.
-        if udpList[i]:
-            udpFieldObj = createPacketHeader(
-                trafficItem[i], packetHeaderToAdd="UDP", appendToStack="IPv4"
-            )
-            udpDstField = udpFieldObj.find(DisplayName="UDP-Dest-Port")
-            udpDstField.Auto = False
-            udpDstField.SingleValue = destPort[i]
 
         # Enable tracking on the VLAN User Priority field (PCP)
         # Get the tracking object for the traffic item
@@ -474,16 +461,9 @@ try:
 
     print("********Done running tests********")
 
-    if debugMode == False:
+    if not debugMode:
         for vport in ixNetwork.Vport.find():
             vport.ReleasePort()
 
-        # For linux and connection_manager only
-        if session.TestPlatform.Platform != "windows":
-            session.Session.remove()
-
 except Exception as errMsg:
     print("\n%s" % traceback.format_exc(None, errMsg))
-    if debugMode == False and "session" in locals():
-        if session.TestPlatform.Platform != "windows":
-            session.Session.remove()

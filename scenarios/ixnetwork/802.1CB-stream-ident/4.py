@@ -37,7 +37,7 @@ import traceback
 
 from dotenv import load_dotenv
 
-from ixnetwork_restpy import *
+from ixnetwork_restpy import SessionAssistant
 
 # Provide username and password to login to Keysight
 load_dotenv()
@@ -418,16 +418,9 @@ try:
 
     ixNetwork.Globals.Testworkflow.Stop()
 
-    if debugMode == False:
+    if not debugMode:
         for vport in ixNetwork.Vport.find():
             vport.ReleasePort()
 
-        # For linux and connection_manager only
-        if session.TestPlatform.Platform != "windows":
-            session.Session.remove()
-
 except Exception as errMsg:
     print("\n%s" % traceback.format_exc(None, errMsg))
-    if debugMode == False and "session" in locals():
-        if session.TestPlatform.Platform != "windows":
-            session.Session.remove()
