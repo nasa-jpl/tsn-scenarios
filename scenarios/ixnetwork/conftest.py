@@ -27,7 +27,7 @@ def pytest_runtest_makereport(item, call):
     return report
 
 
-def parse_ports(ports: str) -> [int]:
+def parse_ports(ports: str) -> list[int]:
     """
     Parse a list of ports.
 
@@ -48,7 +48,7 @@ def parse_ports(ports: str) -> [int]:
 
 def read_env(
     variables: dict[str, Literal["optional", "required"]],
-) -> dict[str, str | None]:
+) -> dict[str, str]:
     """
     Read and validate the environment.
     """
@@ -58,7 +58,7 @@ def read_env(
     env = {}
 
     for variable, optionality in variables.items():
-        env[variable] = os.getenv(variable)
+        env[variable] = os.getenv(variable, "")
         match optionality:
             case "optional":
                 pass
