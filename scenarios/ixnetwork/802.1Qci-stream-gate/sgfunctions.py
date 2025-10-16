@@ -3,6 +3,7 @@
 
 import os
 
+from dotenv import load_dotenv
 from ixnetwork_restpy import SessionAssistant
 
 ep1_eth2 = "global_value"
@@ -15,11 +16,18 @@ tx_port = "global_value"
 rx_port3 = "global_value"
 
 
-def basecfg(scenarioName, time, username, password, traceback):
+def basecfg(scenarioName, time, traceback):
     global ep1_eth2, ep2_eth2
+
+    load_dotenv()
+
+    if proxy := os.getenv("IXN_PROXY"):
+        os.environ["ALL_PROXY"] = proxy
     # Our API server and chassis are same device
     apiServerIp = os.getenv("IXN_ADDRESS")
     chassisIp = os.getenv("IXN_ADDRESS")
+    username = os.getenv("IXN_USER")
+    password = os.getenv("IXN_PASS")
 
     # Some Keysight products have multiple slots within a single chassis, we just have 1 slot
     chassisSlotNumber = 1

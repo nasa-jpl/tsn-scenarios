@@ -35,18 +35,9 @@ import os
 import time
 import traceback
 
-from dotenv import load_dotenv
-
 from ixnetwork_restpy import StatViewAssistant
 
 from sgfunctions import basecfg
-
-# Provide username and password to login to Keysight
-load_dotenv()
-
-# Use this snytax for linux
-username = os.getenv("IXN_USERNAME")
-password = os.getenv("IXN_PASSWORD")
 
 # Provide a name for the keysight session
 scenarioName = "stream_gate-3-gating"
@@ -62,7 +53,7 @@ try:
         ep2_eth2,
         tx_port,
         rx_port3,
-    ] = basecfg(scenarioName, time, username, password, traceback)
+    ] = basecfg(scenarioName, time, traceback)
 
     # Configure raw Traffic items.  Comments further down explain some of this.
     trafficTypeList = ["raw", "raw"]
