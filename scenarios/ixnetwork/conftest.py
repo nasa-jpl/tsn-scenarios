@@ -1,3 +1,5 @@
+from copy import copy
+from dataclasses import dataclass
 import os
 from typing import Literal
 
@@ -66,6 +68,15 @@ def read_env(
     return env
 
 
+@dataclass
+class Config:
+    chassis: str
+    username: str
+    password: str
+    ports: list[int]
+    debug: DebugConfig
+
+
 @pytest.fixture(scope="session")
 def config():
     """
@@ -84,19 +95,21 @@ def config():
         }
     )
 
-    print_env = env.copy()
-    print_env["IXN_PASS"] = "********"
-    print(f"config={print_env}")
-
     if env["IXN_PROXY"]:
         os.environ["ALL_PROXY"] = env["IXN_PROXY"]
 
-    return {
-        "chassis": env["IXN_ADDRESS"],
-        "user": env["IXN_USER"],
-        "pass": env["IXN_PASS"],
-        "ports": parse_ports(env["IXN_PORTS"]),
-    }
+    config = Config(
+        chassis=env["IXN_ADDRESS"],
+        username=env["IXN_USER"],
+        password=env["IXN_PASS"],
+        ports=parse_ports(env["IXN_PORTS"]),
+    )
+
+    print_config = copy(config)
+    print_config.password = "******"
+    print(print_config)
+
+    return config
 
 
 @pytest.fixture(scope="module")
@@ -107,9 +120,9 @@ def session(config, request):
     session_name = f"{dirname}-{scenario}"
 
     session = SessionAssistant(
-        IpAddress=config["chassis"],
-        UserName=config["user"],
-        Password=config["pass"],
+        IpAddress=config.chassis,
+        UserName=config.username,
+        Password=config.password,
         LogLevel=SessionAssistant.LOGLEVEL_INFO,
         ClearConfig=True,
         SessionName=session_name,
