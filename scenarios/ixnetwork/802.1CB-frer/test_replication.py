@@ -32,6 +32,9 @@ def add_traffic(ixn):
     """
 
     def _add_traffic(name, src_addr, dst_addr):
+        ixn.Traffic.TrafficItem.find().remove()
+        ixn.ClearStats()
+
         traffic_item = ixn.Traffic.TrafficItem.add(
             Name=name,
             TrafficType="raw",
@@ -58,12 +61,7 @@ def add_traffic(ixn):
 
         return traffic_item
 
-    yield _add_traffic
-
-    # Prevent cleanup on failure so that we can inspect the state of the system
-    if not pytest.any_test_failed:
-        ixn.Traffic.TrafficItem.find().remove()
-        ixn.ClearStats()
+    return _add_traffic
 
 
 def test_replication(ixn, topology, add_traffic):

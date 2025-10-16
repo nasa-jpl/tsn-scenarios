@@ -69,6 +69,12 @@ def read_env(
 
 
 @dataclass
+class DebugConfig:
+    reuse_session: bool
+    reuse_topology: bool
+
+
+@dataclass
 class Config:
     chassis: str
     username: str
@@ -103,6 +109,10 @@ def config():
         username=env["IXN_USER"],
         password=env["IXN_PASS"],
         ports=parse_ports(env["IXN_PORTS"]),
+        debug=DebugConfig(
+            reuse_session=False,
+            reuse_topology=False,
+        ),
     )
 
     print_config = copy(config)
@@ -124,14 +134,14 @@ def session(config, request):
         UserName=config.username,
         Password=config.password,
         LogLevel=SessionAssistant.LOGLEVEL_INFO,
-        ClearConfig=True,
+        ClearConfig=not config.debug.reuse_session,
         SessionName=session_name,
     )
 
     yield session
 
     # Prevent cleanup on failure so that we can inspect the state of the system
-    if not pytest.any_test_failed:
+    if not pytest.any_test_failed and not config.debug.reuse_session:
         session.Session.remove()
 
 
