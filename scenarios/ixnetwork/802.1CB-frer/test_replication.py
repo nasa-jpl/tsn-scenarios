@@ -5,9 +5,6 @@ import pytest
 
 from ixnetwork_restpy_helpers import run_traffic_blocking, StatsViewSnapshot
 
-RTAG_ETHER_TYPE = "f1c1"
-NOVLAN_ETHER_TYPE_BYTE_OFFSET = 12
-VLAN_ETHER_TYPE_BYTE_OFFSET = 16
 CTAG_SIZE = 4
 RTAG_SIZE = 6
 
