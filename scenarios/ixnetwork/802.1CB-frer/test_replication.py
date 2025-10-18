@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-from ixnetwork_restpy_helpers import StatsViewSnapshot
+from ixnetwork_restpy_helpers import run_traffic_blocking, StatsViewSnapshot
 
 RTAG_ETHER_TYPE = "f1c1"
 NOVLAN_ETHER_TYPE_BYTE_OFFSET = 12
@@ -71,14 +71,11 @@ def test_replication(ixn, topology, add_traffic):
     Verify that they are replicated to both ports 1 and 2 and that both VLAN
     tag and R-Tag have been added.
     """
-    traffic = add_traffic(
+    add_traffic(
         name="Replication", src_addr=ADDR_NONFRER_TALKER, dst_addr=ADDR_FRER_LISTENER
     )
 
-    traffic.StartStatelessTrafficBlocking()
-    # FIXME: Poll "Frames Tx." stat instead?
-    time.sleep(10)
-    traffic.StopStatelessTrafficBlocking()
+    run_traffic_blocking(ixn)
 
     ports = StatsViewSnapshot(ixn, "Port Statistics")
     assert ports[0]["Frames Tx."] == FRAME_COUNT
@@ -95,16 +92,13 @@ def test_no_replication(ixn, topology, add_traffic):
 
     Verify that it is only forwarded to port 1 w/o modification.
     """
-    traffic = add_traffic(
+    add_traffic(
         name="No replication",
         src_addr=ADDR_NONFRER_TALKER,
         dst_addr=ADDR_NONFRER_LISTENER,
     )
 
-    traffic.StartStatelessTrafficBlocking()
-    # FIXME: Poll "Frames Tx." stat instead?
-    time.sleep(10)
-    traffic.StopStatelessTrafficBlocking()
+    run_traffic_blocking(ixn)
 
     ports = StatsViewSnapshot(ixn, "Port Statistics")
     assert ports[0]["Frames Tx."] == FRAME_COUNT

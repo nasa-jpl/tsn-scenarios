@@ -37,3 +37,16 @@ class StatsViewSnapshot:
 
     def __getitem__(self, i: int) -> dict[str, str | int]:
         return self._snapshot[i]
+
+def run_traffic_blocking(ixn, timeout_secs: int = 10):
+    """
+    Runs traffic until completion (e.g., fixed frame count transmitted) or
+    until timeout.
+    """
+    ixn.Globals.Testworkflow.Starttraffic()
+    ixn.Traffic.StartApplicationTraffic()
+    traffic = ixn.Traffic.find()
+    for _ in range(10):
+        if traffic.State == "stopped":
+            break
+        time.sleep(1)
