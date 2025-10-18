@@ -138,6 +138,8 @@ def session(config, request):
         SessionName=session_name,
     )
 
+    session.Ixnetwork.Globals.PortTestOptions.EnableDpdkPerformanceAcceleration = True
+
     yield session
 
     # Prevent cleanup on failure so that we can inspect the state of the system
