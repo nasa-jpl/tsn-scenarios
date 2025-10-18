@@ -1,5 +1,6 @@
 import time
 
+from ixnetwork_restpy import BatchAdd
 import pytest
 
 from ixnetwork_restpy_helpers import run_traffic_blocking, StatsViewSnapshot
@@ -32,34 +33,30 @@ def add_traffic(ixn):
     """
 
     def _add_traffic(name, src_addr, dst_addr):
-        ixn.Traffic.TrafficItem.find().remove()
+        with BatchAdd(ixn):
+            traffic = ixn.Traffic.TrafficItem.add(
+                Name=name,
+                TrafficType="raw",
+                TrafficItemType="quick",
+            )
+            vport = ixn.Vport.find()[0]
+            traffic.EndpointSet.add(Sources=vport.Protocols.find())
+            stream = traffic.HighLevelStream.add(TxPortId=vport)
+            stream.FrameSize.FixedSize = FRAME_SIZE
+            stream.TransmissionControl.Type = "fixedFrameCount"
+            stream.TransmissionControl.FrameCount = FRAME_COUNT
+            stack = stream.Stack.add()
+            eth = stack.Ethernet.add()
+            eth.SourceAddress.Single(src_addr)
+            eth.DestinationAddress.Single(dst_addr)
+
+        traffic.Generate()
+        ixn.Traffic.Apply()
         ixn.ClearStats()
 
-        traffic_item = ixn.Traffic.TrafficItem.add(
-            Name=name,
-            TrafficType="raw",
-            TrafficItemType="quick",
-        )
-        vport = ixn.Vport.find()[0]
-        traffic_item.EndpointSet.add(Sources=vport.Protocols.find())
+        return
 
-        stream = traffic_item.HighLevelStream.find()
-        stream.FrameSize.update(
-            Type="fixed",
-            FixedSize=FRAME_SIZE,
-        )
-        stream.TransmissionControl.update(
-            Type="fixedFrameCount",
-            FrameCount=FRAME_COUNT,
-        )
-
-        ethernet_stack = stream.Stack.find(StackTypeId="^ethernet$")
-        ethernet_stack.Field.find(Name="sourceAddress").SingleValue = src_addr
-        ethernet_stack.Field.find(Name="destinationAddress").SingleValue = dst_addr
-
-        ixn.Traffic.Apply()
-
-        return traffic_item
+    ixn.Traffic.TrafficItem.find().remove()
 
     return _add_traffic
 
