@@ -9,7 +9,4 @@ def topology(config, ixn):
 
     with BatchAdd(ixn):
         for i, port in enumerate(config.ports):
-            vport = i + 1
-            vp = ixn.Vport.add(Name=vport, Location=f"{config.chassis};1;{port}")
-            t = ixn.Topology.add(Vports=vp[-1])
-            t.DeviceGroup.add(Multiplier=1)
+            ixn.Vport.add(Name=i, Location=f"{config.chassis};1;{port}")
