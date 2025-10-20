@@ -151,6 +151,7 @@ def session(config, request):
 def ixn(session):
     return session.Ixnetwork
 
+
 @pytest.fixture(scope="module")
 def vports(config, ixn):
     with BatchAdd(ixn):

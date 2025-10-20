@@ -1,5 +1,6 @@
 import time
 
+
 class StatsViewSnapshot:
     """
     Takes a snapshot of an Ixnetwork.Statistics.View and provides an ergonomic
@@ -39,6 +40,7 @@ class StatsViewSnapshot:
 
     def __getitem__(self, i: int) -> dict[str, str | int]:
         return self._snapshot[i]
+
 
 def run_traffic_blocking(ixn, timeout_secs: int = 10):
     """
