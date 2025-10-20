@@ -58,7 +58,7 @@ def add_traffic(ixn):
     return _add_traffic
 
 
-def test_replication(ixn, topology, add_traffic):
+def test_replication(ixn, vports, add_traffic):
     """
     Send N frames on port 0.
 
@@ -80,7 +80,7 @@ def test_replication(ixn, topology, add_traffic):
     assert ports[2]["Bytes Rx."] == FRAME_COUNT * FRAME_SIZE_REPLICATED
 
 
-def test_no_replication(ixn, topology, add_traffic):
+def test_no_replication(ixn, vports, add_traffic):
     """
     Send traffic on port 0.
 

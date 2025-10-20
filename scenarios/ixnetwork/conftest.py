@@ -4,7 +4,7 @@ import os
 from typing import Literal
 
 from dotenv import load_dotenv
-from ixnetwork_restpy import SessionAssistant
+from ixnetwork_restpy import BatchAdd, SessionAssistant
 import pytest
 
 
@@ -150,3 +150,30 @@ def session(config, request):
 @pytest.fixture(scope="module")
 def ixn(session):
     return session.Ixnetwork
+
+@pytest.fixture(scope="module")
+def vports(config, ixn):
+    with BatchAdd(ixn):
+        for i, port in enumerate(config.ports):
+            ixn.Vport.add(Name=i, Location=f"{config.chassis};1;{port}")
+
+    yield ixn.Vport.find()
+
+    # On the topic of virtual port to physical port connection:
+    #
+    # If physical ports are not already connected to vports in another
+    # session, then vports will automatically connect to assigned
+    # physical ports on traffic apply. However, if physical ports ARE
+    # assigned to vports in another session, traffic apply will fail with
+    # a terse error.
+    #
+    # There are two ways to address this:
+    #
+    # 1. During setup (before the yield statement above), explicitly
+    #    connect ports with force ownership
+    # 2. During teardown (after the yield statement above), explicitly
+    #    release ports
+    #
+    # We use option 2 since it is the safest. Option 2 prevents
+    # automatically stealing ports from others.
+    ixn.Vport.find().ReleasePort()
