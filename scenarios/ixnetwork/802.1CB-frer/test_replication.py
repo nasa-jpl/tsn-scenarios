@@ -1,5 +1,3 @@
-import time
-
 from ixnetwork_restpy import BatchAdd
 import pytest
 
