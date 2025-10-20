@@ -1,3 +1,5 @@
+import time
+
 class StatsViewSnapshot:
     """
     Takes a snapshot of an Ixnetwork.Statistics.View and provides an ergonomic
