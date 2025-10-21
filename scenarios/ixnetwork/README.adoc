@@ -118,6 +118,7 @@ def topologies(ixn):
 
 Then create a fixture that returns a method that creates one or more traffic items.
 This uses the https://docs.pytest.org/en/stable/how-to/fixtures.html#factories-as-fixtures[factory as fixture] pattern to allow the test to pass arguments to the fixture.
+Traffic should be finite (e.g., fixed packet count, fixed duration, etc.) so that it can be auto stopped.
 
 [source,python]
 .Traffic fixture
@@ -161,6 +162,11 @@ def test_myfirsttestcase(ixn, vports, topologies, add_traffic):
 def test_mysecondtestcase(ixn, vports, topologies, add_traffic):
     ...
 ----
+
+The `run_traffic_blocking()` function is defined in `ixnetwork_restpy_helpers.py`.
+It runs finite traffic and auto stops.
+The `StatsViewSnapshot` class is also defined in `ixnetwork_restpy_helpers.py`.
+It creates a snapshot of the named view and then provides an ergonomic way to query the stats within.
 
 === Handling Failures
 
