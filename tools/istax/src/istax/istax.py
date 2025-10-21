@@ -2,6 +2,7 @@ from io import StringIO
 import fileinput
 from http.cookiejar import CookieJar
 import os
+from pathlib import Path
 import sys
 import time
 from typing import TextIO
@@ -72,11 +73,8 @@ class Istax:
             self.ll.config_download(filename)
 
     def render_config(self, ports: PortMap, config) -> StringIO:
-        search_path = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__), "..", "..", "..", "..", "scenarios", "istax"
-            )
-        )
+        project_root = self.get_project_root()
+        search_path = os.path.join(project_root, "scenarios", "istax")
         loader = jinja2.FileSystemLoader(search_path)
         environment = jinja2.Environment(loader=loader, trim_blocks=True)
         template = environment.from_string(config.read())
@@ -84,11 +82,19 @@ class Istax:
         rendered_template = template.render(data)
         return StringIO(rendered_template)
 
+
+    def get_project_root(self):
+        for p in Path(__file__).parents:
+            if (p / ".git").is_dir():
+                return p
+
+        raise RuntimeError("Could not find project root")
+
     def dummy_port_map() -> PortMap:
         return [{"name": f"DummyEthernet 1/{i}"} for i in range(1, 10)]
 
 
-class Progress(object):
+class Progress:
     def __init__(self, text):
         self.spinner = yaspin(text=text, color="blue", stream=sys.stderr)
 
