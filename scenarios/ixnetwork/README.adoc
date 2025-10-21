@@ -1,0 +1,146 @@
+= IxNetwork Scenarios
+
+Scenarios provided herein are currently implemented using a mix of three different implementations:
+
+* Ad-hoc scripts - See 802.1Qci-stream-gate/{1,2,3,4}.py
+* ixn tool - See 802.1CB-stream-ident/{topology,traffic}.yaml
+* Pytest - See 802.1CB-frer/test_replication.py
+
+== Pytest
+
+=== Run Example
+
+[source,sh]
+.Configure the switch
+----
+istaxcfg upload ngatsnsw1 scenarios/istax/802.1CB-frer/replication.cfg
+----
+
+[source,sh]
+.Run the test
+----
+uv --directory scenarios/ixnetwork/ run pytest -sv 802.1CB-frer/test_replication.py --html report.html
+----
+
+=== Environment Variables
+
+The following environment variables are used:
+
+* `IXN_PROXY` - Optional proxy to use for all REST API calls
+* `IXN_ADDRESS` - Hostname or IP address of IxNetwork REST API and chassis
+* `IXN_USER` - Username for the IxNetwork REST API
+* `IXN_PASS` - Password for the IxNetwork REST API
+
+=== Fixtures
+
+The following fixtures are available:
+
+* `session` - creates an IxNetwork session.
++
+One session per subfeature.
+Session names are in the form of `<feature>-<subfeature>`.
+Normally not used by tests directly.
+Tests use the `ixn` feature instead.
+
+* `ixn` - Provides the session.Ixnetwork object which serves as the entrypoint to the IxNetwork REST API.
++
+Used by all tests.
+
+* `config` - Provides configuration obtained from environment variables.
++
+Test rarely, if ever, need to use this fixture.
+
+=== Writing Tests
+
+Create a test script in the form of `<feature>/test_<subfeature>.py` (e.g., `802.1CB-frer/test_elimination.py`).
+Import the following:
+
+[source,python]
+.Imports
+----
+from ixnetwork_restpy import BatchAdd
+import pytest
+
+from ixnetwork_restpy_helpers import run_traffic_blocking, StatsViewSnapshot
+----
+
+Then create (or reuse) a topologies fixture.
+If applicapable to multiple subfeatures, it can live in `<feature>/conftest.py`.
+If applicapable to a single subfeature, it can live in `<feature>/test_<subfeature>.py`.
+
+[source,python]
+.Topologies fixture
+----
+@pytest.fixture(scope="module")
+def topologies(ixn):
+    # TODO: Clean up possible existing topologies
+
+    with BatchAdd(ixn):
+        # TODO: Create one or more IxNetwork topologies here
+----
+
+Then create a fixture that returns a method that creates one or more traffic items.
+This uses the https://docs.pytest.org/en/stable/how-to/fixtures.html#factories-as-fixtures[factory as fixture] pattern to allow the test to pass arguments to the fixture.
+
+[source,python]
+.Traffic fixture
+----
+@pytest.fixture
+def add_traffic(ixn):
+
+    def _add_traffic(
+        # TODO: Add desired arguments here
+    ):
+        with BatchAdd(ixn):
+            # TODO: Create one or more traffic items here
+
+        ixn.Traffic.TrafficItem.find().Generate()
+        ixn.Traffic.Apply()
+        ixn.ClearStats()
+
+        return
+
+    # Clean up possible traffic items from possible previous test
+    ixn.Traffic.TrafficItem.find().remove()
+
+    return _add_traffic
+----
+
+Now create one or more test cases:
+
+[source,python]
+.Test method
+----
+def test_myfirsttestcase(ixn, vports, topologies, add_traffic):
+    add_traffic(...)
+
+    run_traffic_blocking(ixn)
+
+    ports = StatsViewSnapshot(ixn, "Port Statistics")
+    assert ports[0]["Frames Tx."] == ...
+    ...
+
+
+def test_mysecondtestcase(ixn, vports, topologies, add_traffic):
+    ...
+----
+
+=== Handling Failures
+
+Pytest is currently configured to stop on first error.
+This may be made configurable in the future.
+
+The default fixtures (e.g., `session`) perform a teardown (e.g., remove session) on test pass but don't perform any teardown on test failure.
+This allows the state of the system to be inspected and debugged.
+
+User fixtures should handle teardown similarly.
+I.e., teardown on success, don't teardown on failure.
+This can be done in one of two ways:
+
+1. Always cleanup any previous state at start of fixture
+2. Cleanup at end of fixture conditional on `pytest.any_test_failed`
+
+=== Development and Debug
+
+The `config` fixture provides some debug options that may be useful during development and/or debug.
+Use of these options requires modifying `scenarios/ixnetwork/conftest.py` for now.
