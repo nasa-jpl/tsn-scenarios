@@ -82,7 +82,6 @@ class Istax:
         rendered_template = template.render(data)
         return StringIO(rendered_template)
 
-
     def get_project_root(self):
         for p in Path(__file__).parents:
             if (p / ".git").is_dir():
