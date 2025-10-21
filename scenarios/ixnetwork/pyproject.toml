@@ -1,0 +1,26 @@
+[project]
+name="ixn-scenarios"
+version="0.1"
+requires-python = ">=3.12"
+dependencies = [
+    "python-dotenv",
+    "ixnetwork_restpy",
+    "requests[socks]",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-html>=4.1.1",
+]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::pytest.PytestCollectionWarning",
+    "ignore::urllib3.exceptions.InsecureRequestWarning",
+    # Invalid escape sequence in doc comment
+    "ignore::SyntaxWarning:ixnetwork",
+]
+addopts = [
+    "--exitfirst",
+]
