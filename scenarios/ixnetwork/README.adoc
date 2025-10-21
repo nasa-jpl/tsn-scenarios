@@ -1,4 +1,6 @@
 = IxNetwork Scenarios
+:idseperator: -
+:idprefix:
 
 Scenarios provided herein are currently implemented using a mix of three different implementations:
 
@@ -49,6 +51,41 @@ Used by all tests.
 * `config` - Provides configuration obtained from environment variables.
 +
 Test rarely, if ever, need to use this fixture.
+
+=== Writing Fixtures
+
+Users will typically need to write fixtures for topologies and traffic.
+Here are a few things to consider when writing fixtures.
+
+==== Fixture Scope
+
+The fixture scope defines when instances of a fixture are created and when they are reused.
+The default scope is "function" which means that a new instance of the fixture is created for every test function (e.g., `def test_mytest`).
+The other useful scope is "module" which means that a new instance of the fixture is created for every test module (e.g., `test_mytest.py`).
+
+The function scope is a good default for traffic fixtures.
+The module scope is a good default for topology fixtures that are reused across multiple subfeatures.
+
+==== Fixture Phases
+
+Fixture can be thought to have 3 phases: setup, run, teardown.
+
+[source,python]
+.Fixture phases
+----
+@pytest.fixture
+def myfixture(...):
+    # Setup phase - executes before fixture scope (e.g., before test function)
+
+    yield <optional-value> # Run phase - passes value to the test function
+
+    # Teardown phase - executes after fixture scope (e.g., after test function)
+----
+
+Both topologies and traffic fixtures should be written to reuse sessions.
+It is recommended that these fixtures cleanup any previous state in the setup phase (e.g., remove any traffic items).
+This is typically easier that performing conditional cleanup in the teardown phase.
+See <<handling-failures>> for more on this subject.
 
 === Writing Tests
 
