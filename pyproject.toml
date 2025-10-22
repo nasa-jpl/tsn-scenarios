@@ -1,2 +1,5 @@
 [tool.uv.workspace]
-members = ["tools/ixn"]
+members = [
+    "tools/istax",
+    "tools/ixn",
+]

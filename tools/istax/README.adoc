@@ -1,4 +1,4 @@
-= istaxcfg
+= istax CLI
 :toc: macro
 
 Manage configuration for IStaX network switches.
@@ -7,7 +7,7 @@ toc::[]
 
 == Overview
 
-istaxcfg provides powerful configuration management capabilities for network switches running the IStaX platform.
+The istax CLI provides powerful configuration management capabilities for network switches running the IStaX platform.
 
 It allows configuration to be layered and templated.
 
@@ -35,13 +35,13 @@ There are two types on configuration:
 [source,sh]
 .Usage
 ----
-istaxcfg download <host>
+uv run istax download <host>
 ----
 
 [source,console]
 .Example
 ----
-> istaxcfg download hpsctsnsw0 | grep hostname
+> uv run istax download hpsctsnsw0 | grep hostname
 hostname hpsctsnsw0
 ----
 
@@ -52,7 +52,7 @@ The final configuration can be previewed without actually uploading it via the `
 [source,sh]
 .Usage
 ----
-istaxcfg upload <host> <config-file>
+uv run istax upload <host> <config-file>
 ----
 
 ==== Upload Preview Example
@@ -66,7 +66,7 @@ hostname {{ hostname }}
 [source,console]
 .Example
 ----
-> istaxcfg upload --dry-run my-istax-host example.cfg
+> uv run istax upload --dry-run my-istax-host example.cfg
 hostname my-istax-host
 ----
 
@@ -75,13 +75,13 @@ hostname my-istax-host
 [source,sh]
 .Usage
 ----
-istaxcfg upload <host> <partial-config-file> [<partial-config-file>...]
+uv run istax upload <host> <partial-config-file> [<partial-config-file>...]
 ----
 
 [source,console]
 .Example
 ----
-istaxcfg upload hpsctsnsw0 scenario.cfg mirroring.cfg
+uv run istax upload hpsctsnsw0 scenario.cfg mirroring.cfg
 ----
 
 == Advanced Usage
@@ -91,12 +91,12 @@ istaxcfg upload hpsctsnsw0 scenario.cfg mirroring.cfg
 [source,sh]
 ----
 ssh -D 9999 jump-host
-istaxcfg --proxy localhost:9999 download <host>
+uv run istax --proxy localhost:9999 download <host>
 ----
 
 == Configuration Templating
 
-The `istaxcfg upload` commands concatenates all configuration template input files then renders the concatenated template using the Jinja templating library.
+The `istax upload` commands concatenates all configuration template input files then renders the concatenated template using the Jinja templating library.
 
 === Templating Syntax
 
@@ -106,7 +106,7 @@ See the Jinja https://jinja.palletsprojects.com/en/stable/templates/[Template De
 
 The following template variables are provided:
 
-* `hostname` -- the hostname of the IStaX host obtained from the `hostname` argument of the `istaxcfg upload` command.
+* `hostname` -- the hostname of the IStaX host obtained from the `hostname` argument of the `istax upload` command.
 * `ports` -- an array of port objects.
 Each port object has the following members:
 ** `name` -- the internal name of the port.
@@ -150,7 +150,7 @@ The following command line:
 [source,sh]
 .Example command line
 ----
-istaxcfg upload myhostname example.cfg --dry-run
+uv run istax upload myhostname example.cfg --dry-run
 ----
 
 Will generate the following output:
@@ -197,7 +197,7 @@ For example, a mixin could be created to optionally enable port mirroring.
 [source,sh]
 .Example
 ----
-istaxcfg upload myistaxhost scenario.cfg mirroring.cfg
+uv run istax upload myistaxhost scenario.cfg mirroring.cfg
 ----
 
 ==== Ports
