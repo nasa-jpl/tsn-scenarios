@@ -15,7 +15,7 @@ Scenarios provided herein are currently implemented using a mix of three differe
 [source,sh]
 .Configure the switch
 ----
-istaxcfg upload ngatsnsw1 scenarios/istax/802.1CB-frer/replication.cfg
+uv run istax upload ngatsnsw1 scenarios/istax/802.1CB-frer/replication.cfg
 ----
 
 [source,sh]
