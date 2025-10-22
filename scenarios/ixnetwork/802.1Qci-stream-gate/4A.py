@@ -32,7 +32,9 @@ Usage:
 """
 # from ixnetwork_restpy import SessionAssistant
 
-import sys, os, time, traceback
+import os
+import time
+import traceback
 
 from dotenv import load_dotenv
 
@@ -93,7 +95,7 @@ try:
     print("Creating Traffic Item 1 of", len(sourceList), "...", end="")
     for i in range(len(sourceList)):
         print(
-            f"\rCreating Traffic Item", 1, "of", len(sourceList), "...", end=""
+            "\rCreating Traffic Item", 1, "of", len(sourceList), "...", end=""
         )  # Want four of the same traffic item for scenario 4
         # Create a traffic item.  This scenario, all traffic is uni-directional.
         # Need to specify the type so that the appropriate packet headers are applied.
@@ -431,7 +433,7 @@ try:
             ##print("4*(seq+1)+m = ", 4*(seq+1)+m)
             if (4 * (seq + 1) + m) < len(expectedPriority):
                 print(
-                    f"\rUpdating Vlan priority for Traffic Item",
+                    "\rUpdating Vlan priority for Traffic Item",
                     m + 1,
                     "of",
                     len(sourceList),
