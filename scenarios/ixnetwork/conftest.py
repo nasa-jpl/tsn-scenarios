@@ -1,11 +1,22 @@
 from copy import copy
 from dataclasses import dataclass
+import datetime
+import logging
 import os
 from typing import Literal
 
 from dotenv import load_dotenv
 from ixnetwork_restpy import BatchAdd, SessionAssistant
 import pytest
+
+logging.Formatter.formatTime = (
+    lambda self, record, datefmt=None: datetime.datetime.fromtimestamp(
+        record.created, datetime.timezone.utc
+    )
+    .astimezone()
+    .isoformat(timespec="seconds")
+)
+logger = logging.getLogger(__name__)
 
 
 def pytest_configure():
@@ -117,7 +128,7 @@ def config():
 
     print_config = copy(config)
     print_config.password = "******"
-    print(print_config)
+    logger.info(print_config)
 
     return config
 
@@ -129,11 +140,12 @@ def session(config, request):
     scenario = filename.replace("test_", "").replace(".py", "")
     session_name = f"{dirname}-{scenario}"
 
+    logger.info(f"Creating IxNetwork session '{session_name}'")
     session = SessionAssistant(
         IpAddress=config.chassis,
         UserName=config.username,
         Password=config.password,
-        LogLevel=SessionAssistant.LOGLEVEL_INFO,
+        LogLevel=SessionAssistant.LOGLEVEL_NONE,
         ClearConfig=not config.debug.reuse_session,
         SessionName=session_name,
     )
@@ -144,6 +156,7 @@ def session(config, request):
 
     # Prevent cleanup on failure so that we can inspect the state of the system
     if not pytest.any_test_failed and not config.debug.reuse_session:
+        logger.info(f"Removing session '{session_name}'")
         session.Session.remove()
 
 
@@ -154,6 +167,7 @@ def ixn(session):
 
 @pytest.fixture(scope="module")
 def vports(config, ixn):
+    logger.info(f"Creating virtual ports for physical ports {config.ports}")
     with BatchAdd(ixn):
         for i, port in enumerate(config.ports):
             ixn.Vport.add(Name=i, Location=f"{config.chassis};1;{port}")
@@ -177,4 +191,5 @@ def vports(config, ixn):
     #
     # We use option 2 since it is the safest. Option 2 prevents
     # automatically stealing ports from others.
+    logger.info(f"Releasing physical ports {config.ports}")
     ixn.Vport.find().ReleasePort()

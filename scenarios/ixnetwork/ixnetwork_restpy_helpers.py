@@ -1,4 +1,8 @@
+import logging
 import time
+
+
+logger = logging.getLogger(__name__)
 
 
 class StatsViewSnapshot:
@@ -47,6 +51,7 @@ def run_traffic_blocking(ixn, timeout_secs: int = 10):
     Runs traffic until completion (e.g., fixed frame count transmitted) or
     until timeout.
     """
+    logger.info("Starting traffic")
     ixn.Globals.Testworkflow.Starttraffic()
     ixn.Traffic.StartApplicationTraffic()
     traffic = ixn.Traffic.find()
@@ -54,3 +59,4 @@ def run_traffic_blocking(ixn, timeout_secs: int = 10):
         if traffic.State == "stopped":
             break
         time.sleep(1)
+    logger.info("Stopping traffic")
