@@ -6,6 +6,7 @@ dependencies = [
     "python-dotenv",
     "ixnetwork_restpy",
     "requests[socks]",
+    "istax",
 ]
 
 [dependency-groups]
@@ -28,3 +29,6 @@ addopts = [
 log_cli = true
 log_cli_level = "info"
 log_format = "%(asctime)s %(levelname)s %(message)s"
+
+[tool.uv.sources]
+istax = { path = "../../tools/istax", editable = true }

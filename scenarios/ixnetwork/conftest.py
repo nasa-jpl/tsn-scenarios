@@ -3,11 +3,14 @@ from dataclasses import dataclass
 import datetime
 import logging
 import os
+from pathlib import Path
 from typing import Literal
 
 from dotenv import load_dotenv
 from ixnetwork_restpy import BatchAdd, SessionAssistant
 import pytest
+
+from istax import Istax
 
 logging.Formatter.formatTime = (
     lambda self, record, datefmt=None: datetime.datetime.fromtimestamp(
@@ -86,11 +89,20 @@ class DebugConfig:
 
 
 @dataclass
+class SwitchConfig:
+    platform: str
+    host: str
+    username: str
+    password: str
+
+
+@dataclass
 class Config:
     chassis: str
     username: str
     password: str
     ports: list[int]
+    switch: SwitchConfig
     debug: DebugConfig
 
 
@@ -109,6 +121,9 @@ def config():
             "IXN_USER": "required",
             "IXN_PASS": "required",
             "IXN_PORTS": "required",
+            "ISTAX_HOST": "optional",
+            "ISTAX_USER": "optional",
+            "ISTAX_PASS": "optional",
         }
     )
 
@@ -120,6 +135,12 @@ def config():
         username=env["IXN_USER"],
         password=env["IXN_PASS"],
         ports=parse_ports(env["IXN_PORTS"]),
+        switch=SwitchConfig(
+            platform="istax",
+            host=env["ISTAX_HOST"],
+            username=env["ISTAX_USER"],
+            password=env["ISTAX_PASS"],
+        ),
         debug=DebugConfig(
             reuse_session=False,
             reuse_topology=False,
@@ -128,17 +149,23 @@ def config():
 
     print_config = copy(config)
     print_config.password = "******"
+    print_config.switch.password = "******"
     logger.info(print_config)
 
     return config
 
 
+def scenario_from_mod_path(path: str):
+    remainder, filename = os.path.split(path)
+    _remainder, dirname = os.path.split(remainder)
+    feature = dirname
+    subfeature = filename.replace("test_", "").replace(".py", "")
+    return feature, subfeature
+
+
 @pytest.fixture(scope="module")
 def session(config, request):
-    remainder, filename = os.path.split(request.path)
-    remainder, dirname = os.path.split(remainder)
-    scenario = filename.replace("test_", "").replace(".py", "")
-    session_name = f"{dirname}-{scenario}"
+    session_name = "-".join(scenario_from_mod_path(request.path))
 
     logger.info(f"Creating IxNetwork session '{session_name}'")
     session = SessionAssistant(
@@ -193,3 +220,33 @@ def vports(config, ixn):
     # automatically stealing ports from others.
     logger.info(f"Releasing physical ports {config.ports}")
     ixn.Vport.find().ReleasePort()
+
+
+@pytest.fixture(scope="module")
+def switch(config, request):
+    feature, subfeature = scenario_from_mod_path(request.path)
+    match config.switch.platform:
+        case "istax":
+            project_root = get_project_root()
+            scenarios_root = os.path.join(project_root, "scenarios")
+            short_cfg = os.path.join("istax", feature, f"{subfeature}.cfg")
+            switch_cfg_file = os.path.join(scenarios_root, short_cfg)
+            logger.info(f"Uploading switch configuration '{short_cfg}'")
+            Istax(
+                host=config.switch.host,
+                username=config.switch.username,
+                password=config.switch.password,
+                proxy=None,  # We use the ALL_PROXY environment variable instead
+            ).upload(
+                files=[switch_cfg_file],
+            )
+        case _:
+            raise NotImplementedError
+
+
+def get_project_root():
+    for p in Path(__file__).parents:
+        if (p / ".git").is_dir():
+            return p
+
+    raise RuntimeError("Could not find project root")

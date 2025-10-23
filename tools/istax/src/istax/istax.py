@@ -22,9 +22,10 @@ class IstaxError(Exception):
 class Istax:
     host: str
 
-    def __init__(self, host: str, username: str, password: str, proxy: str):
+    def __init__(self, host: str, username: str, password: str, proxy: str, quiet: bool = True):
         self.ll = IstaxLowLevel(host, username, password, proxy)
         self.host = host
+        self.quiet = quiet
 
     def upload(
         self,
@@ -44,9 +45,9 @@ class Istax:
         if dry_run:
             ports = self.dummy_port_map()
         else:
-            with Progress("logging in"):
+            with Progress("logging in", self.quiet):
                 self.ll.login()
-            with Progress("fetching port map"):
+            with Progress("fetching port map", self.quiet):
                 ports = self.ll.get_port_map()
 
         config = self.render_config(ports, config)
@@ -54,22 +55,22 @@ class Istax:
         if dry_run:
             print(config.read())
         else:
-            with Progress("uploading config"):
+            with Progress("uploading config", self.quiet):
                 self.ll.config_upload(filename, merge, config)
             if filename == "running-config":
-                with Progress("activating config"):
+                with Progress("activating config", self.quiet):
                     self.ll.config_activate_status()
 
     def activate(self, filename: str):
-        with Progress("logging in"):
+        with Progress("logging in", self.quiet):
             self.ll.login()
-        with Progress("activating config"):
+        with Progress("activating config", self.quiet):
             self.ll.config_activate(filename)
 
     def download(self, filename: str):
-        with Progress("logging in"):
+        with Progress("logging in", self.quiet):
             self.ll.login()
-        with Progress("downloading config"):
+        with Progress("downloading config", self.quiet):
             self.ll.config_download(filename)
 
     def render_config(self, ports: PortMap, config) -> StringIO:
@@ -94,8 +95,24 @@ class Istax:
 
 
 class Progress:
-    def __init__(self, text):
-        self.spinner = yaspin(text=text, color="blue", stream=sys.stderr)
+    class DevNull:
+        closed = False
+
+        def write(*args):
+            pass
+
+        def isatty(self):
+            return True
+
+        def flush(self):
+            pass
+
+    def __init__(self, text, quiet):
+        if quiet:
+            stream = self.DevNull()
+        else:
+            stream = sys.stderr
+        self.spinner = yaspin(text=text, color="blue", stream=stream)
 
     def __enter__(self) -> Spinner:
         self.spinner.start()
