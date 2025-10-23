@@ -121,6 +121,7 @@ def main_raw():
                 username=opts.username,
                 password=opts.password,
                 proxy=opts.proxy,
+                quiet=False,
             ).activate(opts.filename)
         case "download":
             Istax(
@@ -128,6 +129,7 @@ def main_raw():
                 username=opts.username,
                 password=opts.password,
                 proxy=opts.proxy,
+                quiet=False,
             ).download(opts.filename)
         case "upload":
             Istax(
@@ -135,6 +137,7 @@ def main_raw():
                 username=opts.username,
                 password=opts.password,
                 proxy=opts.proxy,
+                quiet=False,
             ).upload(
                 files=opts.files,
                 dry_run=opts.dry_run,
