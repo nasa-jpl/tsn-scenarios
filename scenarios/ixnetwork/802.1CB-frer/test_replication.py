@@ -1,3 +1,5 @@
+import logging
+
 from ixnetwork_restpy import BatchAdd
 import pytest
 
@@ -15,6 +17,8 @@ ADDR_NONFRER_TALKER = "02:00:00:00:00:01"
 ADDR_FRER_LISTENER = "02:00:00:00:00:02"
 ADDR_NONFRER_LISTENER = "02:00:00:00:00:03"
 
+logger = logging.getLogger(__name__)
+
 
 @pytest.fixture
 def add_traffic(ixn):
@@ -28,6 +32,7 @@ def add_traffic(ixn):
     """
 
     def _add_traffic(name, src_addr, dst_addr):
+        logger.info("Creating traffic")
         with BatchAdd(ixn):
             traffic = ixn.Traffic.TrafficItem.add(
                 Name=name,
@@ -51,6 +56,7 @@ def add_traffic(ixn):
 
         return
 
+    logger.info("Removing traffic")
     ixn.Traffic.TrafficItem.find().remove()
 
     return _add_traffic
