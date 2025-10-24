@@ -35,7 +35,25 @@ The following environment variables are used:
 
 === Fixtures
 
-The following fixtures are available:
+==== Public Fixtures
+
+Public fixtures are used directly by tests.
+The following public fixtures are avilable:
+
+* `ixn` - Provides the session.Ixnetwork object which serves as the entrypoint to the IxNetwork REST API.
++
+Used by all tests.
+
+* `switch` - Automatically loads the corresponding switch configuration.
+
+==== Internal Fixtures
+
+Internal fixtures are used by public fixtures and are rarely if ever used by tests.
+The following internal fixtures are present:
+
+* `config` - Provides configuration obtained from environment variables.
++
+Test rarely, if ever, need to use this fixture.
 
 * `session` - creates an IxNetwork session.
 +
@@ -43,14 +61,6 @@ One session per subfeature.
 Session names are in the form of `<feature>-<subfeature>`.
 Normally not used by tests directly.
 Tests use the `ixn` feature instead.
-
-* `ixn` - Provides the session.Ixnetwork object which serves as the entrypoint to the IxNetwork REST API.
-+
-Used by all tests.
-
-* `config` - Provides configuration obtained from environment variables.
-+
-Test rarely, if ever, need to use this fixture.
 
 === Writing Fixtures
 
@@ -149,7 +159,7 @@ Now create one or more test cases:
 [source,python]
 .Test method
 ----
-def test_myfirsttestcase(ixn, vports, topologies, add_traffic):
+def test_myfirsttestcase(switch, ixn, vports, topologies, add_traffic):
     add_traffic(...)
 
     run_traffic_blocking(ixn)
@@ -159,7 +169,7 @@ def test_myfirsttestcase(ixn, vports, topologies, add_traffic):
     ...
 
 
-def test_mysecondtestcase(ixn, vports, topologies, add_traffic):
+def test_mysecondtestcase(switch, ixn, vports, topologies, add_traffic):
     ...
 ----
 
