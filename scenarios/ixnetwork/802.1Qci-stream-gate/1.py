@@ -159,14 +159,21 @@ try:
         )
         # print("dir(configElement.TransmissionControl) = ",dir(configElement.TransmissionControl))
 
+        # Enable tracking on the VLAN User Priority field (PCP)
+        # Get the tracking object for the traffic item
+        trackBy = trafficItem[i].Tracking.find()
+
         # This adds Traffic Item to the Statistics Tracking field.
         # Without this, keysight will not track frame drops, latencies, etc.
         trafficItem[i].Tracking.find()[0].TrackBy = [
-            "ethernetIiSourceaddress0",
             "trackingenabled0",
-        ]
+            "ethernetIiSourceaddress0",
+            "vlanVlanUserPriority0",
+        ]  # Used Firefox inspector and added Vlan tracking to get the arguments
+        print("Enabled tracking on VLAN priority for the traffic item.")
+        # print("dir(trafficItem[i].Tracking.find()[0].TrackBy = ", dir(trafficItem[i].Tracking.find()[0].TrackBy))
 
-        ##        sys.exit() # Halts the script
+        # sys.exit() # Halts the script
 
         # This generates the frames based on the previous configuration.
         trafficItem[i].Generate()
@@ -399,10 +406,6 @@ try:
             # This generates the frames based on the previous configuration.
             trafficItem[m].Generate()
             print("Generated updated traffic...")
-
-        # Pause the script to change the switch configuration as needed
-        SW_status = input("If needed, update the TSN switch now ")
-        print(f"Switch status, {SW_status}!")
 
     print("********Done running tests********")
 

@@ -41,7 +41,6 @@ from sgfunctions import basecfg
 # Provide a name for the keysight session
 scenarioName = "stream_gate-2-gating"
 
-
 try:
     [
         debugMode,
@@ -362,7 +361,7 @@ try:
                         "NA, FAIL: ",
                     )
             elif seq == 1 or seq == 2:
-                if float(RxFrames[1]) == 0.0 and i == 0:
+                if TxFrames[i] == RxFrames[i] and i == 0:
                     print(
                         "Stream Row[",
                         i,
@@ -473,7 +472,9 @@ try:
             print("Generated updated traffic...")
 
         # Pause the script to change the switch configuration as needed
-        SW_status = input("If needed, update the TSN switch now ")
+        SW_status = input(
+            "Clear Invalid Rx status (if set) at http://$ISTAX_HOST/psfp_gate_status_overview.htm then continue here"
+        )
         print(f"Switch status, {SW_status}!")
 
     print("********Done running tests********")
