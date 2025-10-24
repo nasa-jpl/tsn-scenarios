@@ -36,9 +36,11 @@ class Istax:
         merge: bool = False,
         filename: str = "running-config",
     ) -> None:
+        paths = self.expand_paths(files)
+
         # Concat inputs and insure only one end statement
         config = StringIO()
-        for line in fileinput.input(files):
+        for line in fileinput.input(paths):
             if line != "end\n":
                 config.write(line)
         config.write("end\n")
@@ -75,9 +77,12 @@ class Istax:
         with Progress("downloading config", self.quiet):
             self.ll.config_download(filename)
 
-    def render_config(self, ports: PortMap, config) -> StringIO:
+    def search_path(self):
         project_root = self.get_project_root()
-        search_path = os.path.join(project_root, "scenarios", "istax")
+        return os.path.join(project_root, "scenarios", "istax")
+
+    def render_config(self, ports: PortMap, config) -> StringIO:
+        search_path = self.search_path()
         loader = jinja2.FileSystemLoader(search_path)
         environment = jinja2.Environment(loader=loader, trim_blocks=True)
         template = environment.from_string(config.read())
@@ -94,6 +99,29 @@ class Istax:
 
     def dummy_port_map(self) -> PortMap:
         return [{"name": f"DummyEthernet 1/{i}"} for i in range(1, 10)]
+
+    def expand_paths(self, paths: list[str]) -> list[str]:
+        """
+        Expand paths relative to cwd then relative to search path.
+        """
+        search_path = self.search_path()
+
+        paths = [Path(path) for path in paths]
+        for i, path in enumerate(paths):
+            if path.is_absolute():
+                if not path.is_file():
+                    raise OSError(f"path '{path}' is not a file")
+            elif path.is_file():
+                # path relative to cwd: use as is
+                pass
+            else:
+                search_relative_path = Path(search_path) / path
+                if search_relative_path.is_file():
+                    paths[i] = search_relative_path
+                else:
+                    raise OSError(f"path '{path}' not found")
+
+        return paths
 
 
 class Progress:
