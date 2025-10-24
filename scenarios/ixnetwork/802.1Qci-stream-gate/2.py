@@ -41,7 +41,6 @@ from sgfunctions import basecfg
 # Provide a name for the keysight session
 scenarioName = "stream_gate-2-gating"
 
-
 try:
     [
         debugMode,
@@ -362,7 +361,7 @@ try:
                         "NA, FAIL: ",
                     )
             elif seq == 1 or seq == 2:
-                if float(RxFrames[1]) == 0.0 and i == 0:
+                if TxFrames[i] == RxFrames[i] and i == 0:
                     print(
                         "Stream Row[",
                         i,
