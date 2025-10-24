@@ -90,7 +90,7 @@ class Istax:
 
         raise RuntimeError("Could not find project root")
 
-    def dummy_port_map() -> PortMap:
+    def dummy_port_map(self) -> PortMap:
         return [{"name": f"DummyEthernet 1/{i}"} for i in range(1, 10)]
 
 
