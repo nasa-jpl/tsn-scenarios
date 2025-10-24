@@ -8,6 +8,22 @@ Scenarios provided herein are currently implemented using a mix of three differe
 * ixn tool - See 802.1CB-stream-ident/{topology,traffic}.yaml
 * Pytest - See 802.1CB-frer/test_replication.py
 
+== Ad-hoc Scripts
+
+The ad-hoc script scenarios are run as follows:
+
+[source,sh]
+.Configure the switch
+----
+uv run istax upload ngatsnsw1 802.1Qci-stream-gate/1.cfg
+----
+
+[source,sh]
+.Run the test
+----
+scenarios/ixnetwork/802.1Qci-stream-gate/1.py
+----
+
 == Pytest
 
 === Run Example
