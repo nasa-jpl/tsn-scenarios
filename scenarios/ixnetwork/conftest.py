@@ -231,7 +231,7 @@ def switch(config, request):
             scenarios_root = os.path.join(project_root, "scenarios")
             short_cfg = os.path.join("istax", feature, f"{subfeature}.cfg")
             switch_cfg_file = os.path.join(scenarios_root, short_cfg)
-            logger.info(f"Uploading switch configuration '{short_cfg}'")
+            logger.info(f"Uploading switch configuration '{short_cfg}' to '{config.switch.host}'")
             Istax(
                 host=config.switch.host,
                 username=config.switch.username,
