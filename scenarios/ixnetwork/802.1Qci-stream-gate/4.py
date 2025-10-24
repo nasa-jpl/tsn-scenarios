@@ -445,7 +445,9 @@ try:
             print("Generated updated traffic...")
 
         # Pause the script to change the switch configuration as needed
-        SW_status = input("If needed, update the TSN switch now ")
+        SW_status = input(
+            "Go to http://$ISTAX_HOST/qos_counter.htm, verify traffic received on port 1 queue 0 is evenly transmitted across port 3 queues 4-7, then clear stats, then continue here"
+        )
         print(f"Switch status, {SW_status}!")
 
     print("********Done running tests********")

@@ -407,10 +407,6 @@ try:
             trafficItem[m].Generate()
             print("Generated updated traffic...")
 
-        # Pause the script to change the switch configuration as needed
-        SW_status = input("If needed, update the TSN switch now ")
-        print(f"Switch status, {SW_status}!")
-
     print("********Done running tests********")
 
     if not debugMode:

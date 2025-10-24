@@ -472,7 +472,9 @@ try:
             print("Generated updated traffic...")
 
         # Pause the script to change the switch configuration as needed
-        SW_status = input("If needed, update the TSN switch now ")
+        SW_status = input(
+            "Clear Invalid Rx status (if set) at http://$ISTAX_HOST/psfp_gate_status_overview.htm then continue here"
+        )
         print(f"Switch status, {SW_status}!")
 
     print("********Done running tests********")
