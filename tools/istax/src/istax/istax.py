@@ -22,7 +22,9 @@ class IstaxError(Exception):
 class Istax:
     host: str
 
-    def __init__(self, host: str, username: str, password: str, proxy: str, quiet: bool = True):
+    def __init__(
+        self, host: str, username: str, password: str, proxy: str, quiet: bool = True
+    ):
         self.ll = IstaxLowLevel(host, username, password, proxy)
         self.host = host
         self.quiet = quiet
