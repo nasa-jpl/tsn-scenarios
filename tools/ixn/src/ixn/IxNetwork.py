@@ -210,7 +210,9 @@ class IxNetwork:
         vport = dict()
         if len(self._ports) < len(self._endpoints["endpoints"]):
             raise RuntimeError("Fewer ports provided than endpoints")
-        for port, (key, endpoint) in zip(self._ports, self._endpoints["endpoints"].items()):
+        for port, (key, endpoint) in zip(
+            self._ports, self._endpoints["endpoints"].items()
+        ):
             portName = f"Port_{key}"
             vport[key] = portMap.Map(
                 IpAddress=self._chassis_ip,
@@ -249,9 +251,7 @@ class IxNetwork:
 
                         if "vlan" in eth_stack:
                             ix_eth.EnableVlans.Single(True)
-                            ix_eth.Vlan.find()[0].VlanId.SingleValue(
-                                eth_stack["vlan"]
-                            )
+                            ix_eth.Vlan.find()[0].VlanId.SingleValue(eth_stack["vlan"])
 
                         if eth_stack.get("ipv4"):
                             self._ix_network.info(f"Configuring {name} IP{j}")
