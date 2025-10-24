@@ -446,7 +446,7 @@ try:
 
         # Pause the script to change the switch configuration as needed
         SW_status = input(
-            "Go to http://$ISTAX_HOST/qos_counter.htm, verify traffic received on port 1 queue 0 is evenly transmitted across port 3 queues 4-7, then clear stats, then continue here"
+            "Go to http://$ISTAX_HOST/qos_counter.htm, verify traffic received on port 1 queue 0 is evenly transmitted across port 3 queues 3-6, then clear stats, then continue here"
         )
         print(f"Switch status, {SW_status}!")
 
