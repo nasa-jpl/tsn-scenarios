@@ -1,0 +1,2 @@
+{% set tsn_vlan = 2 %}
+{% set frer_vlan = 3 %}
