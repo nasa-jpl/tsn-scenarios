@@ -472,10 +472,19 @@ try:
             print("Generated updated traffic...")
 
         # Pause the script to change the switch configuration as needed
-        SW_status = input(
-            "Clear Invalid Rx status (if set) at http://$ISTAX_HOST/psfp_gate_status_overview.htm then continue here"
-        )
-        print(f"Switch status, {SW_status}!")
+        match seq:
+            case 0:
+                input("In switch: optionally verify and clear stats then continue.")
+            case 1:
+                input(
+                    "In switch: optionally verify and clear stats then continue. Do not clear Invalid RX status."
+                )
+            case 2:
+                input(
+                    "Clear Invalid Rx status at http://$ISTAX_HOST/psfp_gate_status_overview.htm then continue here"
+                )
+            case 3:
+                pass
 
     print("********Done running tests********")
 

@@ -520,10 +520,21 @@ try:
             print("Generated updated traffic...")
 
         # Pause the script to change the switch configuration as needed
-        SW_status = input(
-            "Clear Octets Exceeded status (if set) at http://$ISTAX_HOST/psfp_gate_status_overview.htm then continue here"
-        )
-        print(f"Switch status, {SW_status}!")
+        match seq:
+            case 0:
+                input(
+                    "In switch: manually enable 'Close Gate Due To Octets Exceeded' and 'Config Change' for stream 2 at http://$ISTAX_HOST/psfp_gate_edit.htm?gateid=2 then continue."
+                )
+            case 1:
+                input(
+                    "In switch: optionally verify and clear stats then continue. Do not clear Octets Exceeded status."
+                )
+            case 2:
+                input(
+                    "Clear Octets Exceeded status for stream 2 at http://$ISTAX_HOST/psfp_gate_status_overview.htm then continue here"
+                )
+            case 3:
+                pass
 
     print("********Done running tests********")
 
