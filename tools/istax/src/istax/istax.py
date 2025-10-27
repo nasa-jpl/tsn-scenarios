@@ -84,7 +84,7 @@ class Istax:
     def render_config(self, ports: PortMap, config) -> StringIO:
         search_path = self.search_path()
         loader = jinja2.FileSystemLoader(search_path)
-        environment = jinja2.Environment(loader=loader, trim_blocks=True)
+        environment = jinja2.Environment(loader=loader, trim_blocks=True, keep_trailing_newline=True)
         template = environment.from_string(config.read())
         data = {"hostname": self.host, "ports": ports}
         rendered_template = template.render(data)
