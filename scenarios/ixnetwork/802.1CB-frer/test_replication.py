@@ -50,10 +50,6 @@ def add_traffic(ixn):
             eth.SourceAddress.Single(src_addr)
             eth.DestinationAddress.Single(dst_addr)
 
-        traffic.Generate()
-        ixn.Traffic.Apply()
-        ixn.ClearStats()
-
         return
 
     logger.info("Removing traffic")

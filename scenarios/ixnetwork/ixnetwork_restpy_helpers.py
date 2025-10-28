@@ -52,11 +52,21 @@ def run_traffic_blocking(ixn, timeout_secs: int = 10):
     until timeout.
     """
     logger.info("Starting traffic")
+
+    # Generate and apply
+    ixn.Traffic.TrafficItem.find().Generate()
+    ixn.Traffic.Apply()
+    ixn.ClearStats()
+
+    # Start traffic
     ixn.Globals.Testworkflow.Starttraffic()
     ixn.Traffic.StartApplicationTraffic()
+
+    # Wait until auto stopped or timeout
     traffic = ixn.Traffic.find()
     for _ in range(10):
         if traffic.State == "stopped":
             break
         time.sleep(1)
+
     logger.info("Stopping traffic")

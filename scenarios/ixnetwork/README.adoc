@@ -158,10 +158,6 @@ def add_traffic(ixn):
         with BatchAdd(ixn):
             # TODO: Create one or more traffic items here
 
-        ixn.Traffic.TrafficItem.find().Generate()
-        ixn.Traffic.Apply()
-        ixn.ClearStats()
-
         return
 
     # Clean up possible traffic items from possible previous test
