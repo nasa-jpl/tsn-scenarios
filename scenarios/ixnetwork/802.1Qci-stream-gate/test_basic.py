@@ -8,14 +8,8 @@ from ixnetwork_restpy_helpers import (
     AssertStats,
 )
 
-NATIVE_VLAN = 0
-VLAN_ETHER_TYPE = "8100"
-RTAG_ETHER_TYPE = "f1c1"
-
-FRAME_COUNT = 10
 FRAME_SIZE = 64
 FRAMES_PER_SECOND = 1000
-STREAM_START_DELAY_US = 5
 
 ADDR_TALKER1 = "02:00:00:00:00:01"
 ADDR_TALKER2 = "02:00:00:00:00:02"
@@ -79,7 +73,7 @@ def add_traffic(ixn):
             )
             stream = traffic.ConfigElement.add()
 
-            stream.FrameSize.FixedSize = 64
+            stream.FrameSize.FixedSize = FRAME_SIZE
             stream.FrameRate.Type = "framesPerSecond"
             stream.FrameRate.Rate = FRAMES_PER_SECOND
             stream.TransmissionControl.StartDelayUnits = "microseconds"
@@ -104,13 +98,13 @@ def test_drop(switch, ixn, vports, protocols, add_traffic):
         name="Stream 1",
         src_proto=protocols[0],
         dst_proto=protocols[-1],
-        start_delay_us=5,
+        start_delay_us=0,
     )
     add_traffic(
         name="Stream 2",
         src_proto=protocols[1],
         dst_proto=protocols[-1],
-        start_delay_us=5,
+        start_delay_us=0,
     )
 
     with RunTraffic(ixn):
