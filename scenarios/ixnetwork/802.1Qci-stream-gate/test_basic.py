@@ -50,14 +50,7 @@ def protocols(ixn, vports):
                 ptp.Role.Single("master")
             ptp.Profile.Single("ieee8021asrev")
 
-            eth = dg.Ethernet.add()
-            eth.Mac.Single(addr)
-            eth.EnableVlans.Single(True)
-            eth.VlanCount = 1
-            vlan = eth.Vlan.add()
-            vlan.VlanId.Single(0)
-
-            protocols.append(eth[-1])
+            protocols.append(eth)
 
     return protocols
 
@@ -103,6 +96,10 @@ def add_traffic(ixn):
 
 
 def test_drop(switch, ixn, vports, protocols, add_traffic):
+    """
+    Verify that frames that arrive outside of allowed time slot are dropped.
+    """
+
     add_traffic(
         name="Stream 1",
         src_proto=protocols[0],
@@ -125,6 +122,10 @@ def test_drop(switch, ixn, vports, protocols, add_traffic):
 
 
 def test_forward(switch, ixn, vports, protocols, add_traffic):
+    """
+    Verify that frames that arrive inside of allowed time slots are forwarded.
+    """
+
     add_traffic(
         name="Stream 1",
         src_proto=protocols[0],
