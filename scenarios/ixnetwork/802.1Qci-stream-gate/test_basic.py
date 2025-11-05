@@ -91,18 +91,6 @@ def add_traffic(ixn):
             stream.FrameRate.Rate = FRAMES_PER_SECOND
             stream.TransmissionControl.StartDelayUnits = "microseconds"
             stream.TransmissionControl.StartDelay = start_delay_us
-            stream.TransmissionControl.Duration = 2
-            # stream.TransmissionControl.Type = "fixedFrameCount"
-            # stream.TransmissionControl.FrameCount = FRAME_COUNT
-
-            # stack = stream.Stack.add()
-            # eth = stack.Ethernet.add()
-            # eth.SourceAddress.Single(src_addr)
-            # eth.DestinationAddress.Single(dst_addr)
-            # eth.EtherType.Single(VLAN_ETHER_TYPE)
-            # vlan = stack.Vlan.add()
-            # vlan.VlanTagVlanID.Single(NATIVE_VLAN)
-            # vlan.ProtocolID.Single(RTAG_ETHER_TYPE)
 
             traffic.Tracking.add(TrackBy=["trackingenabled0"])
 
@@ -152,5 +140,7 @@ def test_forward(switch, ixn, vports, protocols, add_traffic):
 
     with RunTraffic(ixn):
         flows = AssertStats(ixn, "Flow Statistics")
+        flows.assert_equal_eventually(index=0, stat="Tx Frame Rate", value=1000)
+        flows.assert_equal_eventually(index=1, stat="Tx Frame Rate", value=1000)
         flows.assert_equal_eventually(index=0, stat="Rx Frame Rate", value=1000)
         flows.assert_equal_eventually(index=1, stat="Rx Frame Rate", value=1000)
