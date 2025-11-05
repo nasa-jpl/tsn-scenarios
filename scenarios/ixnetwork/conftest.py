@@ -12,6 +12,10 @@ import pytest
 
 from istax import Istax
 
+# Enable pytest assertion rewriting for helpers
+# See https://docs.pytest.org/en/stable/how-to/writing_plugins.html#assertion-rewriting
+pytest.register_assert_rewrite("ixnetwork_restpy_helpers")
+
 logging.Formatter.formatTime = (
     lambda self, record, datefmt=None: datetime.datetime.fromtimestamp(
         record.created, datetime.timezone.utc
