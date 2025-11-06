@@ -123,6 +123,21 @@ class Istax:
 
         return paths
 
+    def get_psfp_gate_status(self):
+        result = self.ll._json_rpc_call("psfp.status.gate.get")
+        status = [
+            {"GateClosedDueToInvalidRx": entry["val"]["GateClosedDueToInvalidRx"]}
+            for entry in result
+        ]
+        return status
+
+    def clear_psfp_gate_closed_due_to_invalid_rx(self, stream_id: int):
+        self.ll._json_rpc_call(
+            "psfp.control.gate_clear.set",
+            stream_id,
+            {"ClearGateClosedDueToInvalidRx": True},
+        )
+
 
 class Progress:
     class DevNull:
@@ -250,12 +265,13 @@ class IstaxLowLevel:
             else:
                 raise IstaxError(f"activation failed with:\n{response.text.strip()}")
 
-    def get_port_map(self) -> PortMap:
+    def _json_rpc_call(self, method: str, *args):
         data = {
-            "method": "port.namemap.get",
+            "method": method,
             "id": "jsonrpc",
-            "params": [],
+            "params": args,
         }
+
         # WORKAROUND: IStaX returns a bad response header (extraneous and malformed
         # HTTP status line).  This causes urllib to raise an internal exception
         # before it parses the content-length.  Because of this, the post call
@@ -269,7 +285,11 @@ class IstaxLowLevel:
         )
 
         data = response.json()
-        ports = [self.transform_port_name(entry["key"]) for entry in data["result"]]
+        return data["result"]
+
+    def get_port_map(self) -> PortMap:
+        result = self._json_rpc_call("port.namemap.get")
+        ports = [self.transform_port_name(entry["key"]) for entry in result]
         return ports
 
     def transform_port_name(self, name: str) -> dict[str, str]:
