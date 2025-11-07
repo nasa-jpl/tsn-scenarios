@@ -61,7 +61,7 @@ def test_drop_due_to_violation(switch, ixn, vports, protocols, add_traffic):
     assert gate_status[1]["GateClosedDueToInvalidRx"] == 1
 
 
-def test_drop_due_to_rx_invalid_set(switch, ixn, vports, protocols, add_traffic):
+def test_drop_due_to_invalid_rx_set(switch, ixn, vports, protocols, add_traffic):
     """
     Verify that traffic continues to be dropped even when conformant due to
     GateClosedDueToInvalidRx status in the switch.
