@@ -5,6 +5,10 @@ from ixnetwork_restpy_helpers import (
 
 
 def test_forward(switch, ixn, vports, protocols, add_traffic):
+    """
+    Verify that traffic that conforms to schedule is forwarded.
+    """
+
     add_traffic(
         name="Stream 1",
         src_proto=protocols[0],
@@ -27,6 +31,11 @@ def test_forward(switch, ixn, vports, protocols, add_traffic):
 
 
 def test_drop_due_to_violation(switch, ixn, vports, protocols, add_traffic):
+    """
+    Verify nonconformat traffic is dropped and that GateClosedDueToInvalidRx is
+    set in the switch.
+    """
+
     add_traffic(
         name="Stream 1",
         src_proto=protocols[0],
@@ -53,6 +62,13 @@ def test_drop_due_to_violation(switch, ixn, vports, protocols, add_traffic):
 
 
 def test_drop_due_to_rx_invalid_set(switch, ixn, vports, protocols, add_traffic):
+    """
+    Verify that traffic continues to be dropped even when conformant due to
+    GateClosedDueToInvalidRx status in the switch.
+
+    NOTE: Depends on previous test case running and passing.
+    """
+
     add_traffic(
         name="Stream 1",
         src_proto=protocols[0],
@@ -84,6 +100,11 @@ def test_drop_due_to_rx_invalid_set(switch, ixn, vports, protocols, add_traffic)
 
 
 def test_forward_due_to_rx_invalid_clear(switch, ixn, vports, protocols, add_traffic):
+    """
+    Verify that conformant traffic now forwards after GateClosedDueToInvalidRx
+    is cleared.
+    """
+
     add_traffic(
         name="Stream 1",
         src_proto=protocols[0],
