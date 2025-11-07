@@ -238,16 +238,19 @@ def switch(config, request):
             logger.info(
                 f"Uploading switch configuration '{short_cfg}' to '{config.switch.host}'"
             )
-            Istax(
+            switch = Istax(
                 host=config.switch.host,
                 username=config.switch.username,
                 password=config.switch.password,
                 proxy=None,  # We use the ALL_PROXY environment variable instead
-            ).upload(
+            )
+            switch.upload(
                 files=[switch_cfg_file],
             )
         case _:
             raise NotImplementedError
+
+    return switch
 
 
 def get_project_root():
