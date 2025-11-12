@@ -92,6 +92,96 @@ The first burst should be fully transmitted and received as the bit rate fits wi
 
 To see a more drastic effect, reduce the inter burst gap to <5 seconds.
 
+=== Scenario 2 - Basic CIR / CBS
+
+==== Detailed Switch Configuration
+
+Configure a stream with Stream ID 1. Within the configuration window, set the following settings:
+
+Create stream ID S1 that matches anything on SMAC connected to port 1. Use color-blind mode.
+
+Create a flow meter with ID 1:
+
+* CIR = 10,000 (10 Mbps)
+* CBS = 200,000 (bytes)
+* EIR = 100,000 (100 Mbps)
+* EBS = 2,000,000 (bytes)
+* Default remaining settings
+
+Add mirroring to port 6 to peruse packets via the network analyzer
+
+==== Detailed Novus Configuration
+
+Create traffic flow on port 1:
+
+* Define a traffic item using IPv4 and UDP packets with VLAN tags
+* Output a burst of 8,000,000 bits at the line rate (1 Gbps) every 0.5 seconds
+* The aggregate rate for this traffic item is 16Mbps
+
+Create traffic flow on port 2:
+
+* Define a traffic item using IPv4 and UDP packets with VLAN tags
+* Output a constant 1 Mbps
+
+.Novus diagram for flow meter scenario 2 
+image::802.1Qci/PSFP_tutorial/FlowMeterS2_NovusCfg.png[]
+
+.Novus traffic items for flow meter scenario 2 
+image::802.1Qci/PSFP_tutorial/FlowMeterS2_NovusTraffic.png[]
+
+==== Running the Scenario & Expected Results
+
+===== Test 1
+
+Generate, Apply, and Run the Novus configuration. For this test, nothing should be dropped. Should see 16 Mbps transmit and received. This test will be using all the green tokens and some of the yellow tokens because the CIR is 10 Mbps and EIR is 100 Mbps. Check the Keysight flow statistics and view the Tx and Rx bps rates to verify that they are 16 Mbps +/- 2%. It was observed that the Tx rate was 16 Mbps and the average Rx rate was 0.998 mMbps. This result is shown in the script output.
+
+.Script output for Novus traffic items for flow meter scenario 2, Test 1
+image::802.1Qci/PSFP_tutorial/FlowMeterS2_Test1Script.png[]
+
+==== Detailed Novus Configuration
+
+Modify the traffic flow on port 1:
+
+*Increase the burst rate fro 0.5 secs/burst to a burst every 0.05 seconds
+
+===== Test 2
+
+Generate, Apply, and Run the Novus configuration. For this test, should see that some frames are dropped. This is because the steady state flow would be 160 Mbps but the combined CIR (10 Mbps) and EIR (100 Mbps) will allow only 110Mbps of the 160 Mbps for the burst stream. Not all frames will be passed. Should see 160 Mbps transmit, and 110 Mbps received. This result in the script output below.
+
+.Script output for Novus traffic items for flow meter scenario 2, Test 2
+image::802.1Qci/PSFP_tutorial/FlowMeterS2_Test2Script.png[]
+
+Use of a mirror port in the switch can be used to capture frames into and out of switch and verify DEI bit not set on ingress, and see if it is sometimes set on egress (because droponyellow = false).
+
+==== Detailed Novus Configuration
+
+Modify the traffic flow on port 1:
+
+*Decrease the burst rate from 0.05 secs/burst to a burst every 0.5 seconds
+
+Modify the traffic flow on port 2:
+
+*Increase the continuous bit rate from 1 Mbps to 980 Mbps
+
+===== Test 3
+
+Generate, Apply, and Run the Novus configuration. For this test, should see that all of the frames for the burst traffic item (with an average rate of 16 Mbps) are received and that the continuous traffic at 980 Mbps is also coming through. This result is seen in the following figure. The slight drop off in the 980 Mbps rate (974 Mbps), seems due to header overhead when adding the VLAN tag. Without the additional header fields needed for the tag, the rate is almost 980 Mbps.
+
+.Script output for Novus traffic items for flow meter scenario 2, Test 3
+image::802.1Qci/PSFP_tutorial/FlowMeterS2_Test3Script.png[]
+
+==== Detailed Novus Configuration
+
+Modify the traffic flow on port 1:
+
+*Increase the burst rate from 0.5 secs/burst to a burst every 0.05 seconds
+
+===== Test 4
+
+Generate, Apply, and Run the Novus configuration. For this test, should see that some of the frames for either/both traffic items are dropped because the burst traffic average rate is 160 Mbps and the continuous traffic item rate is 980 Mbps (1,140 Mbps and a max line rate of 1,000 Mbps). As can be seen from the test script output below, the DEI bit seems to give priority to the flow meter traffic (i.e. the burst traffic). The burst traffic items is still averaging 110 Mbps but the continuous traffic items dropped to ~880 Mbps from 974 Mbps seen in test 3.
+
+.Script output for Novus traffic items for flow meter scenario 2, Test 3
+image::802.1Qci/PSFP_tutorial/FlowMeterS2_Test4Script.png[]
 
 
 
