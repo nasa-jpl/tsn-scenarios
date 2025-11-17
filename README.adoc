@@ -2,6 +2,4 @@
 
 A set of Time-Sensitive Networking (TSN) scenarios implemented in various venues for the purposes of demonstration and application development.
 
-== Keysight (Ixia) Sessions
-
-See link:tools/ixn/README.adoc[ixn]
+https://github.jpl.nasa.gov/pages/hpsc/lab/tsn/main/[Documentation]
