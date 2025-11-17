@@ -24,7 +24,7 @@ def test_drop_larger_than_octets_max(switch, ixn, vports, protocols, add_traffic
         src_proto=protocols[1],
         dst_proto=protocols[-1],
         start_delay_us=506,
-        frame_size = (min_size, max_size),
+        frame_size=(min_size, max_size),
     )
 
     # NOTE: Assumes frame size is uniform random range [min_size, max_size]
@@ -35,4 +35,6 @@ def test_drop_larger_than_octets_max(switch, ixn, vports, protocols, add_traffic
         flows.assert_equal_eventually(index=0, stat="Tx Frame Rate", value=1000)
         flows.assert_approx_eventually(index=0, stat="Loss %", value=0, abs=1)
         flows.assert_equal_eventually(index=1, stat="Tx Frame Rate", value=1000)
-        flows.assert_approx_eventually(index=1, stat="Loss %", value=expected_loss, abs=1)
+        flows.assert_approx_eventually(
+            index=1, stat="Loss %", value=expected_loss, abs=1
+        )

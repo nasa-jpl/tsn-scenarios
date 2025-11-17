@@ -21,7 +21,7 @@ def test_octets_exceeded_status_set(switch, ixn, vports, protocols, add_traffic)
         src_proto=protocols[1],
         dst_proto=protocols[-1],
         start_delay_us=506,
-        frame_size = (64, 600)
+        frame_size=(64, 600),
     )
 
     with RunTraffic(ixn):
@@ -37,7 +37,10 @@ def test_octets_exceeded_status_set(switch, ixn, vports, protocols, add_traffic)
     assert gate_status[0]["GateClosedDueToOctetsExceeded"] == 0
     assert gate_status[1]["GateClosedDueToOctetsExceeded"] == 1
 
-def test_drop_due_to_octets_exceeded_status(switch, ixn, vports, protocols, add_traffic):
+
+def test_drop_due_to_octets_exceeded_status(
+    switch, ixn, vports, protocols, add_traffic
+):
     """
     Verify small frames are dropped due to gateclosedduetooctetsexceeded status set.
     """
@@ -53,7 +56,7 @@ def test_drop_due_to_octets_exceeded_status(switch, ixn, vports, protocols, add_
         src_proto=protocols[1],
         dst_proto=protocols[-1],
         start_delay_us=506,
-        frame_size = 64,
+        frame_size=64,
     )
 
     with RunTraffic(ixn):
