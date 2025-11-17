@@ -71,7 +71,7 @@ class AssertStats:
 
         for _ in range(timeout):
             values = self._view.GetColumnValues(stat)
-            actual = self._cast_as(values[index], expected)
+            actual = self._cast_as(values[index], value)
             if actual == expected:
                 break
             time.sleep(1)
@@ -93,7 +93,7 @@ class AssertStats:
 
         for _ in range(timeout):
             values = self._view.GetColumnValues(stat)
-            actual = self._cast_as(values[index], expected)
+            actual = self._cast_as(values[index], value)
             if actual == expected:
                 break
             time.sleep(1)
