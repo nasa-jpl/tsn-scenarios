@@ -86,10 +86,17 @@ class AssertStats:
         index: int,
         stat: str,
         value: int,
-        tolerance: float = 1e-3,
+        abs: float = None,
+        rel: float = None,
         timeout: int = 10,
     ):
-        expected = pytest.approx(float(value), rel=tolerance)
+        match (abs, rel):
+            case (None, rel):
+                expected = pytest.approx(float(value), rel=rel)
+            case (abs, None):
+                expected = pytest.approx(float(value), abs=abs)
+            case _:
+                raise RuntimeError("invalid tolerance spec")
 
         for _ in range(timeout):
             values = self._view.GetColumnValues(stat)
@@ -99,7 +106,7 @@ class AssertStats:
             time.sleep(1)
 
         logger.info(
-            f"AssertStats('{self._caption}').assert_approx_eventually(index={index} stat='{stat}' actual={actual} expected={expected})"
+            f"Assert {self._entity} {index} {stat} equals {expected} (actual={actual})"
         )
         assert actual == expected
 
