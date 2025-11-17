@@ -55,7 +55,7 @@ def add_traffic(ixn):
     [1]: https://docs.pytest.org/en/stable/how-to/fixtures.html#factories-as-fixtures
     """
 
-    def _add_traffic(name, src_proto, dst_proto, start_delay_us):
+    def _add_traffic(name, src_proto, dst_proto, start_delay_us: int = 0, frame_size: tuple[int, int] | int = FRAME_SIZE):
         with BatchAdd(ixn):
             traffic = ixn.Traffic.TrafficItem.add(
                 Name=name,
@@ -68,7 +68,15 @@ def add_traffic(ixn):
             )
             stream = traffic.ConfigElement.add()
 
-            stream.FrameSize.FixedSize = FRAME_SIZE
+            match frame_size:
+                case (min_size, max_size):
+                    stream.FrameSize.Type = "random"
+                    stream.FrameSize.RandomMin = min_size
+                    stream.FrameSize.RandomMax = max_size
+                case frame_size:
+                    stream.FrameSize.Type = "fixed"
+                    stream.FrameSize.FixedSize = frame_size
+
             stream.FrameRate.Type = "framesPerSecond"
             stream.FrameRate.Rate = FRAMES_PER_SECOND
             stream.TransmissionControl.StartDelayUnits = "microseconds"
