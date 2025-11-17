@@ -107,6 +107,8 @@ class AssertStats:
         match reference:
             case int():
                 return int(float(value))
+            case float():
+                return float(value)
             case _:
                 raise RuntimeError()
 
