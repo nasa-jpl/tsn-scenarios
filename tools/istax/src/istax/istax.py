@@ -126,7 +126,10 @@ class Istax:
     def get_psfp_gate_status(self):
         result = self.ll._json_rpc_call("psfp.status.gate.get")
         status = [
-            {"GateClosedDueToInvalidRx": entry["val"]["GateClosedDueToInvalidRx"]}
+            {
+                "GateClosedDueToInvalidRx": entry["val"]["GateClosedDueToInvalidRx"],
+                "GateClosedDueToOctetsExceeded": entry["val"]["GateClosedDueToOctetsExceeded"],
+            }
             for entry in result
         ]
         return status
@@ -136,6 +139,13 @@ class Istax:
             "psfp.control.gate_clear.set",
             stream_id,
             {"ClearGateClosedDueToInvalidRx": True},
+        )
+
+    def clear_psfp_gate_closed_due_to_octets_exceeded(self, stream_id: int):
+        self.ll._json_rpc_call(
+            "psfp.control.gate_clear.set",
+            stream_id,
+            {"ClearGateClosedDueToOctetsExceeded": True},
         )
 
 
