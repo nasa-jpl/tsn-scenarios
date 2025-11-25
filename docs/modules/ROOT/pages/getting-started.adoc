@@ -1,0 +1,60 @@
+= Getting Started
+
+To run the tools, you must first clone the repository and setup the environment.
+
+== Clone Repository
+
+First clone this repository.
+
+[source,sh]
+----
+git clone https://github.jpl.nasa.gov/hpsc/tsn-scenarios
+cd tsn-scenarios
+----
+
+== Provision the Emulation Venue
+
+Connect three ports of the Keysight Novus One Plus to 3 ports on an IStaX-based TSN switch.
+
+== Setup Environment
+
+Setup the environment by copying the provided `.env.example` to `.env`.
+
+[source,sh]
+----
+cp .env.example .env
+----
+
+Then modify `.env` using your favorite editor.
+
+[source,sh]
+----
+vim .env
+----
+
+Specify the IxNetwork host address, username, password, and ports.
+Also specify the IStaX host address, username, and password.
+Optionally specify a proxy for both.
+
+== Run the Emulation Venue
+
+[source,sh]
+.Run all tests
+----
+cd scenarios/ixnetwork
+uv run pytest
+----
+
+[source,sh]
+.Run a subset of tests
+----
+cd scenarios/ixnetwork
+uv run pytest 802.1Qci-stream-gate
+----
+
+[source,sh]
+.Run a single test module
+----
+cd scenarios/ixnetwork
+uv run pytest 802.1Qci-stream-gate/test_basic.py
+----
