@@ -25,6 +25,7 @@ deploy:
     jfve-pages/exe/pages publish build/site .
 
 archive:
+    just init
     just build
     mkdir {{project}}
     mv build {{project}}
