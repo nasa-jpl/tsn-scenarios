@@ -14,7 +14,7 @@ cd tsn-scenarios
 
 == Provision the Emulation Venue
 
-Connect three ports of the Keysight Novus One Plus to 3 ports of an IStaX-based TSN switch.
+Connect three ports of the Keysight Novus One Plus to ports 1-3 of an IStaX-based TSN switch.
 
 == Setup Environment
 
