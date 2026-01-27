@@ -22,7 +22,7 @@ ADDRS = [
 
 
 @pytest.fixture
-def add_traffic(ixn):
+def add_traffic(ixn, vports):
     """
     Generate a simple L2 quick flow traffic item.
 
@@ -33,9 +33,9 @@ def add_traffic(ixn):
     """
 
     def _add_traffic(
-        name,
-        src_proto,
-        dst_proto,
+        name: str,
+        src_idx: int,
+        dst_idx: int,
         pcp: int = 0,
         start_delay_us: int = 0,
     ):
@@ -46,8 +46,8 @@ def add_traffic(ixn):
                 TrafficItemType="l2L3",
             )
             traffic.EndpointSet.add(
-                Sources=src_proto,
-                Destinations=dst_proto,
+                Sources=vports[src_idx].Protocols.find(),
+                Destinations=vports[dst_idx].Protocols.find(),
             )
             stream = traffic.ConfigElement.add()
 
@@ -60,8 +60,8 @@ def add_traffic(ixn):
 
             stack = stream.Stack.add()
             eth = stack.Ethernet.add()
-            eth.SourceAddress.Single(src_proto.Mac.Pattern)
-            eth.DestinationAddress.Single(dst_proto.Mac.Pattern)
+            eth.SourceAddress.Single(ADDRS[src_idx])
+            eth.DestinationAddress.Single(ADDRS[dst_idx])
             eth.EtherType.Single(VLAN_ETHER_TYPE)
             vlan = stack.Vlan.add()
             vlan.VlanTagVlanID.Single(VID_NATIVE)
