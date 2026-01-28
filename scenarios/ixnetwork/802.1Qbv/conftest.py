@@ -10,7 +10,6 @@ FRAME_SIZE = 64
 FRAMES_PER_SECOND = 1000
 
 VLAN_ETHER_TYPE = "8100"
-VID_NATIVE = 0
 ADDR_TALKER1 = "02:00:00:00:00:01"
 ADDR_TALKER2 = "02:00:00:00:00:02"
 ADDR_LISTENER = "02:00:00:00:00:03"
@@ -64,7 +63,7 @@ def add_traffic(ixn, vports):
             eth.DestinationAddress.Single(ADDRS[dst_idx])
             eth.EtherType.Single(VLAN_ETHER_TYPE)
             vlan = stack.Vlan.add()
-            vlan.VlanTagVlanID.Single(VID_NATIVE)
+            vlan.VlanTagVlanID.Single(3)
             vlan.VlanTagVlanUserPriority.Single(pcp)
 
             traffic.Tracking.add(TrackBy=["trackingenabled0"])
