@@ -49,6 +49,16 @@ class StatsViewSnapshot:
 
 
 class AssertStats:
+    """
+    Helper for asserting against IxNetwork statistics.
+
+    Example:
+
+    >>> flows = AssertStats(ixn, "Flow Statistics")
+    >>> flows.assert_equal_eventually(index=0, stat="Tx Frame Rate", value=1000)
+    >>> flows.assert_equal_eventually(index=1, stat="Tx Frame Rate", value=1000)
+    """
+
     def __init__(self, ixn, view_caption: str, timeout: int = 60):
         self._caption = view_caption
         self._entity = self._caption.split()[0]
@@ -67,6 +77,14 @@ class AssertStats:
     def assert_equal_eventually(
         self, index: int, stat: str, value: str | int, timeout: int = 10
     ):
+        """
+        Assert statistic (index, stat) is equal to provide value.
+
+        :param int index: The row index of the statistic to assert against.
+        :param str stat: The column name of the statistic to assert against.
+        :param str | int value: The expected value of the statistic.
+        :param int timeout: The timeout in seconds for actual value to conform to expected value.
+        """
         expected = value
 
         for _ in range(timeout):
@@ -90,6 +108,16 @@ class AssertStats:
         rel: float = None,
         timeout: int = 10,
     ):
+        """
+        Assert statistic (index, stat) is approximately equal to provide value within the provided absolute or relative tolerance.
+
+        :param int index: The row index of the statistic to assert against.
+        :param str stat: The column name of the statistic to assert against.
+        :param int value: The expected value of the statistic.
+        :param float abs: The absolute tolerance.  Allows values in the range of value∓abs.
+        :param float rel: The relative tolerance.  Allows values in the range of value∓(value*rel).
+        :param int timeout: The timeout in seconds for actual value to conform to expected value.
+        """
         match (abs, rel):
             case (None, rel):
                 expected = pytest.approx(float(value), rel=rel)
@@ -121,6 +149,15 @@ class AssertStats:
 
 
 class RunTraffic:
+    """
+    A context manager that starts traffic on enter and stops traffic on exit.
+
+    Example:
+
+    >>> RunTraffic(ixn):
+    >>>     # Wait until some desired condition is reached
+    """
+
     def __init__(self, ixn):
         self.ixn = ixn
 
