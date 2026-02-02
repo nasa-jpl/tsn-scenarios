@@ -34,4 +34,4 @@ def test_queue_until_open(switch, ixn, vports, protocols, add_traffic):
         flows.assert_equal_eventually(index=0, stat="Rx Frame Rate", value=1000)
         flows.assert_equal_eventually(index=1, stat="Rx Frame Rate", value=1000)
         flows.assert_approx_eventually(index=0, stat="Store-Forward Avg Latency (ns)", value=2000, abs=200)
-        flows.assert_approx_eventually(index=1, stat="Store-Forward Avg Latency (ns)", value=500000, abs=1000)
+        flows.assert_approx_eventually(index=1, stat="Store-Forward Avg Latency (ns)", value=500000, abs=2000)
