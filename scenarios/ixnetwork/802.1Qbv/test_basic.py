@@ -6,7 +6,10 @@ from ixnetwork_restpy_helpers import (
 
 def test_queue_until_open(switch, ixn, vports, protocols, add_traffic):
     """
-    Verify that frames are queued until gate is open.
+    TAS schedule: [500us PCP 2], [500us PCP 3]
+    Send two frames at start of cycle: one with PCP 2, one with PCP 3.
+    Verify PCP 2 frame is forwarded immediately.
+    Verify PCP 3 frame is queued for ~500us.
     """
 
     add_traffic(
@@ -30,8 +33,5 @@ def test_queue_until_open(switch, ixn, vports, protocols, add_traffic):
         flows.assert_equal_eventually(index=1, stat="Tx Frame Rate", value=1000)
         flows.assert_equal_eventually(index=0, stat="Rx Frame Rate", value=1000)
         flows.assert_equal_eventually(index=1, stat="Rx Frame Rate", value=1000)
-
-        # TODO assert latency 0 is ~2us
-        # TODO assert latency 1 is ~500us
-
-    assert 1 == 0
+        flows.assert_approx_eventually(index=0, stat="Store-Forward Avg Latency (ns)", value=2000, abs=200)
+        flows.assert_approx_eventually(index=1, stat="Store-Forward Avg Latency (ns)", value=500000, abs=1000)
