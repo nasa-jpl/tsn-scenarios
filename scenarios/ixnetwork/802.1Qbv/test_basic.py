@@ -4,7 +4,7 @@ from ixnetwork_restpy_helpers import (
 )
 
 
-def test_queue_until_open(switch, ixn, vports, protocols, add_traffic):
+def test_queue_until_gate_open(switch, ixn, vports, protocols, add_traffic):
     """
     TAS schedule: [500us PCP 2], [500us PCP 3]
     Send two frames at start of cycle: one with PCP 2, one with PCP 3.
