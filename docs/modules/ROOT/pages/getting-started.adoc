@@ -1,6 +1,24 @@
 = Getting Started
 
-To run the tools, you must first clone the repository and setup the environment.
+== Device Reservation
+
+The TSN switches that we use are shared resources, and since they can be accessed over management interfaces that allow multiple users, we need to make sure we don't stomp on each other when we are using them. In the absence of a more sophisticated way to manage this, we require that the devices be "reserved" via Outlook calendar invites. The following emails have been created for you to send invitations using Outlook:
+
+* `198-135A-hpsctsnsw0`
+* `198-135A-hpsctsnsw1`
+* `198-135A-hpsctsnsw2`
+* `198-135A-hpsctsnsw3`
+* `198-135A-ngatsnsw0`
+* `198-135A-ngatsnsw1`
+* `198-135A-ngatsnsw2`
+* `198-135A-ngatsnsw3`
+
+For the emulation venue:
+
+* `198-135A-hpsctsnsw0` is connected to the Keysight ports 1-4
+* `198-135A-ngatsnsw1` is connected to the Keysight ports 5-8
+
+For now, unless otherwise agreed upon with Rob Donnelly, assume that the HPSC devices are off limits.
 
 == Clone Repository
 
