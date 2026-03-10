@@ -54,6 +54,12 @@ Specify the IxNetwork host address, username, password, and ports.
 Also specify the IStaX host address, username, and password.
 Optionally specify a proxy for both.
 
+== Create an SSH-SOCKS5 proxy
+----
+ssh -ND9999 aalab
+----
+See https://github.jpl.nasa.gov/pages/hpsc/lab/docs/main/network/remote-access/#start-an-ssh-socks-proxy[here] for more information.
+
 == Run the Emulation Venue
 
 [source,sh]
