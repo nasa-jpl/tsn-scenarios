@@ -1,6 +1,6 @@
 site:
-  title: HPSC Lab
-  url: https://github.jpl.nasa.gov/pages/hpsc/lab
+  title: TSN Scenarios
+  url: https://github.com/nasa-jpl/tsn-scenarios/
   start_page: docs:ROOT:index.adoc
 
 content:
