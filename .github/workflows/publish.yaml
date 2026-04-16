@@ -24,10 +24,7 @@ jobs:
           node-version: '20'
 
       - name: Install Antora
-        run: npm install @antora/cli@3.1 @antora/site-generator@3.1
-
-      - name: Install lunr-extension
-        run: yarn global add @antora/lunr-extension
+        run: npm install @antora/cli@3.1 @antora/site-generator@3.1 @antora/lunr-extension
 
       - name: Generate Site
         run: npx antora docs/antora-playbook.yml --to-dir build/site
