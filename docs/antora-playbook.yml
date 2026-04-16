@@ -6,8 +6,7 @@ site:
 content:
   edit_url: '{web_url}/edit/main/{path}'
   sources:
-    - url: ./../
-      start_path: docs
+    - url: .
 
 ui:
   bundle:
