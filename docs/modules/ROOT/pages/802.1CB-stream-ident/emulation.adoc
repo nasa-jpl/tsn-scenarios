@@ -48,7 +48,7 @@ The expectation is that the traffic item will only see 200 Kbps get through, as 
 
 The results do match that as shown in the screenshots below.  
 
-Note that the bit rate being received slightly exceeds 200 Kbps.  It is not fully understood why that is.  Ticket was opened https://github.jpl.nasa.gov/hpsc/tsn-scenarios/issues/3.  The same effect is expected for any tests using flow meters, but will not repeat this text for every scenario.  This idiosyncrasy will just be captured here.
+Note that the bit rate being received slightly exceeds 200 Kbps.  It is not fully understood why that is.  Ticket was opened https://github.com/nasa-jpl/tsn-scenarios/issues/3.  The same effect is expected for any tests using flow meters, but will not repeat this text for every scenario.  This idiosyncrasy will just be captured here.
 
 .Switch QoS Stats
 image::802.1CB-stream-ident/emulation/1/switch_qos_stats.png[]
@@ -86,7 +86,7 @@ General scenario description should be sufficient.
 
 * For the most part, the general scenario description should be sufficient.
 * Need to have 2 destination MAC addresses each on EP~1~ and EP~2~.  To do this, you can add additional Ethernet protocol stacks to that device group, and then set the MAC address of each.  To avoid issues, don't use the ethernet stack used for time sync.  Changing the MAC address of that might prevent time sync from working.
-* Note that the source MAC address 01:12:00:ff:ff:01 did not work.  Issue https://github.jpl.nasa.gov/hpsc/tsn-scenarios/issues/4 created.  Used 00:12:00:ff:ff:01 instead which works and still demonstrates SMAC matching sufficiently.
+* Note that the source MAC address 01:12:00:ff:ff:01 did not work.  Issue https://github.com/nasa-jpl/tsn-scenarios/issues/4 created.  Used 00:12:00:ff:ff:01 instead which works and still demonstrates SMAC matching sufficiently.
 
 ==== Test Execution and Results
 

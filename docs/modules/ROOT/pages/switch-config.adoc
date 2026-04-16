@@ -49,7 +49,7 @@ image::switch-config/wireshark_after_fixes.png[]
 
 Resetting the switch to factory settings is an optional step but ensures that any modifications made by other users do not impact your configuration.
 
-To follow the instructions to reset and provision the switch, go to the HPSC switch equipment documentation, found https://github.jpl.nasa.gov/pages/hpsc/lab/docs/main/equipment/microchip-sparx-5i-evb/[here].
+To follow the instructions to reset and provision the switch, go to the HPSC switch equipment documentation, found https://nasa-jpl.github.io/tsn-scenarios/docs/main/equipment/microchip-sparx-5i-evb/[here].
 
 === Configuration
 

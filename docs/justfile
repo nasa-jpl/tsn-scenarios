@@ -17,13 +17,6 @@ dev:
     trap 'kill $(jobs -pr)' EXIT
     wait
 
-deploy:
-    # Prevent GitHub Pages from removing underscore directories
-    touch build/site/.nojekyll
-    rm -rf jfve-pages
-    git clone git@github.jpl.nasa.gov:jfve/pages.git jfve-pages
-    jfve-pages/exe/pages publish build/site .
-
 archive:
     just init
     just build

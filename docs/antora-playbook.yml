@@ -1,7 +1,7 @@
 site:
   title: TSN Scenarios
   url: https://nasa-jpl.github.io/tsn-scenarios
-  start_page: tsn:ROOT:index.adoc
+  start_page: docs:ROOT:index.adoc
 
 content:
   edit_url: '{web_url}/edit/main/{path}'

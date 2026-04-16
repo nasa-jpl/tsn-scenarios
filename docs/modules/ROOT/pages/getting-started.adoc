@@ -26,7 +26,7 @@ First clone this repository.
 
 [source,sh]
 ----
-git clone https://github.jpl.nasa.gov/hpsc/tsn-scenarios
+git clone https://github.com/nasa-jpl/tsn-scenarios
 cd tsn-scenarios
 ----
 
@@ -58,7 +58,7 @@ Optionally specify a proxy for both.
 ----
 ssh -ND9999 aalab
 ----
-See https://github.jpl.nasa.gov/pages/hpsc/lab/docs/main/network/remote-access/#start-an-ssh-socks-proxy[here] for more information.
+See https://nasa-jpl.github.io/tsn-scenarios/docs/main/network/remote-access/#start-an-ssh-socks-proxy[here] for more information.
 
 == Run the Emulation Venue
 

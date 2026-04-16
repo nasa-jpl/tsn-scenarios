@@ -8,7 +8,7 @@
 == Detailed steps to setup and enable time synchronization
 
 === Automated Ansible configuration
-The easiest way to configure a set of Linux systems for 802.1AS time synchronization is to use the link:https://github.jpl.nasa.gov/hpsc/tsn-scenarios/tree/main/ansible#ansible[Ansible playbook] provided in the TSN scenarios repository. This playbook will install the necessary packages and configure the system for 802.1AS time synchronization. To do this you will need to designate:
+The easiest way to configure a set of Linux systems for 802.1AS time synchronization is to use the link:https://github.com/nasa-jpl/tsn-scenarios/tree/main/ansible#ansible[Ansible playbook] provided in the TSN scenarios repository. This playbook will install the necessary packages and configure the system for 802.1AS time synchronization. To do this you will need to designate:
 
 * One device/hostname to serve as the grand master clock source
 * One device/hostname to host the PTP process logging server
@@ -33,7 +33,7 @@ sudo apt install ansible systemd
 .Step 2 Clone the TSN scenarios repository:
 [source,sh]
 ----
-git clone https://github.jpl.nasa.gov/hpsc/tsn-scenarios.git
+git clone https://github.com/nasa-jpl/tsn-scenarios.git
 cd tsn-scenarios/ansible
 ----
 
@@ -42,7 +42,7 @@ cd tsn-scenarios/ansible
 ----
 $EDITOR inventory
 ----
-Copy and modify the link:https://github.jpl.nasa.gov/hpsc/tsn-scenarios/blob/main/ansible/inventory[ansible inventory file]:
+Copy and modify the link:https://github.com/nasa-jpl/tsn-scenarios/blob/main/ansible/inventory[ansible inventory file]:
 
 [source,yml]
 ----
@@ -227,11 +227,11 @@ sudo timedatectl set-ntp false
 .Step 3 Download the ptp4l-gm.conf and ptp4l-ei.conf files from the TSN scenarios repository onto their respective devices:
 [source,sh]
 ----
-wget https://github.jpl.nasa.gov/raw/hpsc/tsn-scenarios/main/ansible/roles/AS/templates/ptp4l-gm.conf
+wget https://raw.githubusercontent.com/nasa-jpl/tsn-scenarios/refs/heads/main/ansible/roles/AS/templates/ptp4l-gm.conf
 ----
 [source,sh]
 ----
-wget https://github.jpl.nasa.gov/raw/hpsc/tsn-scenarios/main/ansible/roles/AS/templates/ptp4l-ei.conf
+wget https://raw.githubusercontent.com/nasa-jpl/tsn-scenarios/refs/heads/main/ansible/roles/AS/templates/ptp4l-ei.conf
 ----
 
 You will need to replace the last line of these files to match the network interface you are using. For example, if your network interface is `enp1s0`, the last line should be:
