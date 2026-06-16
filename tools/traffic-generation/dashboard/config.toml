@@ -1,0 +1,38 @@
+[trex]
+server = "127.0.0.1"
+api_path = "/opt/trex/v3.08/automation/trex_control_plane/interactive"
+
+[latency]
+# source = where we get the ingress (TX) timestamp
+# sink   = where we get the egress (RX) timestamp
+# options: "trex" | "nic" | "tap"
+source = "tap"
+sink = "tap"
+
+[nic]
+# NIC interfaces for tcpdump with HW timestamps (phc2sys synced)
+ingress_interface = "enp4s0"
+egress_interface = "enp3s0"
+
+[tap]
+# ProfiShark extcap interfaces for tshark capture (one per direction)
+ingress_interface = "Profishark44b7d0e809c6"
+egress_interface = "Profishark44b7d0e7ecc7"
+
+[[streams]]
+pg_id = 2
+name = "Queue 2 (PCP 2)"
+color = "#fb8c00"
+udp_port = 5002
+
+[[streams]]
+pg_id = 3
+name = "Queue 3 (PCP 3)"
+color = "#1e88e5"
+udp_port = 5003
+
+[[streams]]
+pg_id = 7
+name = "Queue 7 (PCP 7)"
+color = "#4caf50"
+udp_port = 5007

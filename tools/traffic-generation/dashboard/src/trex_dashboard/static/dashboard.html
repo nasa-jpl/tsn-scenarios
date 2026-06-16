@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T-Rex Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+         background: #1a1a2e; color: #e0e0e0; padding: 16px; }
+  .header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .header h1 { font-size: 1.4em; font-weight: 600; }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #f44; }
+  .status-dot.ok { background: #4caf50; }
+  .status-text { font-size: 0.85em; color: #888; }
+
+  .section { background: #16213e; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .section-title { font-size: 0.9em; font-weight: 600; color: #aaa; margin-bottom: 12px;
+                    text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .bw-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .bw-card { background: #1a1a2e; border-radius: 6px; padding: 12px; text-align: center; }
+  .bw-card .label { font-size: 0.75em; color: #888; margin-bottom: 4px; }
+  .bw-card .value { font-size: 1.3em; font-weight: 700; }
+
+  .cpu-total { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .cpu-total .label { font-size: 0.85em; color: #aaa; min-width: 80px; }
+  .cpu-total .value { font-size: 1.2em; font-weight: 700; min-width: 60px; }
+  .cpu-bar-outer { flex: 1; background: #1a1a2e; border-radius: 4px; height: 20px; overflow: hidden; }
+  .cpu-bar-inner { height: 100%; background: #4caf50; border-radius: 4px; transition: width 0.3s; }
+  .cpu-bar-inner.warn { background: #fb8c00; }
+  .cpu-bar-inner.crit { background: #f44336; }
+
+  .cpu-cores { display: flex; flex-wrap: wrap; gap: 8px; }
+  .core-item { flex: 1; min-width: 120px; }
+  .core-item .core-label { font-size: 0.7em; color: #666; margin-bottom: 2px; }
+  .core-bar-outer { background: #1a1a2e; border-radius: 3px; height: 14px; overflow: hidden; }
+  .core-bar-inner { height: 100%; border-radius: 3px; transition: width 0.3s; }
+
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .chart-box { background: #16213e; border-radius: 8px; padding: 16px; }
+  .chart-box canvas { width: 100% !important; height: 250px !important; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 8px 12px; text-align: right; border-bottom: 1px solid #2a2a4a; }
+  th { font-size: 0.75em; color: #888; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  td { font-size: 0.9em; }
+  td:first-child, th:first-child { text-align: left; }
+  .stream-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
+  .na { color: #555; }
+
+  @media (max-width: 800px) {
+    .bw-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>T-Rex Dashboard</h1>
+  <span class="status-dot" id="statusDot"></span>
+  <span class="status-text" id="statusText">Connecting...</span>
+</div>
+
+<div class="section">
+  <div class="section-title">Bandwidth</div>
+  <div class="bw-grid">
+    <div class="bw-card"><div class="label">TX Rate</div><div class="value" id="txBps">--</div></div>
+    <div class="bw-card"><div class="label">RX Rate</div><div class="value" id="rxBps">--</div></div>
+    <div class="bw-card"><div class="label">TX PPS</div><div class="value" id="txPps">--</div></div>
+    <div class="bw-card"><div class="label">RX PPS</div><div class="value" id="rxPps">--</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">CPU Utilization</div>
+  <div class="cpu-total">
+    <span class="label">Total</span>
+    <span class="value" id="cpuTotal">--</span>
+    <div class="cpu-bar-outer"><div class="cpu-bar-inner" id="cpuBar"></div></div>
+  </div>
+  <div class="cpu-cores" id="cpuCores"></div>
+</div>
+
+<div id="trexChartsSection">
+  <div class="charts-grid">
+    <div class="chart-box">
+      <div class="section-title">T-Rex Latency</div>
+      <canvas id="trexLatencyChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<div id="tapChartsSection" style="display:none">
+  <div class="charts-grid">
+    <div class="chart-box">
+      <div class="section-title">Tap Latency</div>
+      <canvas id="tapLatencyChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Latency Statistics</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Stream</th>
+        <th>T-Rex Avg</th>
+        <th>T-Rex Min</th>
+        <th>T-Rex Max</th>
+        <th id="tapHeader1" style="display:none">Tap Avg</th>
+        <th id="tapHeader2" style="display:none">Tap Min</th>
+        <th id="tapHeader3" style="display:none">Tap Max</th>
+        <th id="tapHeader4" style="display:none">Tap Samples</th>
+      </tr>
+    </thead>
+    <tbody id="latencyTable"></tbody>
+  </table>
+</div>
+
+<script>
+const POLL_MS = 500;
+const MAX_POINTS = 120;
+
+let cfg = null;
+let trexLatChart = null;
+let tapLatChart = null;
+let labels = [];
+let hasTrex = false;
+let hasTap = false;
+
+function fmtBps(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + ' Gbps';
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + ' Mbps';
+  if (n >= 1e3) return (n / 1e3).toFixed(0) + ' Kbps';
+  return n.toFixed(0) + ' bps';
+}
+
+function fmtPps(n) {
+  if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+  return n.toFixed(0);
+}
+
+function fmtUs(n) {
+  if (n == null || n === 0) return '--';
+  if (n >= 1000) return (n / 1000).toFixed(2) + ' ms';
+  return n.toFixed(1) + ' us';
+}
+
+function cpuBarClass(pct) {
+  if (pct >= 90) return 'cpu-bar-inner crit';
+  if (pct >= 70) return 'cpu-bar-inner warn';
+  return 'cpu-bar-inner';
+}
+
+function cpuBarColor(pct) {
+  if (pct >= 90) return '#f44336';
+  if (pct >= 70) return '#fb8c00';
+  return '#4caf50';
+}
+
+function makeDatasets(streams) {
+  return streams.map(s => ({
+    label: s.name, borderColor: s.color, backgroundColor: 'transparent',
+    borderWidth: 2, pointRadius: 0, tension: 0.3, data: [], _pg_id: s.pg_id,
+  }));
+}
+
+function createChart(canvas, yLabel, datasets) {
+  return new Chart(canvas, {
+    type: 'line',
+    data: { labels: labels, datasets: datasets },
+    options: {
+      responsive: true, animation: false, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#aaa', font: { size: 11 } } } },
+      scales: {
+        x: { display: false },
+        y: { title: { display: true, text: yLabel, color: '#aaa' },
+             ticks: { color: '#888' }, grid: { color: '#333' },
+             beginAtZero: true }
+      }
+    }
+  });
+}
+
+function updateChart(chart, streams, key) {
+  for (const ds of chart.data.datasets) {
+    const s = streams[ds._pg_id];
+    ds.data.push(s ? (s[key] || 0) : 0);
+    if (ds.data.length > MAX_POINTS) ds.data.shift();
+  }
+  chart.update();
+}
+
+async function init() {
+  const res = await fetch('/api/config');
+  cfg = await res.json();
+
+  hasTrex = cfg.has_trex_latency;
+  hasTap = cfg.has_hw_latency;
+
+  if (hasTrex) {
+    document.getElementById('trexChartsSection').style.display = '';
+    trexLatChart = createChart(document.getElementById('trexLatencyChart'), 'Latency (us)', makeDatasets(cfg.streams));
+  } else {
+    document.getElementById('trexChartsSection').style.display = 'none';
+  }
+
+  if (hasTap) {
+    document.getElementById('tapChartsSection').style.display = '';
+    tapLatChart = createChart(document.getElementById('tapLatencyChart'), 'Latency (us)', makeDatasets(cfg.streams));
+    document.getElementById('tapHeader1').style.display = '';
+    document.getElementById('tapHeader2').style.display = '';
+    document.getElementById('tapHeader3').style.display = '';
+    document.getElementById('tapHeader4').style.display = '';
+  }
+
+  setInterval(poll, POLL_MS);
+  poll();
+}
+
+async function poll() {
+  try {
+    const res = await fetch('/api/stats');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    if (d.error) throw new Error(d.error);
+
+    document.getElementById('statusDot').className = 'status-dot ok';
+    document.getElementById('statusText').textContent = 'Connected';
+
+    const g = d.global;
+    document.getElementById('txBps').textContent = fmtBps(g.tx_bps);
+    document.getElementById('rxBps').textContent = fmtBps(g.rx_bps);
+    document.getElementById('txPps').textContent = fmtPps(g.tx_pps);
+    document.getElementById('rxPps').textContent = fmtPps(g.rx_pps);
+
+    const cpuPct = g.cpu_util || 0;
+    document.getElementById('cpuTotal').textContent = cpuPct.toFixed(1) + '%';
+    const cpuBar = document.getElementById('cpuBar');
+    cpuBar.style.width = cpuPct + '%';
+    cpuBar.className = cpuBarClass(cpuPct);
+
+    const coresDiv = document.getElementById('cpuCores');
+    const cores = g.cpu_util_per_core || [];
+    if (cores.length > 0) {
+      let html = '';
+      for (let i = 0; i < cores.length; i++) {
+        const pct = cores[i] || 0;
+        html += `<div class="core-item">
+          <div class="core-label">Core ${i}: ${pct.toFixed(1)}%</div>
+          <div class="core-bar-outer">
+            <div class="core-bar-inner" style="width:${pct}%;background:${cpuBarColor(pct)}"></div>
+          </div>
+        </div>`;
+      }
+      coresDiv.innerHTML = html;
+    }
+
+    const now = new Date().toLocaleTimeString();
+    labels.push(now);
+    if (labels.length > MAX_POINTS) labels.shift();
+
+    if (trexLatChart) updateChart(trexLatChart, d.streams, 'trex_lat_avg_us');
+    if (tapLatChart) updateChart(tapLatChart, d.streams, 'tap_lat_avg_us');
+
+    // Latency table
+    let tableHtml = '';
+    for (const s of cfg.streams) {
+      const st = d.streams[s.pg_id];
+      if (!st) continue;
+      tableHtml += `<tr>
+        <td><span class="stream-dot" style="background:${s.color}"></span>${s.name}</td>
+        <td>${fmtUs(st.trex_lat_avg_us)}</td>
+        <td>${fmtUs(st.trex_lat_min_us)}</td>
+        <td>${fmtUs(st.trex_lat_max_us)}</td>`;
+      if (hasTap) {
+        tableHtml += `
+        <td>${fmtUs(st.tap_lat_avg_us)}</td>
+        <td>${fmtUs(st.tap_lat_min_us)}</td>
+        <td>${fmtUs(st.tap_lat_max_us)}</td>
+        <td>${st.tap_sample_count != null ? st.tap_sample_count : '--'}</td>`;
+      }
+      tableHtml += '</tr>';
+    }
+    document.getElementById('latencyTable').innerHTML = tableHtml;
+
+  } catch (e) {
+    document.getElementById('statusDot').className = 'status-dot';
+    document.getElementById('statusText').textContent = 'Error: ' + e.message;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
