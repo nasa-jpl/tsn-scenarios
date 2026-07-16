@@ -17,5 +17,13 @@
 *** xref:802.1CB-stream-ident/emulation.adoc[Emulation Venue]
 ** xref:802.1Qci/index.adoc[]
 *** xref:802.1Qci/emulation.adoc[Emulation Venue]
+* Traffic Generation
+** DPDK
+*** xref:dpdk/dpdk-notes.adoc[]
+** TRex
+*** xref:trex/trex-overview.adoc[]
+*** xref:trex/trex-setup.adoc[]
+*** xref:trex/dashboard.adoc[]
 * Appendix
 ** xref:common-issues.adoc[]
+** xref:network-tap.adoc[]

@@ -1,0 +1,12 @@
+= DPDK Notes
+
+== Requirements for using DPDK
+
+1. `vfio` kernel module: DPDK needs `vfio-pci` to unbind NICs from kernel and expose hardware to userspace. Check if your kernel supports it with:
++
+[source,bash]
+----
+$ grep VFIO /boot/config-$(uname -r)
+# CONFIG_VFIO is not set
+----
+2. Check that your link:https://core.dpdk.org/supported/[hardware] (CPU, NIC, DMA) supports it.
