@@ -4,7 +4,7 @@
 
 Open-source stateless packet generator from Cisco. Generates crafted Ethernet frames at high rates with per-packet control over headers, timing, and payload content. Requires a pair of NICs (TX and RX).
 
-In our setup, TRex runs on ngasrv0 with two 10G NICs connected to the switch. Traffic loops back through the switch to the RX NIC. Currently using AF_PACKET mode (kernel sockets), not native DPDK — see link:dpdk-investigation.adoc[dpdk-investigation.adoc] for why.
+TRex can use AF_PACKET mode (kernel sockets) or DPDK — see xref:../dpdk/dpdk-notes.adoc[].
 
 == What It Enables
 
@@ -86,7 +86,7 @@ This is software-timestamped (~μs precision), which is fine for seeing the broa
 
 === Hardware timestamps: network taps
 
-For ns-precision latency, we use external ProfiShark taps with GPS-synced clocks (see link:network-tap.adoc[network-tap.adoc]). One tap on the ingress link, one on the egress link. Each tap timestamps every packet independently of the system under test.
+For ns-precision latency, we use external ProfiShark taps with GPS-synced clocks (see xref:network-tap.adoc[]). One tap on the ingress link, one on the egress link. Each tap timestamps every packet independently of the system under test.
 
 The dashboard captures pcapng from two tshark processes (one per tap), parses the packets, and matches ingress to egress by a unique packet ID to compute latency.
 

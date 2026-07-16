@@ -11,6 +11,7 @@ sink = "tap"
 
 [nic]
 # NIC interfaces for tcpdump with HW timestamps (phc2sys synced)
+# Update this with the interfaces being used
 ingress_interface = "enp4s0"
 egress_interface = "enp3s0"
 

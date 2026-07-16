@@ -2,8 +2,7 @@
 
 == Prerequisites
 
-* T-Rex installed on ngasrv0
-** Shared installation at `/opt/trex/v3.08`
+* T-Rex installed at `/opt/trex/v3.08`
 * `tsn-scenarios` repo cloned (for the `istax` CLI tool)
 
 == 1. Upload switch config
@@ -11,7 +10,7 @@
 [source,bash]
 ----
 cd tsn-scenarios/tools/istax
-uv run istax upload ngatsnsw2 ../../../traffic-generation/tas/switch.cfg
+uv run istax upload <switch_hostname> ../../../traffic-generation/tas/switch.cfg
 ----
 
 == 2. Start T-Rex server
@@ -51,14 +50,14 @@ Start traffic (in trex console):
 
 [source,bash]
 ----
-start -f /home/ndhamani/traffic-generation/tas/tsn_profile_tas.py -p 1 --force
+start -f <path_to_repo>/tools/traffic-generation/tas/tsn_profile_tas.py -p 1 --force
 ----
 
 Higher rate (this might hang due to hitting cpu limits):
 
 [source,bash]
 ----
-start -f /home/ndhamani/traffic-generation/tas/tsn_profile_tas.py -p 1 --force -t pps=500000,bg_pps=25000
+start -f <path_to_repo>/tools/traffic-generation/tas/tsn_profile_tas.py -p 1 --force -t pps=500000,bg_pps=25000
 ----
 
 Stats: `tui` (q to exit)
@@ -67,7 +66,7 @@ Stop traffic: `stop -p 1`
 
 == 4. Start the dashboard
 
-Terminal 3 (on ngasrv0):
+Terminal 3:
 
 [source,bash]
 ----
@@ -75,7 +74,7 @@ cd traffic-generation/dashboard
 uv run trex-dashboard --config config.toml
 ----
 
-Opens on `http://ngasrv0:5000`. Change the port with `--port`.
+Opens on `http://localhost:5000`. Change the port with `--port`.
 
 If connecting from Windows, you can `ssh -L 5000:localhost:5000 user@host` and then from a browser on the windows machine go to `http://localhost:5000`.
 
@@ -85,4 +84,4 @@ The `[latency]` section in `config.toml` controls where timestamps come from:
 * `source = "tap"` / `sink = "tap"` — ProfiShark taps (must be plugged in and synced, see link:network-tap.adoc[network-tap.adoc])
 * `source = "nic"` / `sink = "nic"` — NIC HW timestamps via tcpdump + phc2sys
 
-See link:dashboard.adoc[dashboard.adoc] for architecture details and standalone usage.
+See xref:trex/dashboard.adoc[] for architecture details and standalone usage.

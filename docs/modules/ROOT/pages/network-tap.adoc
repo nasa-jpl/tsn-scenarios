@@ -2,12 +2,13 @@
 
 == Setup
 
+* Ubuntu 24.04.4 LTS
 * https://www.profitap.com/profishark-1g-plus/[Using Profishark Profitap 1G+]
 * Install the driver. Linux instructions are below.
 * Plug in USB from tap to machine on a usb 3.0 port.
 * Connect ethernet cable from a NIC to port A on tap. And other going from port B to the appropriate port on the switch.
 * Use tap with either profishark manager or wireshark.
-* NOTE: must be connected to a usb 3.0 port. It will not work on usb 2.0 and you might lose hours debugging why it wasn't detected :(
+* **NOTE:** must be connected to a usb 3.0 port. It will not work on usb 2.0!
 
 === Linux Driver Install
 
@@ -46,7 +47,7 @@ sudo apt-get install profishark-manager
 
 Run with: `/usr/bin/profishark/profishark-manager`
 
-* If ssh-ing in, make sure to run with X11 forwarding `ssh -Y ngasrv0`
+* If ssh-ing in, make sure to run with X11 forwarding `ssh -Y <hostname>`
 ** If using a mac, https://www.xquartz.org/[xQuartz] has been useful to display X-forwarded windows
 * In order to sync time in the Timing tab check the following options and click save:
 ** Wait For Sync
@@ -63,7 +64,7 @@ Run with: `/usr/bin/profishark/profishark-manager`
 * Restart wireshark and you should see profishark show up as an interface
 * Had to also modify some permissions to get this to work:
 ** `sudo dpkg-reconfigure wireshark-common`
-** `sudo usermod -aG wireshark ndhamani`
+** `sudo usermod -aG wireshark <username>`
 ** You must logout and back in, or run `newgrp wireshark` for this to take effect
 
 == Multiple taps
