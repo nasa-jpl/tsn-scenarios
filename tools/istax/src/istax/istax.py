@@ -219,9 +219,14 @@ class IstaxLowLevel:
         files = {
             "source_file": config,
         }
-        self.session.post(
+        response = self.session.post(
             f"http://{self.host}/config/icfg_conf_upload", data=data, files=files
         )
+        if response.status_code != 200:
+            raise IstaxError(
+                f"config upload to '{self.host}' failed with HTTP "
+                f"{response.status_code}:\n{response.text.strip()}"
+            )
 
     def login(self):
         data = {
