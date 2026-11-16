@@ -245,7 +245,7 @@ class IstaxLowLevel:
 
         self.session.post(f"http://{self.host}/config/icfg_conf_activate", data=data)
 
-        self.istax_config_activate_status()
+        self.config_activate_status()
 
     def config_download(self, filename: str):
         data = {
