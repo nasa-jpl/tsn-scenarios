@@ -123,6 +123,20 @@ class Istax:
 
         return paths
 
+    def list_config_files(self) -> list[dict]:
+        """Lists every config file currently stored on the switch (e.g.
+        "running-config", "startup-config", or any other named file
+        previously uploaded via upload(..., filename=...)), each as
+        {"FileName": str, "Bytes": int, "ModifiedTime": str,
+        "Attribute": str} (field names as returned by the switch's own
+        icfg.status.file.get JSON-RPC call -- "rw"/"r" Attribute means
+        writable/read-only respectively). Does NOT call login() itself --
+        same convention as get_psfp_gate_status() below; callers that
+        haven't already authenticated this session (e.g. via a prior
+        upload()/download() call) should call self.ll.login() first."""
+        result = self.ll._json_rpc_call("icfg.status.file.get")
+        return [entry["val"] for entry in result]
+
     def get_psfp_gate_status(self):
         result = self.ll._json_rpc_call("psfp.status.gate.get")
         status = [
@@ -245,7 +259,7 @@ class IstaxLowLevel:
 
         self.session.post(f"http://{self.host}/config/icfg_conf_activate", data=data)
 
-        self.istax_config_activate_status()
+        self.config_activate_status()
 
     def config_download(self, filename: str):
         data = {
