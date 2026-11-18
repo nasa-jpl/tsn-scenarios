@@ -39,16 +39,18 @@ include::partial$base_topology.adoc[]
 ==== Scenario 2 - EIR / EBS
 
 * Might need to play with numbers - suggest try first with no policing and figure out 2 rates that can run from the 2 ports with no frame drops but as high of bandwidth as possible
-* Create stream ID S1 that matches anything on SMAC connected to port 1.  Use color-blind mode.
-* Create flow meter with CIR = 10,000 (10 Mbps), CBS = 10,000,000 (bytes), EIR = 100,000 (100 Mbps), EBS = 100,000,000 (bytes)
-* Create traffic flow on port 1, output a burst of 8,000,000 bits at line rate, every 0.5 seconds
-* Run this test, nothing should be dropped (should see 16 Mbps transmit and received, it will be using all the green tokens and some of the yellow tokens)
-* Increase burst to every 0.05 seconds, and should see frames dropped from the burst but not all frames (should see 160 Mbps transmit, and 110 Mbps received)
-* Capture frames into and out of switch and verify DEI bit not set on ingress, and see if it is sometimes set on egress (because droponyellow = false)
-* Create 2nd traffic flow on port 2, output a constant 980 Mbps line rate (the value should leave remaining bandwidth > CIR and < EIR)
+* Create stream ID S1 that matches anything on SMAC connected to port 1. Use color-blind mode.
+* Create flow meter with CIR = 10,000 (10 Mbps), CBS = 200,000 (bytes), EIR = 100,000 (100 Mbps), EBS = 2,000,000 (bytes)
+* Create traffic flow on port 1, output a burst of 8,000,000 bits at line the rate every 0.5 seconds; the line rate of 1Gbps limits max toggle rate, but the flow meter EIR of 100Mbps is the limit on the  max number of bits/second and should accommodate 16 Mbps with the flow meter because two bursts per second are sent
+* Create 2nd traffic flow on port 2, output a constant 1 Mbps line rate (should not affect flow rate for traffic item 1)
+* Run this test, nothing should be dropped (should see 16 Mbps transmit and received, it will be using all the green tokens and some of the yellow tokens) -Test 1
+* Increase burst to every 0.05 seconds, and should see frames dropped from the burst but not all frames (should see 160 Mbps transmit, and 110 Mbps received) - Test 2
+* Capture frames into and out of switch and verify that the DEI bit not set on ingress, and see if it is sometimes set on egress (because droponyellow = false)
+* Modify 2nd traffic flow on port 2 to output a constant 980 Mbps line rate (the value should leave remaining bandwidth > CIR and < EIR)
 * Rerun test with burst every 0.5 seconds
 * Nothing should be dropped (and particularly nothing from port 2)
-* Rerun test with burst every 0.05 seconds.  We should see at least 10 Mbps from port 1, but beyond that what happens depends on how switch handles drop eligible bit.
+* Rerun test with burst every 0.05 seconds. We should see at least 10 Mbps from port 1, but beyond that what happens depends on how switch handles drop eligible bit.
+
 
 ==== Scenario 3 - Drop On Yellow
 
